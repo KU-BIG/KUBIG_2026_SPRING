@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Face2Emo</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  background:#0D0D1A;color:#FFF;
+  font-family:'Apple SD Gothic Neo','Noto Sans KR',-apple-system,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+}
+
+/* ── 헤더 ─────────────────────────────────────────────────── */
+header{
+  width:100%;padding:26px 40px;text-align:center;
+  background:linear-gradient(135deg,#1A0533 0%,#0D0D1A 100%);
+  border-bottom:1px solid rgba(255,255,255,.07);
+}
+header h1{
+  font-size:26px;font-weight:700;letter-spacing:-0.5px;
+  background:linear-gradient(90deg,#FF6EC7,#A78BFA,#60A5FA);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+header p{margin-top:5px;color:rgba(255,255,255,.4);font-size:13px;}
+
+/* ── 업로드 ─────────────────────────────────────────────────── */
+#upload-section{margin:48px auto;width:460px;max-width:90vw;text-align:center;}
+.upload-box{
+  border:2px dashed rgba(167,139,250,.5);border-radius:20px;
+  padding:52px 36px;cursor:pointer;transition:all .25s;
+  background:rgba(167,139,250,.04);
+}
+.upload-box:hover{border-color:#A78BFA;background:rgba(167,139,250,.10);transform:translateY(-2px);}
+.upload-icon{font-size:50px;display:block;margin-bottom:14px;}
+.upload-box h2{font-size:17px;font-weight:600;margin-bottom:7px;}
+.upload-box p{color:rgba(255,255,255,.38);font-size:13px;}
+#file-input{display:none;}
+.btn-analyze{
+  margin-top:18px;padding:13px 46px;border:none;border-radius:50px;
+  background:linear-gradient(135deg,#A78BFA,#60A5FA);color:#fff;
+  font-size:15px;font-weight:600;cursor:pointer;transition:all .25s;display:none;
+}
+.btn-analyze:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(167,139,250,.4);}
+
+/* ── 로딩 ─────────────────────────────────────────────────── */
+#loading{display:none;flex-direction:column;align-items:center;gap:14px;padding:60px;}
+.spinner{
+  width:46px;height:46px;border:4px solid rgba(167,139,250,.2);
+  border-top-color:#A78BFA;border-radius:50%;animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── 결과 ─────────────────────────────────────────────────── */
+#result-section{
+  display:none;width:980px;max-width:96vw;
+  padding:0 18px 64px;flex-direction:column;align-items:center;gap:20px;
+}
+
+/* ── 카드 공통 ──────────────────────────────────────────────── */
+.card{
+  background:#161626;border-radius:22px;
+  border:1px solid rgba(255,255,255,.07);
+  padding:22px 24px;
+}
+
+/* ── 상단 행: 얼굴 + 배터리 ────────────────────────────────── */
+.top-row{
+  display:flex;gap:20px;width:100%;
+  align-items:stretch;flex-wrap:wrap;justify-content:center;
+}
+
+/* 얼굴 카드 */
+.face-card{flex:1;min-width:300px;max-width:620px;display:flex;flex-direction:column;gap:14px;}
+.face-img-row{display:flex;gap:12px;width:100%;}
+.face-wrapper{position:relative;border-radius:14px;overflow:hidden;flex:1;}
+.face-wrapper img{width:100%;display:block;border-radius:14px;}
+.face-lbl{text-align:center;font-size:11px;color:rgba(255,255,255,.35);margin-top:5px;letter-spacing:.5px;}
+
+/* 핑크 코너 브래킷 */
+
+.emotion-tag{
+  position:absolute;bottom:10px;right:10px;
+  background:rgba(0,0,0,.72);backdrop-filter:blur(8px);
+  border-radius:12px;padding:7px 13px;
+  display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;
+}
+
+/* 감정 확률 바 */
+.emotion-list{display:flex;flex-direction:column;gap:7px;}
+.emo-row{display:flex;align-items:center;gap:9px;}
+.emo-name{width:44px;font-size:12px;color:rgba(255,255,255,.5);text-align:right;}
+.bar-track{flex:1;height:7px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:4px;transition:width 1s cubic-bezier(.22,1,.36,1);}
+.emo-pct{width:42px;font-size:12px;color:rgba(255,255,255,.65);text-align:right;}
+
+/* 배터리 카드 */
+.battery-card{
+  min-width:220px;max-width:280px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:14px;
+}
+.battery-card .card-label{font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.38);}
+
+/* 배터리 아이콘 (iOS 앱 스타일) */
+.batt-icon-wrap{
+  position:relative;width:156px;height:156px;
+  background:#1E1E30;border-radius:34px;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 8px 30px rgba(0,0,0,.45);
+}
+.batt-body{
+  position:relative;width:90px;height:50px;
+  border:4px solid rgba(255,255,255,.68);border-radius:10px;
+}
+.batt-tip{
+  position:absolute;right:-13px;top:50%;transform:translateY(-50%);
+  width:7px;height:22px;background:rgba(255,255,255,.68);border-radius:0 4px 4px 0;
+}
+.batt-fill{
+  position:absolute;left:4px;top:4px;bottom:4px;border-radius:5px;
+  transition:width 1.3s cubic-bezier(.22,1,.36,1);width:0%;
+}
+.score-num{font-size:42px;font-weight:800;letter-spacing:-2px;}
+.score-lbl{font-size:17px;font-weight:600;}
+.score-sub{font-size:12px;color:rgba(255,255,255,.38);text-align:center;}
+
+/* ── 퍼스널 컬러 그리드 카드 ──────────────────────────────── */
+.grid-card{width:100%;display:flex;gap:20px;flex-wrap:wrap;align-items:stretch;}
+.grid-info{flex:1;min-width:180px;display:flex;flex-direction:column;gap:10px;justify-content:center;}
+.grid-info h3{font-size:13px;letter-spacing:1.5px;color:rgba(255,255,255,.38);}
+.grid-axis{display:flex;align-items:center;gap:10px;}
+.axis-label{font-size:13px;color:rgba(255,255,255,.45);width:60px;}
+.axis-bar-track{flex:1;height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;}
+.axis-fill{height:100%;border-radius:3px;transition:width 1.2s cubic-bezier(.22,1,.36,1);width:0%;}
+.axis-val{font-size:12px;color:rgba(255,255,255,.5);width:32px;text-align:right;}
+.grid-tag{
+  display:inline-block;padding:5px 14px;border-radius:50px;font-size:13px;font-weight:600;
+  background:rgba(167,139,250,.2);color:#C4B5FD;border:1px solid rgba(167,139,250,.3);
+}
+
+/* 얼굴 색상 */
+.face-colors{flex:1;min-width:200px;display:flex;flex-direction:column;gap:10px;}
+.face-colors h3{font-size:13px;letter-spacing:1.5px;color:rgba(255,255,255,.38);}
+.fc-row{display:flex;gap:12px;}
+.fc-item{display:flex;align-items:center;gap:10px;flex:1;}
+.fc-swatch{width:44px;height:44px;border-radius:11px;border:2px solid rgba(255,255,255,.1);flex-shrink:0;}
+.fc-text .fcn{font-size:12px;color:rgba(255,255,255,.42);}
+.fc-text .fch{font-size:14px;font-weight:600;font-family:monospace;}
+
+/* ── 오늘의 컬러 카드 ────────────────────────────────────── */
+.color-card{width:100%;}
+.color-card-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:20px;flex-wrap:wrap;gap:8px;}
+.color-card-header h2{font-size:20px;font-weight:700;}
+.color-card-header .ch-sub{font-size:13px;color:rgba(255,255,255,.38);}
+
+.color-main-row{display:flex;gap:18px;align-items:stretch;flex-wrap:wrap;}
+
+/* 기본 감정색 */
+.color-box{
+  flex:1;min-width:140px;border-radius:16px;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
+  padding:20px 16px 16px;gap:6px;min-height:160px;
+  border:2px solid rgba(255,255,255,.08);transition:transform .2s;cursor:pointer;
+}
+.color-box:hover{transform:translateY(-4px);}
+.color-box .cb-tag{
+  background:rgba(0,0,0,.35);backdrop-filter:blur(6px);
+  border-radius:8px;padding:4px 10px;font-size:11px;color:rgba(255,255,255,.7);
+}
+.color-box .cb-hex{font-size:15px;font-weight:700;font-family:monospace;}
+.color-box .cb-name{font-size:13px;color:rgba(255,255,255,.75);font-weight:600;}
+.color-box .cb-desc{font-size:11px;color:rgba(255,255,255,.48);text-align:center;line-height:1.4;}
+
+.color-arrow{font-size:22px;color:rgba(255,255,255,.3);display:flex;align-items:center;padding:0 4px;}
+
+/* ── 다시하기 ────────────────────────────────────────────── */
+.btn-reset{
+  padding:11px 34px;border:2px solid rgba(255,255,255,.13);border-radius:50px;
+  background:transparent;color:rgba(255,255,255,.5);font-size:14px;cursor:pointer;transition:all .2s;
+}
+.btn-reset:hover{border-color:#A78BFA;color:#A78BFA;}
+
+@media(max-width:640px){
+  .top-row{flex-direction:column;align-items:center;}
+  .battery-card{width:100%;max-width:100%;}
+  .grid-card{flex-direction:column;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Face2Emo</h1>
+  <p>사진 한 장으로 오늘의 감정 상태와 나에게 맞는 컬러를 알아보세요</p>
+</header>
+
+<!-- 업로드 -->
+<div id="upload-section">
+  <label for="file-input">
+    <div class="upload-box" id="upload-box">
+      <span class="upload-icon">📷</span>
+      <h2>얼굴 사진을 업로드하세요</h2>
+      <p>JPG · PNG · WEBP · 클릭하거나 드래그</p>
+    </div>
+  </label>
+  <input type="file" id="file-input" accept="image/*">
+  <br>
+  <button class="btn-analyze" id="btn-analyze" onclick="analyze()">분석 시작 ▶</button>
+</div>
+
+<!-- 로딩 -->
+<div id="loading">
+  <div class="spinner"></div>
+  <p style="color:rgba(255,255,255,.38)">감정 분석 중…</p>
+</div>
+
+<!-- 결과 -->
+<div id="result-section">
+
+  <!-- 상단: 얼굴 + 배터리 -->
+  <div class="top-row">
+    <!-- 얼굴 -->
+    <div class="card face-card">
+      <div class="face-img-row">
+        <div>
+          <div class="face-wrapper">
+            <img id="face-img" src="" alt="face">
+            <div class="emotion-tag">
+              <span id="top-emoji"></span>
+              <span id="top-kr"></span>
+            </div>
+          </div>
+          <div class="face-lbl">ORIGINAL</div>
+        </div>
+        <div>
+          <div class="face-wrapper">
+            <img id="lm-img" src="" alt="landmark">
+          </div>
+          <div class="face-lbl">LANDMARK</div>
+        </div>
+      </div>
+      <div class="emotion-list" id="emotion-list"></div>
+    </div>
+
+    <!-- 배터리 -->
+    <div class="card battery-card">
+      <div class="card-label">CONDITION SCORE</div>
+      <div class="batt-icon-wrap">
+        <div class="batt-body">
+          <div class="batt-fill" id="batt-fill"></div>
+          <div class="batt-tip"></div>
+        </div>
+      </div>
+      <div class="score-num" id="score-num">--</div>
+      <div class="score-lbl" id="score-lbl">--</div>
+      <div class="score-sub" id="score-sub"></div>
+    </div>
+  </div>
+
+  <!-- 퍼스널 컬러 그리드 + 얼굴 색상 -->
+  <div class="card" style="width:100%;">
+    <div class="grid-card">
+
+      <!-- 16그리드 -->
+      <div class="grid-info">
+        <h3>PERSONAL COLOR GRID</h3>
+        <div class="grid-axis">
+          <span class="axis-label">🌡 온도</span>
+          <div class="axis-bar-track">
+            <div class="axis-fill" id="temp-fill"
+                 style="background:linear-gradient(90deg,#60A5FA,#FBBF24)"></div>
+          </div>
+          <span class="axis-val" id="temp-val">-</span>
+        </div>
+        <div class="grid-axis">
+          <span class="axis-label">☀️ 명도</span>
+          <div class="axis-bar-track">
+            <div class="axis-fill" id="light-fill"
+                 style="background:linear-gradient(90deg,#374151,#F9FAFB)"></div>
+          </div>
+          <span class="axis-val" id="light-val">-</span>
+        </div>
+        <div style="margin-top:6px;">
+          <span class="grid-tag" id="grid-tag">--</span>
+        </div>
+      </div>
+
+      <!-- 얼굴 고유 색상 -->
+      <div class="face-colors">
+        <h3>FACE COLORS</h3>
+        <div class="fc-row" id="fc-row"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 오늘의 컬러 -->
+  <div class="card color-card">
+    <div class="color-card-header">
+      <h2>🎨 오늘의 컬러</h2>
+      <span class="ch-sub" id="color-sub"></span>
+    </div>
+    <div class="color-main-row" id="color-row"></div>
+  </div>
+
+  <button class="btn-reset" onclick="resetApp()">↩ 다시 분석하기</button>
+</div>
+
+<script>
+const EMOTION_KR = {
+  angry:'분노',disgust:'혐오',fear:'공포',
+  happy:'행복',neutral:'중립',sad:'슬픔',surprise:'놀람'
+};
+
+let selFile = null;
+
+document.getElementById('file-input').addEventListener('change', e=>{
+  selFile = e.target.files[0];
+  if(!selFile) return;
+  const reader = new FileReader();
+  reader.onload = ev=>{
+    document.getElementById('upload-box').innerHTML =
+      `<img src="${ev.target.result}" style="max-height:190px;border-radius:12px;max-width:100%">
+       <p style="margin-top:10px;color:rgba(255,255,255,.44);font-size:13px">${selFile.name}</p>`;
+  };
+  reader.readAsDataURL(selFile);
+  document.getElementById('btn-analyze').style.display='inline-block';
+});
+
+// 드래그 앤 드롭
+const ub=document.getElementById('upload-box');
+ub.addEventListener('dragover',e=>{e.preventDefault();ub.style.borderColor='#A78BFA';});
+ub.addEventListener('dragleave',()=>{ub.style.borderColor='rgba(167,139,250,.5)';});
+ub.addEventListener('drop',e=>{
+  e.preventDefault();
+  const f=e.dataTransfer.files[0]; if(!f) return;
+  selFile=f;
+  document.getElementById('file-input').files=e.dataTransfer.files;
+  document.getElementById('file-input').dispatchEvent(new Event('change'));
+});
+
+function battColor(s){
+  if(s>=70) return '#2ECC71';
+  if(s>=45) return '#F1C40F';
+  if(s>=20) return '#E74C3C';
+  return '#8E44AD';
+}
+function scoreLabel(s){
+  if(s>=80) return['매우 좋음 😊','기분이 아주 좋은 하루!'];
+  if(s>=60) return['좋음 🙂','컨디션이 좋네요'];
+  if(s>=40) return['보통 😐','평범한 하루'];
+  if(s>=20) return['나쁨 😔','휴식이 필요해요'];
+  return ['매우 나쁨 😞','충분한 휴식을 취하세요'];
+}
+
+async function analyze(){
+  if(!selFile) return;
+  document.getElementById('upload-section').style.display='none';
+  document.getElementById('loading').style.display='flex';
+  try{
+    const fd=new FormData();
+    fd.append('image',selFile);
+    const analyzeUrl=new URL('analyze',window.location.href).href;
+    const res=await fetch(analyzeUrl,{method:'POST',body:fd});
+    if(!res.ok) throw new Error('서버 오류 '+res.status);
+    const d=await res.json();
+    document.getElementById('loading').style.display='none';
+    render(d);
+    const rs=document.getElementById('result-section');
+    rs.style.display='flex';
+    rs.style.flexDirection='column';
+    rs.style.alignItems='center';
+  }catch(e){
+    document.getElementById('loading').style.display='none';
+    document.getElementById('upload-section').style.display='block';
+    alert('분석 실패: '+e.message+'\n잠시 후 다시 시도해주세요.');
+  }
+}
+
+function render(d){
+  // 얼굴 이미지
+  document.getElementById('face-img').src='data:image/jpeg;base64,'+d.image_b64;
+  document.getElementById('top-emoji').textContent=d.top_emoji;
+  document.getElementById('top-kr').textContent=d.top_kr;
+  document.getElementById('lm-img').src='data:image/jpeg;base64,'+d.lm_b64;
+
+  // 감정 바 (내림차순)
+  const ordered=Object.entries(d.probs).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('emotion-list').innerHTML=ordered.map(([em,p])=>{
+    const pct=(p*100).toFixed(1);
+    return `<div class="emo-row">
+      <span class="emo-name">${EMOTION_KR[em]}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%;background:${d.bar_colors[em]}" data-w="${pct}"></div></div>
+      <span class="emo-pct">${pct}%</span>
+    </div>`;
+  }).join('');
+  setTimeout(()=>{
+    document.querySelectorAll('.bar-fill').forEach(el=>el.style.width=el.dataset.w+'%');
+  },80);
+
+  // 배터리
+  const sc=d.score, bc=battColor(sc), [lbl,sub]=scoreLabel(sc);
+  document.getElementById('score-num').textContent=sc+'점';
+  document.getElementById('score-num').style.color=bc;
+  document.getElementById('score-lbl').textContent=lbl;
+  document.getElementById('score-lbl').style.color=bc;
+  document.getElementById('score-sub').textContent=sub;
+  const bf=document.getElementById('batt-fill');
+  bf.style.background=bc;
+  setTimeout(()=>{bf.style.width=sc+'%';},80);
+
+  // 16그리드
+  const g=d.grid;
+  setTimeout(()=>{
+    document.getElementById('temp-fill').style.width=g.temp_score+'%';
+    document.getElementById('light-fill').style.width=g.light_score+'%';
+  },80);
+  document.getElementById('temp-val').textContent=g.temp_score;
+  document.getElementById('light-val').textContent=g.light_score.toFixed(0);
+  document.getElementById('grid-tag').textContent=g.temp_label+' + '+g.light_label;
+
+  // 얼굴 색상
+  const fcs=[
+    {n:'피부',h:d.skin_hex,r:d.skin_rgb},
+    {n:'머리',h:d.hair_hex,r:d.hair_rgb},
+    {n:'눈동자',h:d.eye_hex,r:d.eye_rgb},
+  ];
+  document.getElementById('fc-row').innerHTML=fcs.map(fc=>`
+    <div class="fc-item">
+      <div class="fc-swatch" style="background:${fc.h}"></div>
+      <div class="fc-text">
+        <div class="fcn">${fc.n}</div>
+        <div class="fch">${fc.h}</div>
+      </div>
+    </div>`).join('');
+
+  // 오늘의 컬러
+  document.getElementById('color-sub').textContent=
+    d.top_emoji+' '+d.top_kr+' 감정 기반 → 퍼스널컬러 보정 ('+d.grid.temp_label+' / '+d.grid.light_label+')';
+
+  document.getElementById('color-row').innerHTML=`
+    <!-- 기본 감정색 -->
+    <div class="color-box" style="background:${d.base_hex}"
+         onclick="copy('${d.base_hex}',this)" title="클릭하여 복사">
+      <div class="cb-tag">기본 감정색</div>
+      <div class="cb-hex">${d.base_hex}</div>
+      <div class="cb-name">${d.color_name}</div>
+      <div class="cb-desc">${d.color_desc}</div>
+    </div>
+
+    <div class="color-arrow">→</div>
+
+    <!-- 보정된 오늘의 컬러 (크게) -->
+    <div class="color-box" style="background:${d.adjusted_hex};flex:2;border:3px solid rgba(255,255,255,.22);"
+         onclick="copy('${d.adjusted_hex}',this)" title="클릭하여 복사">
+      <div class="cb-tag" style="background:rgba(0,0,0,.5);font-size:13px;padding:5px 14px">
+        🎨 오늘의 컬러 (퍼스널 보정)
+      </div>
+      <div class="cb-hex" style="font-size:20px">${d.adjusted_hex}</div>
+      <div class="cb-name" style="font-size:16px">${d.color_name}</div>
+      <div class="cb-desc">LAB 보정 L${d.grid.light_adj>0?'+':''}${d.grid.light_adj} / B${d.grid.temp_adj>0?'+':''}${d.grid.temp_adj}</div>
+    </div>`;
+}
+
+function copy(hex, el){
+  navigator.clipboard.writeText(hex).then(()=>{
+    const orig=el.style.transform;
+    el.style.transform='scale(0.96)';
+    setTimeout(()=>el.style.transform=orig,150);
+  });
+}
+
+function resetApp(){
+  document.getElementById('result-section').style.display='none';
+  document.getElementById('upload-section').style.display='block';
+  document.getElementById('upload-box').innerHTML=
+    `<span class="upload-icon">📷</span>
+     <h2>얼굴 사진을 업로드하세요</h2>
+     <p>JPG · PNG · WEBP · 클릭하거나 드래그</p>`;
+  document.getElementById('btn-analyze').style.display='none';
+  selFile=null;
+}
+</script>
+</body>
+</html>

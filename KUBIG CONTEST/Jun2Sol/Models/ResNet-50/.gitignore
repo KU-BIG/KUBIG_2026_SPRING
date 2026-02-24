@@ -1,0 +1,55 @@
+# Dataset (too large)
+cleaned_7class/
+cropped_7class/
+merged_7class_all/
+*.zip
+
+# Model checkpoints
+results*/
+*.pt
+*.pth
+*.tar.gz
+
+# Pretrained weights
+pretrained/
+
+# MediaPipe model
+*.task
+
+# Landmark cache
+landmarks.npy
+heatmaps_*.npy
+
+# Output directories
+gradcam_results/
+gradcam_compare_results/
+inference_results/
+
+# Old experiment versions
+run_ablation*.py
+gradcam_v6.py
+gradcam_compare.py
+run_arcface_compare.py
+iresnet.py
+clean_dataset.py
+crop_faces.py
+visualize_cleaning.py
+
+# Logs
+*.log
+logs_*.txt
+cleaning_report.json
+cleaning_viz/
+
+# Notebooks
+*.ipynb
+.ipynb_checkpoints/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# OS
+.DS_Store
+Thumbs.db
