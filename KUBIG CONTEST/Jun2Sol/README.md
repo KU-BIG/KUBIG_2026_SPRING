@@ -77,6 +77,30 @@ python Models/ResNet-50/train_fer_cls_weight.py --data-root ./cleaned_7class --g
 python Models/ResNet-50/inference.py --checkpoint ./results/best_GCN_FiLM_L34.pt --image face.jpg
 ```
 
+**실험 결과**
+
+| 모델 | 테스트 정확도 |
+|---|---|
+| Baseline (ResNet-50 only) | 86.18% |
+| GCN_FiLM_L4 | 86.72% |
+| GCN_FiLM_L234 | 86.91% |
+| GAT_FiLM_L34 | 86.54% |
+| **GCN_FiLM_L34 (최고 성능)** | **87.12%** |
+
+**클래스별 정확도 (GCN_FiLM_L34)**
+
+| 클래스 | 정확도 |
+|---|---|
+| happy | 95.4% |
+| surprise | 88.0% |
+| neutral | 87.9% |
+| sad | 86.6% |
+| angry | 83.4% |
+| fear | 58.5% |
+| disgust | 54.2% |
+
+> fear/disgust는 데이터 수 부족으로 성능 저하. 클래스 가중치 손실 적용 시 disgust +7.7%, fear +1.7% 향상.
+
 ## 3-3. Color matching
 
 ## 3-4. User Interface
