@@ -54,6 +54,22 @@ VGGFace2로 사전학습된 ResNet-50에 GCN 기반 랜드마크 정보를 FiLM�
 - **FiLM**: `γ(c)·x + β(c)` 형태로 ResNet feature map에 스케일/시프트 적용
 - **주입 위치**: layer3 + layer4 (ablation 결과 최적)
 
+**학습**
+
+```bash
+# 최고 성능 모델 (GCN_FiLM_L34)
+python Models/ResNet-50/train_fer_gcn_film.py --data-root ./cleaned_7class --gpus 0,1 --experiments GCN_FiLM_L34
+
+# 클래스 가중치 학습 (소수 클래스 성능 개선)
+python Models/ResNet-50/train_fer_cls_weight.py --data-root ./cleaned_7class --gpus 0,1
+```
+
+**추론**
+
+```bash
+python Models/ResNet-50/inference.py --checkpoint ./results/best_GCN_FiLM_L34.pt --image face.jpg
+```
+
 **실험 결과**
 
 | 모델 | 테스트 정확도 |
