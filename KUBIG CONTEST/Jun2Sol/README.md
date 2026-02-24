@@ -10,7 +10,7 @@
 
 ## 3-1. Datasets
 
-학습에 사용한 7클래스 FER 데이터셋입니다 (RAF-DB 기반).
+학습에 사용한 7클래스 FER 데이터셋입니다 (RAF-DB 등.....).
 
 **다운로드**: [Google Drive](https://drive.google.com/file/d/1iO3nstMqRdVtq41dR4N_ta4lS2L7B5A8/view?usp=sharing)
 
