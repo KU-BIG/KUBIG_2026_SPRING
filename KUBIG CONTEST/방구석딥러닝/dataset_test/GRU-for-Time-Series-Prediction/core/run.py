@@ -163,11 +163,6 @@ import tensorflow as tf
 import numpy as np
 
 
-# 텐서플로우가 즉시 실행 모드에서 함수를 실행하도록 강제합니다.
-tf.config.run_functions_eagerly(True)
-# 넘파이 변환 에러를 방지하기 위해 디버그 모드를 활성화합니다.
-tf.data.experimental.enable_debug_mode()
-
 
 current_time = datetime.now().strftime("%Y%m%d%H")
 
