@@ -24,6 +24,16 @@
 | fear | 615 |
 | disgust | 840 |
 
+### 전처리
+
+```bash
+# 1. 얼굴 크롭
+python datasets/crop_faces.py --src ./raw_data --dst ./cropped_7class
+
+# 2. 저품질 이미지 정제 (블러, 중복, 랜드마크 미검출 제거)
+python datasets/clean_dataset.py --src ./cropped_7class --dst ./cleaned_7class
+```
+
 ## 3-2. Models
 
 ## 3-3. Color matching
