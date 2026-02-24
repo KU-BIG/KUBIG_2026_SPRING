@@ -54,6 +54,13 @@ VGGFace2로 사전학습된 ResNet-50에 GCN 기반 랜드마크 정보를 FiLM�
 - **FiLM**: `γ(c)·x + β(c)` 형태로 ResNet feature map에 스케일/시프트 적용
 - **주입 위치**: layer3 + layer4 (ablation 결과 최적)
 
+**VGGFace2 사전학습 가중치**
+
+[Oxford VGG 공식 페이지](https://www.robots.ox.ac.uk/~vgg/data/vgg_face2/)에서 `resnet50_ft_weight.pkl` 다운로드 후 아래 경로에 저장:
+```
+pretrained/resnet50_ft_weight.pkl
+```
+
 **학습**
 
 ```bash
