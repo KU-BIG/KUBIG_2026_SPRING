@@ -14,15 +14,16 @@
 
 **다운로드**: [Google Drive](https://drive.google.com/file/d/1iO3nstMqRdVtq41dR4N_ta4lS2L7B5A8/view?usp=sharing)
 
-| 클래스 | 샘플 수 |
+| 클래스 | 샘플 수 (전처리 후) |
 |---|---|
-| happy | 6,030 |
-| neutral | 4,500 |
-| sad | 4,105 |
-| angry | 2,140 |
-| surprise | 2,425 |
-| fear | 615 |
-| disgust | 840 |
+| happy | 11,926 |
+| neutral | 9,245 |
+| sad | 8,241 |
+| angry | 4,089 |
+| surprise | 4,776 |
+| fear | 1,310 |
+| disgust | 1,725 |
+| **합계** | **41,312** |
 
 ### 전처리
 
