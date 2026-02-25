@@ -118,7 +118,7 @@ python Models/ResNet-50/train_fer_cls_weight.py --data-root ./cleaned_7class --g
 python Models/ResNet-50/inference.py --checkpoint ./results/best_GCN_FiLM_L34.pt --image face.jpg
 ```
 
-### EfficientNet-B2 (Final Model)
+### EfficientNet-B2
 
 AffectNet으로 사전학습된 EfficientNet-B2 구조에 2-Phase Transfer Learning 기법과 클래스 불균형 해소를 위한 최적화 기법을 적용한 최종 모델입니다.
 
@@ -129,6 +129,7 @@ AffectNet으로 사전학습된 EfficientNet-B2 구조에 2-Phase Transfer Learn
                     ├── Phase 1: Classification Head만 학습 (Backbone Freeze)
                     └── Phase 2: 전체 모델 미세 조정 (Fully Unfreeze, LR↓)
 ```
+**학습**
 
 ```bash
 # Classification Head 학습
@@ -139,6 +140,12 @@ python Models/EfficientNet-B2/train_fer.py --data-root ./cleaned_7class --gpus 0
 
 # 최종 모델 학습 (Weighted Cross Entropy + Label Smoothing 적용)
 python Models/EfficientNet-B2/train_fer_final.py --data-root ./cleaned_7class --gpus 0,1 --loss weighted_ce --use-label-smoothing
+```
+
+**추론**
+
+```bash
+python Models/ResNet-50/inference.py --checkpoint ./results/best_GCN_FiLM_L34.pt --image face.jpg
 ```
 
 ## 4-3. Color matching
