@@ -171,13 +171,13 @@ python Models/ResNet-50/inference.py --checkpoint ./results/best_GCN_FiLM_L34.pt
 <table style="border:none; border-collapse: collapse; width:100%;">
   <tr style="border:none;">
     <td align="center" valign="middle" style="border:none; width: 33%;">
-      <img src="https://github.com/user-attachments/assets/3f2efa6a-ec4a-405b-b2fd-17f01dd548fd" width="100%" alt="image1" />
+      <img src="./images/html_screenshots/html_upload.jpg" width="100%" alt="upload" />
     </td>
     <td align="center" valign="middle" style="border:none; width: 33%;">
-      <img src="https://github.com/user-attachments/assets/6105b312-f988-49fe-8435-9cd4008b048c" width="100%" alt="image2" />
+      <img src="./images/html_screenshots/html_junho.png" width="100%" alt="junho" />
     </td>
     <td align="center" valign="middle" style="border:none; width: 33%;">
-      <img src="https://github.com/user-attachments/assets/83ff61c3-df04-4171-9fd5-199d0b8bdfba" width="100%" alt="image3" />
+      <img src="./images/html_screenshots/html_junyoung.png" width="100%" alt="junyoung" />
     </td>
   </tr>
 </table>
