@@ -108,7 +108,7 @@ In this phase, we compared the best-performing configurations of each sequential
 | **WMT** | -0.2865 | **+0.4503** | +0.4175 | +0.4472 |
 | **KO** | +0.0591 | +0.3630 | +0.3782 | **+0.3829** |
 
-#### **Findings**
+#### 💡**Findings**
 - Sequential Superiority: Every sequential model (RNN/LSTM/GRU) significantly outperformed the CNN across all tickers
 - Recovery of Poor Performers: Stocks like WMT and AMD, which showed degradation in the weighted CNN experiment, achieved massive $R^2$ gains (up to +0.45) when processed through sequential layers
 
@@ -166,13 +166,28 @@ In this phase, we analyzed how the rolling window size ($N$) and volume sensitiv
 | 20 | 0.3 | 0.39 | **0.9105** | 0.9257 | 0.9175 |
 | 20 | 0.6 | 0.52 | 0.8825 | 0.9187 | 0.8888 |
 
-#### **Findings**
+#### 💡**Findings**
 | Stock | Best Model | Best Params | $R^2$ (Peak) | Observations |
 | :--- | :---: | :---: | :---: | :--- |
-| **TSM** | **LSTM** | $N=10, k=0.3$ | **0.9337** | Highly stable across all sequential models. |
-| **AMD** | **LSTM** | $N=20, k=0.1$ | **0.8827** | Massive jump from CNN (0.5) to sequential models (0.8+). |
-| **WMT** | **RNN** | $N=20, k=0.3$ | **0.8013** | Performance normalized at $N=20$ where CNN failed. |
-| **KO** | **GRU** | $N=10, k=0.3$ | **0.9304** | Highest peak, but RNN showed instability without gating. |
+| **GOOG** | **RNN** | $N=10, k=0.3$ | **0.7808** | RNN achieved the highest peak, showing a massive jump from CNN's baseline. |
+| **TSM** | **LSTM** | $N=10, k=0.3$ | **0.9337** | Highly stable; all sequential models achieved $R^2 > 0.83$. |
+| **AMD** | **LSTM** | $N=20, k=0.1$ | **0.8827** | Significant jump from CNN (0.5) to sequential models (0.8+). |
+| **WMT** | **RNN** | $N=20, k=0.3$ | **0.8013** | Successfully normalized predictions at $N=20$ where CNN failed (negative $R^2$). |
+| **KO** | **GRU** | $N=10, k=0.3$ | **0.9304** | Gated models (LSTM/GRU) were very stable, while RNN showed instability at $N=10, k=0.1$. |
+
+Each stock showed unique sensitivity to the "Sentiment Decay" feature depending on its market volatility and news persistence.
+
+* **Tech Sector (GOOG, TSM, AMD): High Receptivity to Sequential Memory**
+    * **Observation**: These stocks showed the most dramatic $R^2$ improvements (up to +0.58 for GOOG) when moving from CNN to sequential models.
+    * **Analysis**: High-tech stocks are highly sensitive to continuous news flows (earnings, tech breakthroughs). LSTM/RNN effectively captured the "persistence" of these news cycles where CNN's static window failed.
+
+* **Consumer Goods & Value Stocks (WMT, KO): Noise Filtering & Gating Importance**
+    * **Observation**: **WMT** was a "failure case" for CNN (negative $R^2$) but was successfully "rescued" by RNN/GRU ($R^2$ 0.80+).
+    * **Analysis**: For stable stocks like Walmart and Coca-Cola, news often acts as temporary noise. The **Gating Mechanism** of LSTM/GRU and the **Time-Decay** feature acted as a low-pass filter, smoothing out volatility and recovering the underlying price trend.
+
+* **Model Specifics: The Stability of Gated Units**
+    * **RNN**: While capable of high peaks (GOOG, WMT), it showed catastrophic instability in certain conditions (KO at $N=10, k=0.1$), likely due to the vanishing gradient problem in specific noise environments.
+    * **LSTM/GRU**: Proved to be the most reliable "All-Rounders." Specifically, **LSTM** consistently maintained $R^2 > 0.85$ across almost all tested hyperparameters, making it the most robust choice for sentiment-integrated trading models.
 
 
 # Disclaimer
