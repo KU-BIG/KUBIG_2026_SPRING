@@ -112,6 +112,10 @@ python Models/ResNet-50/train_fer_gcn_film.py --data-root ./cleaned_7class --gpu
 python Models/ResNet-50/train_fer_cls_weight.py --data-root ./cleaned_7class --gpus 0,1
 ```
 
+### ResNet-50 + GCN_FiLM
+
+
+
 **추론**
 
 ```bash
