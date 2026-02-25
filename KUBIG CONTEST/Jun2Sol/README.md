@@ -81,6 +81,8 @@ python datasets/clean_dataset.py --src ./cropped_7class --dst ./cleaned_7class
 ### ResNet-50 + GCN_FiLM
 
 VGGFace2로 사전학습된 ResNet-50에 GCN 기반 랜드마크 정보를 FiLM으로 주입한 모델입니다.
+<img width="869" height="868" alt="image" src="https://github.com/user-attachments/assets/a5e3a799-0209-4ab7-a939-5a996ab14fd3" />
+
 
 **VGGFace2 사전학습 가중치**
 
