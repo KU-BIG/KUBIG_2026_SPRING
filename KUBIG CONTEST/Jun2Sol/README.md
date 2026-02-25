@@ -6,7 +6,7 @@
 
 # 2. Overview
 
-Face2Emo는 얼굴 이미지로부터 감정을 인식하고, 개인 고유 피부, 눈동자, 머리 톤을 반영하여 맞춤형 컬러를 추천하는 시스템입니다.
+Face2Emo는 얼굴 이미지로부터 감정을 인식하고, 개인 고유 특성(피부톤, 눈동자 색깔, 머리 색깔)을 반영하여 하루의 맞춤형 컬러를 추천하는 시스템입니다.
 
 ## 2-1. Objectives
 - FER 성능 최적화
@@ -167,7 +167,9 @@ python Models/ResNet-50/inference.py --checkpoint ./results/best_GCN_FiLM_L34.pt
 
 
 ## 4-4. User Interface
-<img width="1714" height="1128" alt="image" src="https://github.com/user-attachments/assets/3f2efa6a-ec4a-405b-b2fd-17f01dd548fd" />
+<div align="center">
+  <img width="50%" alt="image" src="https://github.com/user-attachments/assets/3f2efa6a-ec4a-405b-b2fd-17f01dd548fd" />
+</div>
 
 
 # 5. Results
