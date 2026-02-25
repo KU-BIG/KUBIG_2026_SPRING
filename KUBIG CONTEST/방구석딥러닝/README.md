@@ -96,42 +96,83 @@ This experiment investigates the temporal persistence of news sentiment.
 Unlike CNNs that focus on local feature extraction, we hypothesize that sentiment impact decays exponentially over time and influences subsequent stock prices through sequential memory.
 
 
-### Experiment A: Model Performance Comparison (vs. Base CNN)
+### 📊 Experiment A: Model Performance Comparison (vs. Base CNN)
 In this phase, we compared the best-performing configurations of each sequential model against the Baseline CNN to evaluate the effectiveness of capturing "sentiment residue."
 
 #### Key results ($R^2$ inprovement)
-Stock,CNN (Weighted),RNN,LSTM,GRU
-GOOG,+0.2064,+0.5863,+0.5844,+0.4931
-TSM,+0.1659,+0.4040,+0.4173,+0.4105
-AMD,-0.0103,+0.3455,+0.3694,+0.3618
-WMT,-0.2865,+0.4503,+0.4175,+0.4472
-KO,+0.0591,+0.3630,+0.3782,+0.3829
+| Stock | CNN (Weighted) | RNN | LSTM | GRU |
+| :--- | :---: | :---: | :---: | :---: |
+| **GOOG** | +0.2064 | **+0.5863** | +0.5844 | +0.4931 |
+| **TSM** | +0.1659 | +0.4040 | **+0.4173** | +0.4105 |
+| **AMD** | -0.0103 | +0.3455 | **+0.3694** | +0.3618 |
+| **WMT** | -0.2865 | **+0.4503** | +0.4175 | +0.4472 |
+| **KO** | +0.0591 | +0.3630 | +0.3782 | **+0.3829** |
 
-#### Findings
+#### **Findings**
 - Sequential Superiority: Every sequential model (RNN/LSTM/GRU) significantly outperformed the CNN across all tickers
 - Recovery of Poor Performers: Stocks like WMT and AMD, which showed degradation in the weighted CNN experiment, achieved massive $R^2$ gains (up to +0.45) when processed through sequential layers
 
 
-### Experiment B: Parametric Sensitivity Analysis ($N$ and $k$)
+### 📊 Experiment B: Parametric Sensitivity Analysis ($N$ and $k$)
 In this phase, we analyzed how the rolling window size ($N$) and volume sensitivity ($k$) affect the $R^2$ performance of each model.
 
 #### 1. GOOG result
-N,k,CNN,RNN,LSTM,GRU
-10,0.1,0.2935,0.7260,0.2922,-1.5704
-10,0.3,0.0835,0.7808,0.6041,0.0780
-10,0.6,0.3975,0.5530,0.6694,-1.9824
-20,0.1,0.3925,0.5910,0.7071,-1.1768
-20,0.3,0.4005,0.5788,0.7168,0.6876
-20,0.6,0.2985,0.7549,0.7789,-0.2375
+| Window ($N$) | Sensitivity ($k$) | CNN | RNN | LSTM | GRU |
+| :---: | :---: | :---: | :---: | :---: | :---: |
+| 10 | 0.1 | 0.2935 | 0.7260 | 0.2922 | -1.5704 |
+| 10 | 0.3 | 0.0835 | **0.7808** | 0.6041 | 0.0780 |
+| 10 | 0.6 | 0.3975 | 0.5530 | 0.6694 | -1.9824 |
+| 20 | 0.1 | 0.3925 | 0.5910 | 0.7071 | -1.1768 |
+| 20 | 0.3 | **0.4005** | 0.5788 | 0.7168 | **0.6876** |
+| 20 | 0.6 | 0.2985 | 0.7549 | **0.7789** | -0.2375 |
 
 #### 2. TSM result
-N,k,CNN,RNN,LSTM,GRU
-10 0.1 0.5134 0.8796 0.9114 0.8854
-10 0.3 0.6394 0.8817 0.9337 0.9225
-10 0.6 0.6564 0.9204 0.8832 0.9215
-20 0.1 0.6594 0.8354 0.9240 0.9269
-20 0.3 0.6664 0.9078 0.9182 0.9025
-20 0.6 0.6814 0.9146 0.9239 0.8922
+| Window ($N$) | Sensitivity ($k$) | CNN | RNN | LSTM | GRU |
+| :---: | :---: | :---: | :---: | :---: | :---: |
+| 10 | 0.1 | 0.5134 | 0.8796 | 0.9114 | 0.8854 |
+| 10 | 0.3 | 0.6394 | 0.8817 | **0.9337** | 0.9225 |
+| 10 | 0.6 | 0.6564 | **0.9204** | 0.8832 | 0.9215 |
+| 20 | 0.1 | 0.6594 | 0.8354 | 0.9240 | **0.9269** |
+| 20 | 0.3 | 0.6664 | 0.9078 | 0.9182 | 0.9025 |
+| 20 | 0.6 | **0.6814** | 0.9146 | 0.9239 | 0.8922 |
+
+#### 3. AMD result
+| Window ($N$) | Sensitivity ($k$) | CNN | RNN | LSTM | GRU |
+| :---: | :---: | :---: | :---: | :---: | :---: |
+| 10 | 0.1 | **0.50** | 0.8187 | 0.8610 | 0.7280 |
+| 10 | 0.3 | 0.39 | 0.8268 | 0.8816 | 0.8709 |
+| 10 | 0.6 | 0.43 | 0.7850 | 0.8774 | **0.8751** |
+| 20 | 0.1 | 0.40 | 0.8176 | **0.8827** | 0.8726 |
+| 20 | 0.3 | 0.18 | 0.7944 | 0.8804 | 0.8223 |
+| 20 | 0.6 | 0.43 | **0.8588** | 0.8807 | 0.8437 |
+
+#### 4. WMT result
+| Window ($N$) | Sensitivity ($k$) | CNN | RNN | LSTM | GRU |
+| :---: | :---: | :---: | :---: | :---: | :---: |
+| 10 | 0.1 | -0.49 | 0.3081 | **0.7685** | 0.5741 |
+| 10 | 0.3 | -0.109 | 0.2354 | 0.7496 | 0.6853 |
+| 10 | 0.6 | -0.941 | 0.7334 | 0.7265 | 0.7032 |
+| 20 | 0.1 | -0.577 | 0.7117 | 0.6955 | 0.7290 |
+| 20 | 0.3 | -0.311 | **0.8013** | 0.6588 | **0.7982** |
+| 20 | 0.6 | **0.065** | 0.7756 | 0.6719 | 0.7850 |
+
+#### 5. KO result
+| Window ($N$) | Sensitivity ($k$) | CNN | RNN | LSTM | GRU |
+| :---: | :---: | :---: | :---: | :---: | :---: |
+| 10 | 0.1 | **0.61** | -0.6099 | 0.8812 | 0.8826 |
+| 10 | 0.3 | 0.56 | 0.8882 | **0.9236** | **0.9304** |
+| 10 | 0.6 | 0.51 | 0.9029 | 0.9062 | 0.9194 |
+| 20 | 0.1 | 0.34 | 0.8936 | 0.8973 | 0.9139 |
+| 20 | 0.3 | 0.39 | **0.9105** | 0.9257 | 0.9175 |
+| 20 | 0.6 | 0.52 | 0.8825 | 0.9187 | 0.8888 |
+
+#### **Findings**
+| Stock | Best Model | Best Params | $R^2$ (Peak) | Observations |
+| :--- | :---: | :---: | :---: | :--- |
+| **TSM** | **LSTM** | $N=10, k=0.3$ | **0.9337** | Highly stable across all sequential models. |
+| **AMD** | **LSTM** | $N=20, k=0.1$ | **0.8827** | Massive jump from CNN (0.5) to sequential models (0.8+). |
+| **WMT** | **RNN** | $N=20, k=0.3$ | **0.8013** | Performance normalized at $N=20$ where CNN failed. |
+| **KO** | **GRU** | $N=10, k=0.3$ | **0.9304** | Highest peak, but RNN showed instability without gating. |
 
 
 # Disclaimer
