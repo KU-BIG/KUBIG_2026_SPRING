@@ -146,7 +146,7 @@ python Models/EfficientNet-B2/train_fer_final.py --data-root ./cleaned_7class --
 **추론**
 
 ```bash
-python Models/ResNet-50/inference.py --checkpoint ./results/best_GCN_FiLM_L34.pt --image face.jpg
+python Models/EfficientNet-B2/inference.py --checkpoint ./results/best_final.pt --image face.jpg
 ```
 
 ## 3-3. Color matching
