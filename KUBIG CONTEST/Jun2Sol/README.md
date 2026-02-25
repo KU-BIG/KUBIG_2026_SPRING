@@ -4,13 +4,58 @@
 
 22기 박준영 | 23기 서민솔, 정준호
 
-# 2. Introduction
+# 2. Overview
 
-# 3. Experiments
+Face2Emo는 얼굴 이미지로부터 감정을 인식하고, 개인 고유 피부, 눈동자, 머리 톤을 반영하여 맞춤형 컬러를 추천하는 시스템입니다.
 
-## 3-1. Datasets
+## 2-1. Objectives
+1. FER 성능 최적화
+2. 클래스 불균형 해결
+3. 감정 및 개인 신체 색상 특성을 기반으로 심리 보완 색상 도출
 
-학습에 사용한 7클래스 FER 데이터셋입니다 (RAF-DB 등.....).
+## 2-2. Architecture
+
+### Overall Pipeline
+1. Input Image
+2. Face Detection
+3. EfficientNet-B2 (FER)
+4. Emotion Probability (7-class softmax)
+5. Condition Score (Heuristic Mapping)
+6. Personal Color Extraction (CIE LAB color space)
+7. Color Synthesis
+
+### Key Components
+- Backbone: EfficientNet-B2
+- Pretraining: AffectNet
+- Landmark: MediaPipe (478 pts)
+- Color Space: CIE LAB
+- Clustering Algorithm: K-Means
+
+# 3. Repository Structure
+📦 Face2Emo
+
+┣ 📂 Models
+
+┣ 📂 datasets
+
+┣ 📂 html
+
+┣ 📂 images
+
+┣ 📜 README.md
+
+┗ 📜 requirements.txt
+
+
+# 4. Experiments
+
+## 4-1. Datasets
+
+- FER2013
+- RAF-DB
+- etc
+
+학습에 사용한 7클래스 데이터셋입니다.
 
 **다운로드**: [Google Drive](https://drive.google.com/file/d/1iO3nstMqRdVtq41dR4N_ta4lS2L7B5A8/view?usp=sharing)
 
@@ -73,6 +118,16 @@ python Models/ResNet-50/inference.py --checkpoint ./results/best_GCN_FiLM_L34.pt
 
 ## 3-3. Color matching
 
+1. Emotional Color
+- Softmax 확률 기반 Top-3 blending
+- 감정-색 매핑
+
+2. Personal Color
+- MediaPipe FaceLandmarker (478 pts)
+- Skin / Hair / Iris 영역 추출
+- RGB → CIE LAB 변환
+- 16-Type Grid Classification
+- 
 ## 3-4. User Interface
 
 # 4. Results
