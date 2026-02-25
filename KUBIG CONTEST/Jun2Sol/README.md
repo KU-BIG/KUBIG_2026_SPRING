@@ -56,7 +56,6 @@ Face2Emo는 얼굴 이미지로부터 감정을 인식하고, 개인 고유 피�
 - etc
 
 학습에 사용한 7클래스 데이터셋입니다.
-
 **다운로드**: [Google Drive](https://drive.google.com/file/d/1iO3nstMqRdVtq41dR4N_ta4lS2L7B5A8/view?usp=sharing)
 
 ### 전처리
@@ -121,6 +120,7 @@ python Models/ResNet-50/inference.py --checkpoint ./results/best_GCN_FiLM_L34.pt
 1. Emotional Color
 - Softmax 확률 기반 Top-3 blending
 - 감정-색 매핑
+
 
 2. Personal Color
 - MediaPipe FaceLandmarker (478 pts)
