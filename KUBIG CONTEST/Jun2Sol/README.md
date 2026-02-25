@@ -184,3 +184,18 @@ python Models/ResNet-50/inference.py --checkpoint ./results/best_GCN_FiLM_L34.pt
 
 
 # 5. Results
+## Transfer Learning
+ImageNet 대신 대규모 얼굴 데이터 가번 사전학습된 가중치를 사용하여 얼굴 구조에 특화된 feature를 FER에 효과적으로 전이
+
+## Graph Neural Network
+얼굴 랜드마크를 그래프로 모델링하여 랜드마크 간 공간적 관계 및 기하학적 구조 정보 보강
+더 정밀한 랜드마크 사용 시 성능 향상 가능
+
+## Condition Injection
+GCN 임베딩을 ResNet 중간 레이어에 FiLM방식으로 주입. landmark 관련 조건을 효과적으로 conditioning
+더 복잡한 조건 정보에는 cross-attention 구조 고려 가능
+
+## Class Imbalance
+Disgust/Fear 데이터가 약 1/8 수준으로 심한 불균형 존재 
+class weighted loss, focal loss, oversamling, label smoothing 등 적용 → 소수 클래스 성능을 향상. 다만 전체 정확도는 소폭 감소함을 보임
+
