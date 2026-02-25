@@ -44,6 +44,10 @@ Face2Emo는 얼굴 이미지로부터 감정을 인식하고, 개인 고유 피�
 
 ┣ 📜 README.md
 
+┣ 📜 JUN2SOL.pdf
+
+┣ 📜 JUN2SOL.pptx
+
 ┗ 📜 requirements.txt
 
 
