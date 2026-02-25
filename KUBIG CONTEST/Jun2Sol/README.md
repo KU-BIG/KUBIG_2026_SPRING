@@ -72,7 +72,7 @@ python datasets/clean_dataset.py --src ./cropped_7class --dst ./cleaned_7class
 |---|---|---|---|---|---|---|---|---|
 | 샘플 수 | 11,926 | 9,245 | 8,241 | 4,776 | 4,089 | 1,725 | 1,310 | **41,312** |
 
-## 3-2. Models
+## 4-2. Models
 
 ### ResNet-50 + GCN_FiLM
 
@@ -115,7 +115,7 @@ python Models/ResNet-50/inference.py --checkpoint ./results/best_GCN_FiLM_L34.pt
 ```
 
 
-## 3-3. Color matching
+## 4-3. Color matching
 
 1. Emotional Color
 - Softmax 확률 기반 Top-3 blending
@@ -128,6 +128,6 @@ python Models/ResNet-50/inference.py --checkpoint ./results/best_GCN_FiLM_L34.pt
 - RGB → CIE LAB 변환
 - 16-Type Grid Classification
 - 
-## 3-4. User Interface
+## 4-4. User Interface
 
-# 4. Results
+# 5. Results
