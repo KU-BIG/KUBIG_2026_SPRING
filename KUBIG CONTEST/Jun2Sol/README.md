@@ -31,7 +31,7 @@ Face2Emo는 얼굴 이미지로부터 감정을 인식하고, 개인 고유 특�
 - Color Space: CIE LAB
 - Clustering Algorithm: K-Means
 
-# 3. Repository Structure
+## 2-3. Repository Structure
 📦 Face2Emo
 
 ┣ 📂 Models
@@ -51,9 +51,9 @@ Face2Emo는 얼굴 이미지로부터 감정을 인식하고, 개인 고유 특�
 ┗ 📜 requirements.txt
 
 
-# 4. Experiments
+# 3. Experiments
 
-## 4-1. Datasets
+## 3-1. Datasets
 
 - FER2013
 - RAF-DB
@@ -76,7 +76,7 @@ python datasets/clean_dataset.py --src ./cropped_7class --dst ./cleaned_7class
 |---|---|---|---|---|---|---|---|---|
 | 샘플 수 | 11,926 | 9,245 | 8,241 | 4,776 | 4,089 | 1,725 | 1,310 | **41,312** |
 
-## 4-2. Models
+## 3-2. Models
 
 ### ResNet-50 + GCN_FiLM
 
@@ -149,7 +149,7 @@ python Models/EfficientNet-B2/train_fer_final.py --data-root ./cleaned_7class --
 python Models/ResNet-50/inference.py --checkpoint ./results/best_GCN_FiLM_L34.pt --image face.jpg
 ```
 
-## 4-3. Color matching
+## 3-3. Color matching
 
 ### Emotional Color
 - Softmax 확률 기반 Top-3 blending
@@ -167,7 +167,7 @@ python Models/ResNet-50/inference.py --checkpoint ./results/best_GCN_FiLM_L34.pt
 - Today’s Color: 퍼스널 보정된 감정 기반 색상
 
 
-## 4-4. User Interface
+## 3-4. User Interface
 <table style="border:none; border-collapse: collapse; width:100%;">
   <tr style="border:none;">
     <td align="center" valign="middle" style="border:none; width: 33%;">
@@ -183,7 +183,7 @@ python Models/ResNet-50/inference.py --checkpoint ./results/best_GCN_FiLM_L34.pt
 </table>
 
 
-# 5. Results
+# 4. Results
 ### Transfer Learning
 - ImageNet 대신 대규모 얼굴 데이터 가번 사전학습된 가중치를 사용하여 얼굴 구조에 특화된 feature를 FER에 효과적으로 전이
 
