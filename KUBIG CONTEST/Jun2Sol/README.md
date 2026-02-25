@@ -150,18 +150,24 @@ python Models/ResNet-50/inference.py --checkpoint ./results/best_GCN_FiLM_L34.pt
 
 ## 4-3. Color matching
 
-1. Emotional Color
+### Emotional Color
 - Softmax 확률 기반 Top-3 blending
 - 감정-색 매핑
 
 
-2. Personal Color
+### Personal Color
 - MediaPipe FaceLandmarker (478 pts)
 - Skin / Hair / Iris 영역 추출
 - RGB → CIE LAB 변환
 - 16-Type Grid Classification
 
 
+### Synthesis: Emotional Color + Personal Color 
+- Today’s Color: 퍼스널 보정된 감정 기반 색상
+
+
 ## 4-4. User Interface
+<img width="1714" height="1128" alt="image" src="https://github.com/user-attachments/assets/3f2efa6a-ec4a-405b-b2fd-17f01dd548fd" />
+
 
 # 5. Results
