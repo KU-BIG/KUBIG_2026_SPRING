@@ -160,7 +160,8 @@ python Models/ResNet-50/inference.py --checkpoint ./results/best_GCN_FiLM_L34.pt
 - Skin / Hair / Iris 영역 추출
 - RGB → CIE LAB 변환
 - 16-Type Grid Classification
-- 
+
+
 ## 4-4. User Interface
 
 # 5. Results
