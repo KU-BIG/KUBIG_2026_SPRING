@@ -1,0 +1,22 @@
+{
+  "name": "AI Compliance RAG",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11",
+
+  "postCreateCommand": "pip install -r web/requirements.txt && echo '✅ 설치 완료! bash start.sh 로 서버를 시작하세요.'",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "mikestead.dotenv"
+      ]
+    }
+  },
+
+  "forwardPorts": [8000, 8501],
+  "portsAttributes": {
+    "8000": { "label": "FastAPI", "onAutoForward": "notify" },
+    "8501": { "label": "Streamlit", "onAutoForward": "openBrowser" }
+  }
+}

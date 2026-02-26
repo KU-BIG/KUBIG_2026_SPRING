@@ -1,0 +1,27 @@
+# Web Framework
+fastapi
+uvicorn[standard]
+streamlit
+requests
+httpx
+
+# LangChain
+langchain>=0.1.0
+langchain-core
+langchain-openai
+langchain-neo4j
+langchain-text-splitters>=1.0.0
+
+# Database
+neo4j>=5.0.0
+
+# AI / ML
+openai>=1.0.0
+sentence-transformers
+numpy
+
+# Data & Utils
+python-dotenv>=1.0.0
+pydantic
+pypdf>=3.0.0
+beautifulsoup4>=4.12.0
