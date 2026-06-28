@@ -91,3 +91,6 @@ ACM(paper 3 클래스, Macro-F1), seed 0/1/2 평균 (성능 주장이 아니라 
 
 ablation(D1 no-kNN / D2 no-MIN / D3 채널수 / D4 GTN 깊이 / D5 random)과 전체 표는
 [`docs/design.ko.md` §7](docs/design.ko.md) 참고. 범위·한계는 [`docs/design.ko.md` §8](docs/design.ko.md).
+
+> end-to-end 학습(C4)은 미구현(future work): GTN soft 인접 → 이산 그래프(kNN/ego) 단계가
+> 미분 불가라 task loss 가 GTN 까지 역전파되지 않아 staged 학습만 했습니다.
