@@ -100,6 +100,8 @@ Ablation (C2 기준 변형, test Macro-F1):
 | D5 | random 메타패스 (학습 없음) | 0.8887 | GTN(0.896) > 랜덤 → 학습이 의미 있음 |
 | D6 | manual(B2) vs GTN(C2) | 0.8977 vs 0.8958 | GTN이 수동 선택을 못 넘음 |
 
+> D1(no-kNN)은 희소화를 빼면 ego 그래프가 커져 **실행이 매우 오래 걸립니다** (그래서 표가 비어 있음).
+
 범위·한계는 [`docs/design.ko.md` §8](docs/design.ko.md).
 
 > end-to-end 학습(C4)은 미구현(future work): GTN soft 인접 → 이산 그래프(kNN/ego) 단계가
