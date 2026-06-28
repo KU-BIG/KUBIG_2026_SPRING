@@ -16,9 +16,9 @@
 핵심 질문: **위상 특징이 이종 그래프 학습을 돕는가? 그리고 그걸 가능케 하는 메타패스 선택을
 자동화(GTN)할 수 있는가?** — 기존엔 메타패스를 사람이 직접 골랐습니다(예: PAP, PSP).
 
-구성 요소(전부 출처 있음): GTN(Yun et al., NeurIPS 2019) · PDGNN(Yan et al., NeurIPS 2022,
-neural EPD 근사기) · HAN(Wang et al., WWW 2019) · Persistence Image(Adams et al., 2017).
-자세한 설계·충실도·한계는 [`docs/design.ko.md`](docs/design.ko.md).
+구성 요소: GTN(Yun et al., NeurIPS 2019) · PDGNN(Yan et al., NeurIPS 2022, neural EPD 근사기) ·
+HAN(Wang et al., WWW 2019) · Persistence Image(Adams et al., 2017).
+자세한 설계와 한계는 [`docs/design.ko.md`](docs/design.ko.md).
 
 ## 설치 & 실행
 
@@ -90,12 +90,4 @@ ACM(paper 3 클래스, Macro-F1), seed 0/1/2 평균 (성능 주장이 아니라 
 넘지는 못한다.
 
 ablation(D1 no-kNN / D2 no-MIN / D3 채널수 / D4 GTN 깊이 / D5 random)과 전체 표는
-[`docs/design.ko.md` §7](docs/design.ko.md) 참고.
-
-## 충실도 & 한계 (요약)
-
-- **PDGNN 은 진짜 neural EPD 근사기.** 정확 EPD(gudhi)는 학습 라벨로만 쓰고 추론 시 정확
-  계산 없음. 위상을 가장한 단순 통계("fallback")는 이 저장소에 **없음**.
-- 범위: **HAN 만 / attention fusion 만 / ACM 만** 배선(사용자 지정). HGT·concat·타 데이터셋 제외.
-- **end-to-end 학습(C4)은 미구현(future work)** — GTN soft→이산 그래프 단계가 미분 불가.
-- 성능 향상은 **가설**이며 실측으로 baseline 초과는 보장되지 않음. 자세히는 `docs/design.ko.md §8`.
+[`docs/design.ko.md` §7](docs/design.ko.md) 참고. 범위·한계는 [`docs/design.ko.md` §8](docs/design.ko.md).
