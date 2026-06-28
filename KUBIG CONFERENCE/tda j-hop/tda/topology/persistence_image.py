@@ -11,6 +11,14 @@
 
 birth/persistence 범위는 노드 간 비교 가능하도록 **고정**한다(기본값은 z-정규화된 HKS
 필터에서 나오는 sublevel EPD 값 범위에 맞춤). 범위는 설정으로 바꿀 수 있다.
+
+**원본과의 의도적 편차(충실도 명시):** 원본 TLC-GNN 파이프라인은 cython `sg2dgm`
+`PersistenceImager(resolution=5)` 의 기본값(birth/pers 범위 (0,1), 등방 σ=1.0,
+가우시안 CDF 픽셀 적분)을 썼다. 본 구현은 (a) 순수 numpy, (b) 범위 birth(-3,3)/pers(0,6),
+σ=0.5, 격자점 PDF 평가를 쓴다. HKS 필터가 스케일별 z-정규화되어 EPD 값이 대략
+birth∈[-3,3]·pers∈[0,6] 범위라, 원본의 (0,1) 범위는 대부분을 클리핑해 정보가 뭉개진다.
+따라서 z-정규화 필터에 맞춰 범위를 넓힌 것이며(원본보다 더 정보적), 원본의 정확한 수치를
+재현하지는 않는다. 자세한 내용은 docs/design.ko.md §4 참고.
 """
 from __future__ import annotations
 

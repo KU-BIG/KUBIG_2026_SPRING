@@ -123,12 +123,12 @@ def gen_training_samples(g: nx.Graph, hks: np.ndarray, hop: int, max_nodes: int,
 
 
 def train_pdgnn(samples, hidden=32, layers=3, epochs=30, lr=1e-3, seed=1234,
-                device=None, verbose=False) -> PDGNN:
-    """ego EPD 라벨로 PDGNN 학습 (bipartite loss)."""
+                device=None, verbose=False, agg="sum_min") -> PDGNN:
+    """ego EPD 라벨로 PDGNN 학습 (bipartite loss). agg='sum_min'(원본)|'sum'(D2 ablation)."""
     dev = device or (torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu"))
     torch.manual_seed(seed)
     np.random.seed(seed)
-    model = PDGNN(hidden_dim=hidden, num_layers=layers).to(dev)
+    model = PDGNN(hidden_dim=hidden, num_layers=layers, agg=agg).to(dev)
     if not samples:
         return model
     opt = torch.optim.Adam(model.parameters(), lr=lr)
@@ -185,12 +185,21 @@ def compute_channel_topology(adj: torch.Tensor, config: dict, seed: int,
                              device=None, verbose: bool = False) -> np.ndarray:
     """한 채널 인접행렬 -> (N, res^2 * K) PDGNN 위상 특징."""
     pc = config["pdgnn"]
-    g = knn_graph_from_dense(adj, pc["knn_k"])
+    # stage2(PDGNN 입력) 전용 kNN. 기본은 knn_k 와 동일하되, D1(no-kNN) ablation 에서
+    # base-relation/HAN kNN(=knn_k)은 그대로 두고 이 값만 키워 PDGNN 앞 희소화만 제거한다.
+    g = knn_graph_from_dense(adj, pc.get("channel_knn_k", pc["knn_k"]))
     ei = _edge_index_of(g)
     hks = compute_hks(ei, num_nodes=adj.size(0), K=pc["hks_K"], device=device, verbose=verbose)
     samples = gen_training_samples(g, hks, pc["hop"], pc["max_nodes"], pc["n_train_samples"], seed)
     model = train_pdgnn(samples, hidden=pc["hidden_dim"], layers=pc["layers"],
                         epochs=pc["epochs"], lr=pc["lr"], seed=seed + 1234,
-                        device=device, verbose=verbose)
-    imager = PersistenceImage(resolution=pc["pi_resolution"])
+                        device=device, verbose=verbose, agg=pc.get("agg", "sum_min"))
+    # PI 범위/σ 는 데이터셋마다 튜닝 가능(유연). HKS 가 z-정규화돼 기본값은 대체로 통용되지만
+    # config 로 덮어쓸 수 있다. 미지정 시 z-norm HKS 에 맞춘 기본값 사용.
+    imager = PersistenceImage(
+        resolution=pc["pi_resolution"],
+        sigma=pc.get("pi_sigma", 0.5),
+        birth_range=tuple(pc.get("pi_birth_range", (-3.0, 3.0))),
+        pers_range=tuple(pc.get("pi_pers_range", (0.0, 6.0))),
+    )
     return predict_node_pi(model, g, hks, pc["hop"], pc["max_nodes"], imager, device=device)

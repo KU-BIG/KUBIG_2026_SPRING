@@ -17,7 +17,8 @@
   },
   "pdgnn": {
     "hks_K": 3, "knn_k": 20, "hop": 1, "max_nodes": 80, "pi_resolution": 5,
-    "n_train_samples": 200, "hidden_dim": 32, "layers": 3, "epochs": 30, "lr": 0.001
+    "n_train_samples": 200, "hidden_dim": 32, "layers": 3, "epochs": 30, "lr": 0.001,
+    "pi_sigma": 0.5, "pi_birth_range": [-3.0, 3.0], "pi_pers_range": [0.0, 6.0]
   },
   "han": {
     "hidden_dim": 64, "heads": 4, "dropout": 0.5,

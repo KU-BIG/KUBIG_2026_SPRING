@@ -38,13 +38,15 @@ def _scatter_min(src: torch.Tensor, index: torch.Tensor, dim_size: int) -> torch
 
 
 class PDGNNLayer(MessagePassing):
-    """PDGNN 메시지 패싱 레이어, AGG = SUM ⊕ MIN."""
+    """PDGNN 메시지 패싱 레이어. agg='sum_min'(기본, 원본) 또는 'sum'(ablation D2)."""
 
-    def __init__(self, in_dim: int, out_dim: int):
+    def __init__(self, in_dim: int, out_dim: int, agg: str = "sum_min"):
         super().__init__(aggr=None, flow="source_to_target")
+        self.agg = agg
         self.lin_self = nn.Linear(in_dim, out_dim, bias=False)
         self.lin_msg = nn.Linear(2 * in_dim, out_dim, bias=False)
-        self.lin_combine = nn.Linear(3 * out_dim, out_dim, bias=True)
+        n_agg = 3 if agg == "sum_min" else 2  # [sum(,min) || self]
+        self.lin_combine = nn.Linear(n_agg * out_dim, out_dim, bias=True)
         self.act_msg = nn.PReLU(out_dim)
         self.act_out = nn.PReLU(out_dim)
 
@@ -61,19 +63,22 @@ class PDGNNLayer(MessagePassing):
 
     def aggregate(self, inputs, index, dim_size: Optional[int] = None):
         sum_agg = _scatter_sum(inputs, index, dim_size)
-        min_agg = _scatter_min(inputs, index, dim_size)
-        return torch.cat([sum_agg, min_agg], dim=-1)
+        if self.agg == "sum_min":
+            min_agg = _scatter_min(inputs, index, dim_size)
+            return torch.cat([sum_agg, min_agg], dim=-1)
+        return sum_agg
 
 
 class PDGNN(nn.Module):
     """모든 엣지에 대해 1차원 extended persistence (birth, death) 쌍을 예측."""
 
-    def __init__(self, hidden_dim: int = 32, num_layers: int = 3, dropout: float = 0.0):
+    def __init__(self, hidden_dim: int = 32, num_layers: int = 3, dropout: float = 0.0,
+                 agg: str = "sum_min"):
         super().__init__()
         self.layers = nn.ModuleList()
-        self.layers.append(PDGNNLayer(1, hidden_dim))
+        self.layers.append(PDGNNLayer(1, hidden_dim, agg=agg))
         for _ in range(num_layers - 1):
-            self.layers.append(PDGNNLayer(hidden_dim, hidden_dim))
+            self.layers.append(PDGNNLayer(hidden_dim, hidden_dim, agg=agg))
         self.dropout = dropout
         self.edge_mlp = nn.Sequential(
             nn.Linear(2 * hidden_dim, hidden_dim),

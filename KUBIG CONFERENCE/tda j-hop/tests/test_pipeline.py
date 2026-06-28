@@ -81,4 +81,52 @@ def test_run_full_pipeline_with_topology(tmp_path):
     assert 0.0 <= rec["test_macro_f1"] <= 1.0
     assert rec["topo_dim"] == 5 * 5 * cfg["pdgnn"]["hks_K"]
     assert len(rec["fusion_beta"]) == cfg["gtn"]["num_channels"]
+    assert rec["topology_source"] == "gtn"
+    assert rec["gtn_only_test_macro_f1"] is not None  # 실험 A3 기록
     assert (tmp_path / "toyrun" / "metrics.json").exists()
+
+
+def test_run_random_topology_source_D5():
+    cfg = _cfg(); cfg["use_topology"] = True; cfg["topology_source"] = "random"
+    rec = run(cfg, "toy", data_root="./data", device=torch.device("cpu"), verbose=False)
+    assert rec["topology_source"] == "random"
+    assert rec["random_metapath"] is True
+    assert 0.0 <= rec["test_macro_f1"] <= 1.0
+
+
+def test_run_agg_sum_only_D2():
+    cfg = _cfg(); cfg["use_topology"] = True; cfg["pdgnn"]["agg"] = "sum"
+    rec = run(cfg, "toy", data_root="./data", device=torch.device("cpu"), verbose=False)
+    assert 0.0 <= rec["test_macro_f1"] <= 1.0
+
+
+def test_run_topology_only_and_permutation_diagnostics():
+    cfg = _cfg(); cfg["use_topology"] = True
+    cfg["node_features"] = "off"; cfg["permute_topology"] = True
+    rec = run(cfg, "toy", data_root="./data", device=torch.device("cpu"), verbose=False)
+    assert rec["node_features"] == "off"
+    assert "test_macro_f1_permuted" in rec
+    assert 0.0 <= rec["test_macro_f1_permuted"] <= 1.0
+
+
+def test_pdgnn_agg_sum_only_shapes():
+    from tda.models.pdgnn import PDGNN
+    m = PDGNN(hidden_dim=8, num_layers=2, agg="sum")
+    filt = torch.randn(5, 1)
+    ei = torch.tensor([[0, 1, 2, 1], [1, 2, 3, 0]], dtype=torch.long)
+    assert m(filt, ei).shape == (ei.size(1), 2)
+
+
+def test_run_manual_topology_source_B(tmp_path):
+    # 실험 B: GTN 없이 고정 수동 메타패스(PAP/PSP) 위 PDGNN-EPD
+    cfg = _cfg()
+    cfg["use_topology"] = True
+    cfg["topology_source"] = "manual"
+    rec = run(cfg, "toy", data_root="./data", device=torch.device("cpu"),
+              output_dir=str(tmp_path / "manualrun"), verbose=False)
+    assert rec["topology_source"] == "manual"
+    assert rec["manual_metapaths"] == cfg["han_metapaths"]
+    assert 0.0 <= rec["test_macro_f1"] <= 1.0
+    # manual 모드엔 GTN 산출물 없음
+    assert "gtn_only_test_macro_f1" not in rec
+    assert len(rec["fusion_beta"]) == len(cfg["han_metapaths"])

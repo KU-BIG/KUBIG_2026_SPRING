@@ -23,7 +23,7 @@ import torch.nn.functional as F
 
 from tda.data import get_dataset
 from tda.models.fusion import SemanticAttentionFusion
-from tda.models.gtn import GTN
+from tda.models.gtn import GTN, GTConv
 from tda.models.han import HAN
 from tda.topology.epd import compute_channel_topology
 from tda.utils import Timer, accuracy, get_device, load_json, macro_f1, save_json, set_seed
@@ -68,8 +68,14 @@ def train_gtn(bundle, A_stack, x, y, masks, config, device, verbose=False) -> to
     model.load_state_dict(best_state)
     model.eval()
     with torch.no_grad():
+        logits, _ = model(A_stack, x)
         H = model.discover(A_stack).detach()
-    print(f"  [gtn] best val_f1={best_val:.4f}; discovered H {tuple(H.shape)}", flush=True)
+    # GTN 단독 분류 성능(= 실험 A3, EPD 없이 GTN 만)도 기록
+    train_gtn.last_val_f1 = float(best_val)
+    train_gtn.last_test_f1 = macro_f1(logits[masks["test"]], y[masks["test"]])
+    train_gtn.last_test_acc = accuracy(logits[masks["test"]], y[masks["test"]])
+    print(f"  [gtn] best val_f1={best_val:.4f} test_f1={train_gtn.last_test_f1:.4f} (A3=GTN-only); "
+          f"discovered H {tuple(H.shape)}", flush=True)
     # 발견된 메타패스 해석용 어텐션 가중치 저장
     train_gtn.last_attentions = [[w.cpu().tolist() for w in layer]
                                  for layer in model.channel_attentions()]
@@ -77,11 +83,12 @@ def train_gtn(bundle, A_stack, x, y, masks, config, device, verbose=False) -> to
 
 
 def train_han(bundle, x_in_builder, in_dim, edge_index_dict, y, masks, config,
-              device, extra_params=None, verbose=False) -> Dict:
+              device, extra_params=None, extra_eval=None, verbose=False) -> Dict:
     """Stage 3: HAN(+fusion) 학습. test macro-F1/accuracy 반환.
 
     x_in_builder(): 매 forward 마다 입력 특징을 만드는 콜러블 (fusion 학습 반영).
     extra_params: fusion 등 함께 최적화할 추가 파라미터 리스트.
+    extra_eval: {name: builder} — 최적 모델로 추가 test 평가(예: permutation 진단).
     """
     hc = config["han"]
     model = HAN(in_dim=in_dim, hidden_dim=hc["hidden_dim"], num_classes=bundle.num_classes,
@@ -106,19 +113,24 @@ def train_han(bundle, x_in_builder, in_dim, edge_index_dict, y, masks, config,
         if vf1 > best_val:
             best_val = vf1
             best_state = (copy.deepcopy(model.state_dict()),
-                          copy.deepcopy(extra_params[0].state_dict()) if extra_params else None)
+                          [copy.deepcopy(m.state_dict()) for m in extra_params] if extra_params else None)
         if verbose and (ep % 20 == 0 or ep == 1):
             print(f"  [han] ep {ep:3d} loss={loss.item():.4f} val_f1={vf1:.4f}", flush=True)
     model.load_state_dict(best_state[0])
     if extra_params and best_state[1] is not None:
-        extra_params[0].load_state_dict(best_state[1])
+        for m, s in zip(extra_params, best_state[1]):
+            m.load_state_dict(s)
     model.eval()
     with torch.no_grad():
         logits = model(x_in_builder(), edge_index_dict)
         test_f1 = macro_f1(logits[masks["test"]], y[masks["test"]])
         test_acc = accuracy(logits[masks["test"]], y[masks["test"]])
-    return {"val_macro_f1": float(best_val), "test_macro_f1": float(test_f1),
-            "test_accuracy": float(test_acc)}
+        result = {"val_macro_f1": float(best_val), "test_macro_f1": float(test_f1),
+                  "test_accuracy": float(test_acc)}
+        for name, builder in (extra_eval or {}).items():
+            lg = model(builder(), edge_index_dict)
+            result[f"test_macro_f1_{name}"] = float(macro_f1(lg[masks["test"]], y[masks["test"]]))
+    return result
 
 
 def run(config: dict, dataset: str, data_root: str, device=None,
@@ -137,37 +149,82 @@ def run(config: dict, dataset: str, data_root: str, device=None,
     print(f"[data] N={bundle.num_nodes} feat={x.size(1)} classes={bundle.num_classes} "
           f"base_rel={list(bundle.base_relations)} han_mp={list(bundle.han_metapaths)}", flush=True)
 
+    topo_source = config.get("topology_source", "gtn")  # 'gtn' (C) | 'manual' (B)
     record = {"dataset": dataset, "use_topology": use_topo, "seed": seed,
+              "topology_source": topo_source if use_topo else None,
               "num_nodes": bundle.num_nodes, "num_classes": bundle.num_classes}
 
     if use_topo:
-        with Timer("stage1_gtn"):
+        # Stage 1: 채널(=메타패스) 인접행렬 확보 — GTN 자동발견(C) 또는 고정 수동메타패스(B).
+        if topo_source == "gtn":
+            with Timer("stage1_gtn"):
+                A_stack = _build_A_stack(bundle, device)
+                H = train_gtn(bundle, A_stack, x, y, masks, config, device, verbose)
+            channel_adjs = [H[c] for c in range(H.size(0))]
+            record["gtn_attentions"] = getattr(train_gtn, "last_attentions", None)
+            # 실험 A3: EPD 없이 GTN 단독 분류 성능
+            record["gtn_only_test_macro_f1"] = getattr(train_gtn, "last_test_f1", None)
+            record["gtn_only_test_accuracy"] = getattr(train_gtn, "last_test_acc", None)
+            record["gtn_only_val_macro_f1"] = getattr(train_gtn, "last_val_f1", None)
+        elif topo_source == "manual":
+            manual = config.get("manual_metapaths", config["han_metapaths"])
+            channel_adjs = [bundle.base_relations[m].to(device) for m in manual]
+            record["manual_metapaths"] = list(manual)
+            print(f"  [manual] 고정 메타패스 채널: {list(manual)}", flush=True)
+        elif topo_source == "random":
+            # D5: 학습 없이 무작위 초기화 GTN 으로 채널 발견 (random meta-path 대조군)
+            gc = config["gtn"]
             A_stack = _build_A_stack(bundle, device)
-            H = train_gtn(bundle, A_stack, x, y, masks, config, device, verbose)
-        record["gtn_attentions"] = getattr(train_gtn, "last_attentions", None)
+            gtn = GTN(num_relations=A_stack.size(0), num_channels=gc["num_channels"],
+                      in_dim=x.size(1), hidden_dim=gc["hidden_dim"], num_classes=bundle.num_classes,
+                      num_layers=gc["num_layers"], dropout=gc["dropout"]).to(device)
+            for m in gtn.modules():
+                if isinstance(m, GTConv):
+                    torch.nn.init.normal_(m.weight)
+            with torch.no_grad():
+                H = gtn.discover(A_stack).detach()
+            channel_adjs = [H[c] for c in range(H.size(0))]
+            record["random_metapath"] = True
+            print(f"  [random] 무작위 메타패스 채널 {H.size(0)}개 (학습 없음)", flush=True)
+        else:
+            raise ValueError(f"unknown topology_source '{topo_source}' (gtn|manual|random)")
 
         with Timer("stage2_pdgnn_topology"):
             topo_channels: List[torch.Tensor] = []
-            for c in range(H.size(0)):
-                feat = compute_channel_topology(H[c], config, seed, device=device, verbose=verbose)
+            for c, adj in enumerate(channel_adjs):
+                feat = compute_channel_topology(adj, config, seed, device=device, verbose=verbose)
                 topo_channels.append(torch.tensor(feat, dtype=torch.float32, device=device))
                 print(f"  [stage2] channel {c} topo {tuple(topo_channels[-1].shape)}", flush=True)
             topo_dim = topo_channels[0].size(1)
 
         fusion = SemanticAttentionFusion(topo_dim).to(device)
 
+        # 진단: node_features=off → 위상만으로 분류(topology-only). 기본은 'on'.
+        nf = config.get("node_features", "on")
+        x_base = x if nf == "on" else torch.zeros_like(x)
+        record["node_features"] = nf
+
         def x_in_builder():
-            fused = fusion(topo_channels)            # (N, topo_dim)
-            return torch.cat([x, fused], dim=1)      # 원본 ⊕ 융합 위상
+            return torch.cat([x_base, fusion(topo_channels)], dim=1)  # (원본 또는 0) ⊕ 융합 위상
+
+        # 진단: permutation test — test 시 위상 특징 행을 섞어 모델이 위상을 실제 쓰는지 확인.
+        extra_eval = None
+        if config.get("permute_topology", False):
+            perm = torch.randperm(bundle.num_nodes, device=device)
+            extra_eval = {"permuted": lambda: torch.cat([x_base, fusion(topo_channels)[perm]], dim=1)}
 
         with Timer("stage3_han"):
             metrics = train_han(bundle, x_in_builder, x.size(1) + topo_dim, edge_index_dict,
-                                y, masks, config, device, extra_params=[fusion], verbose=verbose)
+                                y, masks, config, device, extra_params=[fusion],
+                                extra_eval=extra_eval, verbose=verbose)
         record["fusion_beta"] = getattr(fusion, "last_beta", torch.zeros(0)).cpu().tolist()
         record["topo_dim"] = topo_dim
     else:
+        nf = config.get("node_features", "on")
+        x_base = x if nf == "on" else torch.zeros_like(x)
+        record["node_features"] = nf
         with Timer("stage3_han_baseline"):
-            metrics = train_han(bundle, lambda: x, x.size(1), edge_index_dict,
+            metrics = train_han(bundle, lambda: x_base, x.size(1), edge_index_dict,
                                 y, masks, config, device, extra_params=None, verbose=verbose)
 
     record.update(metrics)
@@ -188,7 +245,12 @@ def main():
     ap.add_argument("--dataset", default=None, help="config 의 dataset 을 덮어씀")
     ap.add_argument("--data-root", default="./data")
     ap.add_argument("--output-dir", default=None)
-    ap.add_argument("--no-topology", action="store_true", help="baseline (HAN 단독)")
+    ap.add_argument("--no-topology", action="store_true", help="baseline A1 (HAN 단독)")
+    ap.add_argument("--topology-source", choices=["gtn", "manual", "random"], default=None,
+                    help="gtn=C(GTN 발견) | manual=B(고정 수동) | random=D5(무작위) 메타패스")
+    ap.add_argument("--node-features", choices=["on", "off"], default=None,
+                    help="off=topology-only 진단")
+    ap.add_argument("--permute-topology", action="store_true", help="permutation 진단 평가 추가")
     ap.add_argument("--seed", type=int, default=None)
     ap.add_argument("--cpu", action="store_true")
     args = ap.parse_args()
@@ -197,6 +259,12 @@ def main():
     dataset = args.dataset or config.get("dataset", "acm")
     if args.no_topology:
         config["use_topology"] = False
+    if args.topology_source is not None:
+        config["topology_source"] = args.topology_source
+    if args.node_features is not None:
+        config["node_features"] = args.node_features
+    if args.permute_topology:
+        config["permute_topology"] = True
     if args.seed is not None:
         config["seed"] = args.seed
     device = torch.device("cpu") if args.cpu else get_device()

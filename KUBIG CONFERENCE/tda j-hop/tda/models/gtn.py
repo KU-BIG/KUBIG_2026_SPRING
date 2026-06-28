@@ -24,12 +24,20 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-def _row_normalize(adj: torch.Tensor) -> torch.Tensor:
-    """A_hat = A + I 를 행 정규화 (GCN 스타일). adj: (N, N)."""
-    n = adj.size(0)
-    a = adj + torch.eye(n, device=adj.device, dtype=adj.dtype)
-    deg = a.sum(dim=1, keepdim=True).clamp(min=1e-12)
-    return a / deg
+def _gtn_norm(H: torch.Tensor, add: bool) -> torch.Tensor:
+    """공식 GTN 정규화(Yun et al. 2019, model.py `norm`): H^T 위에서 대각을 0으로 비우고
+    (add 면 1로 채움) 행 정규화한 뒤 다시 전치한다. 학습된 메타패스 인접 H 는 비대칭이므로
+    이 전치가 전파 방향과 어느 차수(in/out)로 정규화할지를 결정한다. H: (N, N)."""
+    Ht = H.t()
+    n = Ht.size(0)
+    eye = torch.eye(n, device=H.device, dtype=H.dtype)
+    Ht = Ht * (eye == 0)        # 대각 제거
+    if add:
+        Ht = Ht + eye          # 자기 루프(최종 GCN conv 에만)
+    deg = Ht.sum(dim=1, keepdim=True)
+    deg_inv = torch.where(deg > 0, 1.0 / deg, torch.zeros_like(deg))
+    Ht = deg_inv * Ht
+    return Ht.t()
 
 
 class GTConv(nn.Module):
@@ -37,7 +45,9 @@ class GTConv(nn.Module):
 
     def __init__(self, num_relations: int, num_channels: int):
         super().__init__()
-        self.weight = nn.Parameter(torch.randn(num_channels, num_relations))
+        # 공식 GTN: 상수 초기화로 관계축 softmax 가 균등에서 출발(편향 없는 평균에서 학습 시작).
+        self.weight = nn.Parameter(torch.empty(num_channels, num_relations))
+        nn.init.constant_(self.weight, 0.1)
 
     def forward(self, A: torch.Tensor) -> torch.Tensor:
         # A: (R, N, N) -> (C, N, N)
@@ -63,7 +73,8 @@ class GTLayer(nn.Module):
             b = self.conv2(A)
             return torch.bmm(a, b)
         a = self.conv1(A)
-        Hn = torch.stack([_row_normalize(H_prev[c]) for c in range(H_prev.size(0))], dim=0)
+        # 레이어 사이 정규화: 공식과 동일하게 self-loop 없이(add=False)
+        Hn = torch.stack([_gtn_norm(H_prev[c], add=False) for c in range(H_prev.size(0))], dim=0)
         return torch.bmm(Hn, a)
 
     def attentions(self) -> List[torch.Tensor]:
@@ -100,7 +111,8 @@ class GTN(nn.Module):
         return H
 
     def gcn_conv(self, X: torch.Tensor, adj: torch.Tensor) -> torch.Tensor:
-        return _row_normalize(adj) @ (X @ self.gcn_weight)
+        # 공식 GTN gcn_conv: norm(H, add=True) 후 H^T 로 전파 -> rownorm(H^T, diag=1) @ (X W)
+        return _gtn_norm(adj, add=True).t() @ (X @ self.gcn_weight)
 
     def forward(self, A: torch.Tensor, X: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         """반환: (logits (N, num_classes), 학습된 채널 인접행렬 H (C, N, N))."""
