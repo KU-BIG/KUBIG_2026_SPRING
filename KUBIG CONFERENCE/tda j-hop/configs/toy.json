@@ -1,0 +1,25 @@
+{
+  "dataset": "toy",
+  "use_topology": true,
+  "fusion": "attention",
+  "seed": 0,
+  "base_relations": {
+    "PAP": [["paper", "to", "author"], ["author", "to", "paper"]],
+    "PSP": [["paper", "to", "subject"], ["subject", "to", "paper"]],
+    "PcP": [["paper", "cite", "paper"]],
+    "PTP": [["paper", "to", "term"], ["term", "to", "paper"]]
+  },
+  "han_metapaths": ["PAP", "PSP"],
+  "gtn": {
+    "num_channels": 2, "num_layers": 2, "hidden_dim": 16,
+    "epochs": 8, "lr": 0.01, "weight_decay": 0.001, "dropout": 0.3
+  },
+  "pdgnn": {
+    "hks_K": 2, "knn_k": 8, "hop": 1, "max_nodes": 30, "pi_resolution": 5,
+    "n_train_samples": 12, "hidden_dim": 16, "layers": 2, "epochs": 4, "lr": 0.001
+  },
+  "han": {
+    "hidden_dim": 16, "heads": 2, "dropout": 0.3,
+    "epochs": 10, "lr": 0.01, "weight_decay": 0.001
+  }
+}

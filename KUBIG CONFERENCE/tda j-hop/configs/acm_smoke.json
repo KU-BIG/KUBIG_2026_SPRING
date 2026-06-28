@@ -1,0 +1,26 @@
+{
+  "dataset": "acm",
+  "use_topology": true,
+  "fusion": "attention",
+  "seed": 0,
+  "base_relations": {
+    "PAP": [["paper", "to", "author"], ["author", "to", "paper"]],
+    "PSP": [["paper", "to", "subject"], ["subject", "to", "paper"]],
+    "PcP": [["paper", "cite", "paper"]],
+    "PrP": [["paper", "ref", "paper"]],
+    "PTP": [["paper", "to", "term"], ["term", "to", "paper"]]
+  },
+  "han_metapaths": ["PAP", "PSP"],
+  "gtn": {
+    "num_channels": 2, "num_layers": 2, "hidden_dim": 32,
+    "epochs": 30, "lr": 0.005, "weight_decay": 0.001, "dropout": 0.5
+  },
+  "pdgnn": {
+    "hks_K": 2, "knn_k": 20, "hop": 1, "max_nodes": 60, "pi_resolution": 5,
+    "n_train_samples": 30, "hidden_dim": 16, "layers": 2, "epochs": 5, "lr": 0.001
+  },
+  "han": {
+    "hidden_dim": 32, "heads": 4, "dropout": 0.5,
+    "epochs": 10, "lr": 0.005, "weight_decay": 0.001
+  }
+}

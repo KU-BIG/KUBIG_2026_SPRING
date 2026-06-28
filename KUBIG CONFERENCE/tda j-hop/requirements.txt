@@ -1,0 +1,10 @@
+# TDA 파이프라인 의존성 (env: tlcgnn, python 3.9, CUDA 11.8 기준)
+# torch / torch_geometric 는 플랫폼에 맞는 휠로 설치 권장 (아래는 검증된 버전).
+torch==2.1.0
+torch_geometric==2.5.3
+gudhi>=3.9
+numpy>=1.24
+scipy>=1.10
+networkx>=2.8
+# 주: 원본 PDGNN 의 torch_scatter 의존성은 torch 기본 scatter 로 대체하여 불필요.
+#     persistence image 도 cython(sg2dgm) 대신 순수 numpy 로 재구현 → 추가 빌드 불필요.

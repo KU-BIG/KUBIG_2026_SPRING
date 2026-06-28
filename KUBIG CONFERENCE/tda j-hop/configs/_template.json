@@ -1,0 +1,24 @@
+{
+  "_help": "새 데이터셋 추가 템플릿. (1) tda/data/<name>.py 에 로더 작성 후 tda/data/registry.py 의 DATASETS 에 등록, (2) 이 파일을 configs/<name>.json 으로 복사해 아래를 채운다. base_relations 의 각 엣지 triple 은 PyG HeteroData 의 edge_type 이름과 일치해야 한다.",
+  "dataset": "<name>",
+  "use_topology": true,
+  "fusion": "attention",
+  "seed": 0,
+  "base_relations": {
+    "<REL1>": [["<target>", "<rel>", "<mid>"], ["<mid>", "<rel>", "<target>"]],
+    "<REL2>": [["<target>", "<rel>", "<target>"]]
+  },
+  "han_metapaths": ["<REL1>", "<REL2>"],
+  "gtn": {
+    "num_channels": 4, "num_layers": 2, "hidden_dim": 64,
+    "epochs": 50, "lr": 0.005, "weight_decay": 0.001, "dropout": 0.5
+  },
+  "pdgnn": {
+    "hks_K": 3, "knn_k": 20, "hop": 1, "max_nodes": 80, "pi_resolution": 5,
+    "n_train_samples": 200, "hidden_dim": 32, "layers": 3, "epochs": 30, "lr": 0.001
+  },
+  "han": {
+    "hidden_dim": 64, "heads": 4, "dropout": 0.5,
+    "epochs": 100, "lr": 0.005, "weight_decay": 0.001
+  }
+}
