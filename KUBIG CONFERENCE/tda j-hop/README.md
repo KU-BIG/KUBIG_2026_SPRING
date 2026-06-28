@@ -89,8 +89,18 @@ ACM(paper 3 클래스, Macro-F1), seed 0/1/2 평균 (성능 주장이 아니라 
 분산 주장은 통계적으로 약하다. GTN-학습 메타패스(C2)는 random(0.8887)보다 낫지만 manual(B2)을
 넘지는 못한다.
 
-ablation(D1 no-kNN / D2 no-MIN / D3 채널수 / D4 GTN 깊이 / D5 random)과 전체 표는
-[`docs/design.ko.md` §7](docs/design.ko.md) 참고. 범위·한계는 [`docs/design.ko.md` §8](docs/design.ko.md).
+Ablation (C2 기준 변형, test Macro-F1):
+
+| 실험 | 변형 | 결과 |
+|------|------|------|
+| D1 | kNN 희소화 제거 (PDGNN 앞) | _(실행 중)_ |
+| D2 | MIN 집계 제거 (SUM 만) | 0.8988 |
+| D3 | num_channels 2 / 4 / 8 | 0.8852 / 0.8958 / 0.8951 |
+| D4 | GTN depth 1 / 2 / 3 | 0.8965 / 0.8958 / 0.8891 |
+| D5 | random 메타패스 (학습 없음) | 0.8887 |
+| D6 | manual(B2) vs GTN(C2) | 0.8977 vs 0.8958 |
+
+범위·한계는 [`docs/design.ko.md` §8](docs/design.ko.md).
 
 > end-to-end 학습(C4)은 미구현(future work): GTN soft 인접 → 이산 그래프(kNN/ego) 단계가
 > 미분 불가라 task loss 가 GTN 까지 역전파되지 않아 staged 학습만 했습니다.
