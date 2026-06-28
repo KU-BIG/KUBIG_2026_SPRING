@@ -34,7 +34,7 @@ python -m tda.train --config configs/acm.json --dataset acm --output-dir runs/a1
 ```
 
 데이터가 없으면 PyG 가 ACM(HGB)을 자동 다운로드합니다. 결과는 `runs/<name>/metrics.json`.
-클러스터는 `sbatch experiments/run_acm.slurm`, 전체 ablation 은 `experiments/run_ablation.slurm`.
+클러스터 + **ablation 토글**: `bash experiments/run_acm.sh off`(메인만) / `bash experiments/run_acm.sh on`(메인 + D1~D6 ablation).
 테스트: `env -u PYTHONPATH CUDA_VISIBLE_DEVICES="" python -m pytest tests/ -q`
 
 ## 다른 데이터셋 쓰기
