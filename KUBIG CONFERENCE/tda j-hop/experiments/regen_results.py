@@ -41,11 +41,12 @@ def cell(ds, setting, key="test_macro_f1"):
 
 
 DATASETS = ["acm", "dblp", "dblp_pyg", "aminer", "mag", "imdb", "imdb_pyg", "freebase",
-            "aifb", "mutag", "bgs", "am"]
+            "aifb", "mutag", "bgs", "am", "pubmed", "yelp"]
 DOMAIN = {"acm": "학술/인용", "dblp": "학술/인용", "dblp_pyg": "학술(PyG판)",
           "aminer": "학술(대형·subsample·featureless)", "mag": "학술(대형·subsample)",
           "imdb": "영화(멀티라벨)", "imdb_pyg": "영화(단일라벨)", "freebase": "지식그래프(featureless)",
-          "aifb": "RDF·연구기관", "mutag": "RDF·화학", "bgs": "RDF·지질", "am": "RDF·박물관"}
+          "aifb": "RDF·연구기관", "mutag": "RDF·화학", "bgs": "RDF·지질", "am": "RDF·박물관",
+          "pubmed": "생의학(HNE)", "yelp": "business(HNE·멀티라벨)"}
 # 캠페인에 아직 안 들어온(결과 없는) 데이터셋은 표에서 자동 생략
 
 DATASETS = [ds for ds in DATASETS if any(k.startswith(ds + "__") for k in C)]  # 결과 있는 것만
