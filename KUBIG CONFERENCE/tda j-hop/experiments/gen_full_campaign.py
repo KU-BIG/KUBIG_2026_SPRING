@@ -10,7 +10,7 @@ OUT = "configs/campaign"
 os.makedirs(OUT, exist_ok=True)
 
 DATASETS = ["acm", "dblp", "imdb", "freebase", "aminer", "mag", "dblp_pyg", "imdb_pyg",
-            "aifb", "mutag", "bgs", "am"]  # 12개 전부 (학술/영화/지식/RDF 4도메인)
+            "aifb", "mutag", "bgs", "am", "pubmed", "yelp"]  # 12개 전부 (학술/영화/지식/RDF 4도메인)
 # (suffix, overrides). A1/B/C/D 전부 (A3 는 c2 안에 기록, D1=no-kNN 은 비현실적이라 제외).
 SETTINGS = [
     ("a1_baseline", [("use_topology", False)]),
