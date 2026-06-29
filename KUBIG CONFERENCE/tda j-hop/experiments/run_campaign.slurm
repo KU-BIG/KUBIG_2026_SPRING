@@ -27,6 +27,7 @@ SEED=$((SLURM_ARRAY_TASK_ID % 3))
 NAME=$(basename "$CFG" .json)          # e.g. dblp__d5_random
 DS=$(python -c "import json;print(json.load(open('$CFG'))['dataset'])")
 OUT=runs/campaign/${NAME}_s${SEED}
+if [ -f "$OUT/metrics.json" ]; then echo "skip (이미 완료): $OUT"; exit 0; fi   # resume
 echo "host=$(hostname) gpu=${CUDA_VISIBLE_DEVICES:-?} date=$(date) cfg=$CFG ds=$DS seed=$SEED"
 python -m tda.train --config "$CFG" --dataset "$DS" \
     --data-root "$DATA_ROOT" --output-dir "$OUT" --seed "$SEED"

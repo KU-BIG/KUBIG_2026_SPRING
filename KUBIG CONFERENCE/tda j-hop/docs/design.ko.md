@@ -117,11 +117,11 @@ test Macro-F1
 - `pdgnn.knn_k` / `pdgnn.hks_K` / `pdgnn.pi_resolution` — 위상 추출 설정
 - `seed` — 견고성(분산) 분석
 
-`experiments/run_acm.slurm` = baseline×3 + full×3 (seed 0/1/2) SLURM 배열.
+`experiments/run_campaign.sh` = 12 데이터셋 × 전체 A~D × seed 0/1/2 한 번에 (config 자동생성+청크제출+집계).
 
 ## 7. 결과 & Ablation (ACM, test Macro-F1)
 
-`experiments/run_ablation.slurm` 실측치 (한 코드 버전, seed 0/1/2 평균±표준편차).
+`experiments/run_campaign.sh` 실측치 (한 코드 버전, seed 0/1/2 평균±표준편차).
 기준 config = `configs/acm.json` (GTN 4채널·2레이어, PDGNN K=3·knn20·hop1, HAN hidden64·
 heads4, attention fusion). **성능 주장이 아니라 실측치.**
 
@@ -166,7 +166,7 @@ heads4, attention fusion). **성능 주장이 아니라 실측치.**
 | 그룹 | 상태 |
 |------|------|
 | A1 (HAN), A3 (GTN 단독), B2 (manual+EPD), C2 (GTN+PDGNN+HAN attn) | ✅ 수행 |
-| D1–D5 ablation, D6 (= B2 vs C2) | ✅ 수행 (`experiments/run_ablation.slurm`) |
+| D1–D5 ablation, D6 (= B2 vs C2) | ✅ 수행 (`experiments/run_campaign.sh`) |
 | A2 (HGT), C1 (concat), C3 (HGT) | ⛔ 사용자 제약으로 제외 |
 | B1/B3/B4 (DBLP/IMDB/ogbn-mag) | ⛔ ACM 만 배선(레지스트리+config 로 확장 가능) |
 | **C4 (end-to-end 학습)** | ❌ **미구현 (future work)** — 아래 |
