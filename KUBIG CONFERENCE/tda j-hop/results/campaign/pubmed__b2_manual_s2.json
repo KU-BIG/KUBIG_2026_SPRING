@@ -1,0 +1,21 @@
+{
+  "dataset": "pubmed",
+  "use_topology": true,
+  "seed": 2,
+  "topology_source": "manual",
+  "num_nodes": 6000,
+  "num_classes": 8,
+  "manual_metapaths": [
+    "DGD",
+    "DCD"
+  ],
+  "node_features": "on",
+  "fusion_beta": [
+    0.42350295186042786,
+    0.5764970779418945
+  ],
+  "topo_dim": 75,
+  "val_macro_f1": 0.11997526283240569,
+  "test_macro_f1": 0.05440251572327044,
+  "test_accuracy": 0.16981132328510284
+}

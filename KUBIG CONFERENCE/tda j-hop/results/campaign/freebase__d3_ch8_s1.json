@@ -1,0 +1,182 @@
+{
+  "dataset": "freebase",
+  "use_topology": true,
+  "seed": 1,
+  "topology_source": "gtn",
+  "num_nodes": 6000,
+  "num_classes": 7,
+  "gtn_attentions": [
+    [
+      [
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ],
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ],
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ],
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ],
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ],
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ],
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ],
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ]
+      ],
+      [
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ],
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ],
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ],
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ],
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ],
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ],
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ],
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ]
+      ]
+    ],
+    [
+      [
+        [
+          0.2499999850988388,
+          0.2499999850988388,
+          0.2500000298023224,
+          0.2500000298023224
+        ],
+        [
+          0.25,
+          0.25,
+          0.25,
+          0.25
+        ],
+        [
+          0.25,
+          0.25,
+          0.25,
+          0.25
+        ],
+        [
+          0.25,
+          0.25,
+          0.25,
+          0.25
+        ],
+        [
+          0.2499999850988388,
+          0.2500000596046448,
+          0.2499999701976776,
+          0.2499999850988388
+        ],
+        [
+          0.25,
+          0.2499999701976776,
+          0.25,
+          0.25
+        ],
+        [
+          0.25,
+          0.25,
+          0.25,
+          0.25
+        ],
+        [
+          0.25,
+          0.25,
+          0.25,
+          0.25
+        ]
+      ]
+    ]
+  ],
+  "gtn_only_test_macro_f1": 0.001961425302386401,
+  "gtn_only_test_accuracy": 0.00691244238987565,
+  "gtn_only_val_macro_f1": 0.0,
+  "node_features": "on",
+  "fusion_beta": [
+    0.125,
+    0.125,
+    0.125,
+    0.125,
+    0.125,
+    0.125,
+    0.125,
+    0.125
+  ],
+  "topo_dim": 75,
+  "val_macro_f1": 0.33467741935483875,
+  "test_macro_f1": 0.14603377831334377,
+  "test_accuracy": 0.5645161271095276
+}

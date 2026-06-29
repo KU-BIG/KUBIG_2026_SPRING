@@ -1,0 +1,20 @@
+{
+  "dataset": "pubmed",
+  "use_topology": true,
+  "seed": 1,
+  "topology_source": "random",
+  "num_nodes": 6000,
+  "num_classes": 8,
+  "random_metapath": true,
+  "node_features": "on",
+  "fusion_beta": [
+    0.2019275724887848,
+    0.6622844934463501,
+    0.026101311668753624,
+    0.10968659818172455
+  ],
+  "topo_dim": 75,
+  "val_macro_f1": 0.13203463203463203,
+  "test_macro_f1": 0.04666666666666666,
+  "test_accuracy": 0.13461539149284363
+}

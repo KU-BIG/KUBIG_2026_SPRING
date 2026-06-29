@@ -1,0 +1,20 @@
+{
+  "dataset": "yelp",
+  "use_topology": true,
+  "seed": 2,
+  "topology_source": "random",
+  "num_nodes": 5484,
+  "num_classes": 16,
+  "random_metapath": true,
+  "node_features": "on",
+  "fusion_beta": [
+    0.16749341785907745,
+    0.14588434994220734,
+    0.2833092212677002,
+    0.4033130407333374
+  ],
+  "topo_dim": 75,
+  "val_macro_f1": 0.07474207267446499,
+  "test_macro_f1": 0.0731557774042311,
+  "test_accuracy": 0.8336371779441833
+}

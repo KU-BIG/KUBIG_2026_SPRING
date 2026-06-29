@@ -1,0 +1,21 @@
+{
+  "dataset": "yelp",
+  "use_topology": true,
+  "seed": 1,
+  "topology_source": "manual",
+  "num_nodes": 5484,
+  "num_classes": 16,
+  "manual_metapaths": [
+    "BLB",
+    "BPB"
+  ],
+  "node_features": "on",
+  "fusion_beta": [
+    0.337685227394104,
+    0.6623148322105408
+  ],
+  "topo_dim": 75,
+  "val_macro_f1": 0.0700595692277347,
+  "test_macro_f1": 0.07301177788929018,
+  "test_accuracy": 0.8409867882728577
+}

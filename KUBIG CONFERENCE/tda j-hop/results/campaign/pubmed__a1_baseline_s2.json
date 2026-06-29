@@ -1,0 +1,12 @@
+{
+  "dataset": "pubmed",
+  "use_topology": false,
+  "seed": 2,
+  "topology_source": null,
+  "num_nodes": 6000,
+  "num_classes": 8,
+  "node_features": "on",
+  "val_macro_f1": 0.1565854435419653,
+  "test_macro_f1": 0.0953125,
+  "test_accuracy": 0.11320754885673523
+}

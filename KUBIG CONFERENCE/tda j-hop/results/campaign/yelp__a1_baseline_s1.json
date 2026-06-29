@@ -1,0 +1,12 @@
+{
+  "dataset": "yelp",
+  "use_topology": false,
+  "seed": 1,
+  "topology_source": null,
+  "num_nodes": 5484,
+  "num_classes": 16,
+  "node_features": "on",
+  "val_macro_f1": 0.1316430884553328,
+  "test_macro_f1": 0.1323184905501684,
+  "test_accuracy": 0.5943481922149658
+}
