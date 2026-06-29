@@ -28,13 +28,20 @@ for sub in ("runs/campaign", "runs/campaign_rdf"):
 C = {os.path.basename(p)[:-5]: load(p) for p in glob.glob("results/campaign/*.json")}
 
 
+try:
+    SEEDSET = set(int(x) for x in open("experiments/seeds.txt").read().split())
+except Exception:
+    SEEDSET = None  # 없으면 모든 seed 집계
+
+
 def per_seed(ds, setting, key="test_macro_f1"):
-    """{seed: value} — 가변 seed 수 자동 처리(s0..sN)."""
+    """{seed: value} — experiments/seeds.txt 에 기록된 random seed 만 집계(있으면)."""
     pref = f"{ds}__{setting}_s"
     out = {}
     for k, v in C.items():
         rem = k[len(pref):]
-        if k.startswith(pref) and rem.isdigit() and v and v.get(key) is not None:
+        if (k.startswith(pref) and rem.isdigit() and v and v.get(key) is not None
+                and (SEEDSET is None or int(rem) in SEEDSET)):
             out[int(rem)] = v[key]
     return out
 

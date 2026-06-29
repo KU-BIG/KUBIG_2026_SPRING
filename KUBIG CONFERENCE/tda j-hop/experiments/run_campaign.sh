@@ -11,12 +11,12 @@ cd "$(dirname "$0")/.."
 source /mnt/data/users/junyoungpark/miniforge3/etc/profile.d/conda.sh
 conda activate tlcgnn
 
-NSEED=${NSEED:-10}                                 # robustness: 기본 10 seed
-echo "[1/3] config 생성 (14 데이터셋 × A~D), NSEED=$NSEED"
+echo "[1/3] config 생성 (14 데이터셋 × A~D)"
 python experiments/gen_full_campaign.py
 N=$(wc -l < configs/campaign/manifest.txt)
-TOTAL=$((N * NSEED))                               # × seed{0..NSEED-1}
-echo "  configs=$N, tasks=$TOTAL (seed 0..$((NSEED-1)))"
+NSEED=$(grep -c . experiments/seeds.txt)           # 기록된 random seed 개수 (experiments/seeds.txt)
+TOTAL=$((N * NSEED))
+echo "  configs=$N, random seeds=$NSEED, tasks=$TOTAL"
 
 echo "[2/3] 단일 배열을 QOS 안에서 청크 제출 (GPU 포화)"
 NEXT=0; CHUNK=80

@@ -21,10 +21,10 @@ cd /mnt/data/users/junyoungpark/code/TDA
 DATA_ROOT=/mnt/data/users/junyoungpark/code/hetero_pdg_lp/data
 
 mapfile -t CFGS < configs/campaign/manifest.txt
-N=${#CFGS[@]}
-NSEED=${NSEED:-3}                       # seed 수 (run_campaign.sh 에서 export)
+mapfile -t SEEDS < experiments/seeds.txt    # 20개 random seed (재현용 기록)
+N=${#CFGS[@]}; NSEED=${#SEEDS[@]}
 CFG=${CFGS[$((SLURM_ARRAY_TASK_ID / NSEED))]}
-SEED=$((SLURM_ARRAY_TASK_ID % NSEED))
+SEED=${SEEDS[$((SLURM_ARRAY_TASK_ID % NSEED))]}
 NAME=$(basename "$CFG" .json)          # e.g. dblp__d5_random
 DS=$(python -c "import json;print(json.load(open('$CFG'))['dataset'])")
 OUT=runs/campaign/${NAME}_s${SEED}
