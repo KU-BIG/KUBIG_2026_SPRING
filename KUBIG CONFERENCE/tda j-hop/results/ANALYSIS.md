@@ -1,0 +1,83 @@
+# 실험 결과 분석 (14개 데이터셋 × A~D)
+
+test Macro-F1, mean±std (seed 0/1/2). 수치 근거는 [`SUMMARY.md`](SUMMARY.md). 성능 주장이 아니라
+실측 기반 해석이며, 잘 안 되는 케이스도 그대로 적는다.
+
+## 1. 핵심 발견 — 위상은 "node feature 가 약할 때"만 도움
+
+C2(GTN+PDGNN+HAN) vs A1(HAN 단독)의 Δ를 baseline 강도와 함께 보면 패턴이 분명하다.
+
+| 그룹 | 데이터셋 (Δ = C2−A1) | 해석 |
+|------|----------------------|------|
+| **위상 크게 도움** | AIFB **+0.196**, DBLP **+0.081**, AMiner **+0.070**, MAG +0.017, imdb_pyg +0.014 | baseline 약/featureless → 위상이 빈 곳을 채움 |
+| **≈0 (도움 없음)** | dblp_pyg −0.001, ACM +0.004, IMDB −0.001, Freebase +0.003 | baseline 이미 강함(0.89~0.93) → 위상 중복 |
+| **음수/실패** | PubMed −0.027, Yelp −0.025, MUTAG/BGS/AM ±0.000 | 아래 §5 |
+
+**가장 깔끔한 증거: DBLP vs dblp_pyg.** 같은 도메인(저자분류)·같은 334차원 특징인데,
+HGB-DBLP 는 baseline 이 약해서(0.793) 위상이 +0.081, MAGNN-DBLP 는 baseline 이 강해서(0.932)
+위상이 −0.001. → **위상의 효용을 결정하는 건 도메인이 아니라 "baseline 의 여유(headroom)".**
+node feature 가 이미 충분하면 위상은 추가 정보를 못 준다.
+
+## 2. GTN 자동 메타패스는 random 보다 낫고 manual 과 비등 이상
+
+위상이 의미 있는 데이터셋에서(C2 기준):
+
+- **C2(GTN) > D5(random)**: DBLP 0.874 vs 0.760, AIFB 0.634 vs 0.546, ACM 0.892 vs 0.883.
+  → **학습된 메타패스가 무작위 조합보다 낫다** (자동 발견이 헛돌지 않음).
+- **C2(GTN) ≥ B2(manual)**: DBLP 0.874 vs 0.806(크게), AMiner 0.495 vs 0.474, AIFB 0.634 vs 0.618.
+  ACM 만 비등(0.892 vs 0.893). → **GTN 이 수동 선택을 대체 가능**(특히 DBLP).
+
+즉 플랜의 "메타패스 자동화" 가설은 *위상이 효과 있는 곳에서는* 지지된다.
+
+## 3. 그러나 전체 파이프라인이 "plain GTN" 을 항상 이기진 못한다 (정직)
+
+A3(GTN 단독, EPD 없음)는 그 자체로 강한 이종 GNN이다. 단일라벨 데이터셋에서 A3 vs C2:
+
+- **GTN 단독이 더 나음**: DBLP 0.919 vs 0.874, MUTAG 0.650 vs 0.398, PubMed 0.395 vs 0.059.
+- **위상 파이프라인이 더 나음**: AMiner 0.495 vs 0.260, AIFB 0.634 vs 0.251, dblp_pyg 0.931 vs 0.920.
+- 비등: ACM, MAG, BGS.
+
+→ **"위상 파이프라인 > 모든 것" 은 성립하지 않는다.** 특히 PubMed/MUTAG/DBLP 에선 PDGNN-위상+HAN
+조립이 plain GTN 보다 떨어진다. (A3 는 GTN 분류헤드가 CE 라 멀티라벨 imdb/freebase/am 에선
+0 으로 degenerate → 멀티라벨 A3 는 무의미, 비교 제외.)
+
+## 4. Ablation — MIN/채널수/깊이는 영향 작음, 핵심은 kNN
+
+- **D2 (MIN 집계 제거)**: 거의 모든 데이터셋에서 C2 와 동등하거나 오히려 약간 높음
+  (ACM 0.898 vs 0.892, Freebase 0.158 vs 0.143). → **PDGNN 의 MIN 집계는 여기선 기여 없음.**
+- **D3 (채널 2/4/8)·D4 (깊이 1/2/3)**: 대부분 평탄(차이 < std). 채널 4·깊이 2가 약간 안정적인 정도.
+- **D1 (kNN 제거)**: ego 폭증으로 비현실적(>2h 미완) → **kNN 희소화는 성능 이전에 실행 가능성의 필수 조건.**
+
+→ 위상 파이프라인의 민감한 부분은 집계방식/용량이 아니라 **그래프 희소화(kNN)** 다.
+
+## 5. 잘 안 되는 케이스 (한계, 그대로 보고)
+
+- **MUTAG/BGS/AM (featureless RDF)**: baseline=full=대부분 설정, std 0 → 모델이 **다수 클래스만 예측**
+  (one-hot 특징 + 라벨 sparse + 메타패스 그래프가 라벨 노드를 거의 연결 못 함). 파이프라인이 학습 실패.
+- **MAG**: 절대값 0.01~0.04 (349 클래스, subsample 후 test 작음) → 노이즈로 해석 곤란.
+- **PubMed/Yelp**: 절대값 0.06~0.12 로 낮고 Δ 음수. PubMed 은 A3(0.395) 대비 C2(0.059) 가 붕괴 →
+  데이터가 아니라 **HAN+메타패스 단계가 희소 생의학 그래프에서 무너지는 것**이 원인.
+
+## 6. 진단으로 인과 확인 — 모델은 "도움되는 곳에서만" 위상을 쓴다
+
+- **permutation (test 때 위상 셔플)**: 위상이 중요한 곳일수록 크게 하락 —
+  AMiner 0.495→0.114, DBLP 0.874→0.613, AIFB 0.634→0.386, ACM 0.892→0.829.
+  위상이 무의미한 곳은 거의 불변 — IMDB 0.440→0.440, Freebase 0.143→0.143, dblp_pyg 0.931→0.894.
+- **topology-only (노드 특징 off)**: feature 약한 곳에선 위상만으로 feature-baseline 에 근접 —
+  DBLP 0.760(≈A1 0.793), AMiner 0.465(≈A1 0.425), ACM 0.749(< A1 0.889).
+
+→ Δ·permutation·topology-only 세 지표가 **일관**: 위상 신호는 실재하고, 모델은 그것이 유용한
+데이터셋에서만 실제로 사용한다. (이전 LP 실험의 "통제 시 위상 무신호" 와 대비되는, faithful
+파이프라인의 효과.)
+
+## 7. 종합
+
+1. **위상(GTN+PDGNN)의 효용은 조건부다** — node feature 가 약/없고 baseline 에 여유가 있을 때
+   유의미하게 도움(DBLP/AMiner/AIFB), feature 가 강하면 ≈0(ACM/dblp_pyg/IMDB).
+2. **자동 메타패스(GTN)는 random 보다 낫고 manual 과 비등 이상** — 자동화는 정당화된다.
+3. **단, 위상 파이프라인이 plain GTN 을 항상 이기진 않는다** — 과장 금지.
+4. **진단(permutation/topology-only)이 인과를 뒷받침** — 위상은 유용한 곳에서만 쓰인다.
+5. **한계**: featureless RDF·초다클래스·희소 생의학에선 (특히 HAN+메타패스 단계가) 실패. 분산도
+   featureless 에서 큼(±0.08~0.10) → "위상=robustness" 는 일관된 패턴이 아니다.
+6. **다음**: feature 강한 곳에서 무의미한 위상을 끄는 gating fusion, 멀티라벨용 GTN 헤드(BCE),
+   희소 그래프용 메타패스 강화, end-to-end(C4) 가 자연스러운 후속.
