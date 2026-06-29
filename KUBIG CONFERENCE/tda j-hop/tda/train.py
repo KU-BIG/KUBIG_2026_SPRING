@@ -26,7 +26,24 @@ from tda.models.fusion import SemanticAttentionFusion
 from tda.models.gtn import GTN, GTConv
 from tda.models.han import HAN
 from tda.topology.epd import compute_channel_topology
-from tda.utils import Timer, accuracy, get_device, load_json, macro_f1, save_json, set_seed
+from tda.utils import (Timer, accuracy, get_device, load_json, macro_f1,
+                       multilabel_accuracy, multilabel_macro_f1, save_json, set_seed)
+
+
+def _loss_fn(logits, y, mask, multilabel):
+    if multilabel:
+        return F.binary_cross_entropy_with_logits(logits[mask], y[mask].float())
+    return F.cross_entropy(logits[mask], y[mask])
+
+
+def _f1_fn(logits, y, mask, multilabel):
+    return (multilabel_macro_f1(logits[mask], y[mask]) if multilabel
+            else macro_f1(logits[mask], y[mask]))
+
+
+def _acc_fn(logits, y, mask, multilabel):
+    return (multilabel_accuracy(logits[mask], y[mask]) if multilabel
+            else accuracy(logits[mask], y[mask]))
 
 
 def _build_A_stack(bundle, device) -> torch.Tensor:
@@ -54,13 +71,13 @@ def train_gtn(bundle, A_stack, x, y, masks, config, device, verbose=False) -> to
         model.train()
         opt.zero_grad()
         logits, _ = model(A_stack, x)
-        loss = F.cross_entropy(logits[masks["train"]], y[masks["train"]])
+        loss = _loss_fn(logits, y, masks["train"], bundle.multilabel)
         loss.backward()
         opt.step()
         model.eval()
         with torch.no_grad():
             logits, _ = model(A_stack, x)
-            vf1 = macro_f1(logits[masks["val"]], y[masks["val"]])
+            vf1 = _f1_fn(logits, y, masks["val"], bundle.multilabel)
         if vf1 > best_val:
             best_val, best_state = vf1, copy.deepcopy(model.state_dict())
         if verbose and (ep % 10 == 0 or ep == 1):
@@ -72,8 +89,8 @@ def train_gtn(bundle, A_stack, x, y, masks, config, device, verbose=False) -> to
         H = model.discover(A_stack).detach()
     # GTN 단독 분류 성능(= 실험 A3, EPD 없이 GTN 만)도 기록
     train_gtn.last_val_f1 = float(best_val)
-    train_gtn.last_test_f1 = macro_f1(logits[masks["test"]], y[masks["test"]])
-    train_gtn.last_test_acc = accuracy(logits[masks["test"]], y[masks["test"]])
+    train_gtn.last_test_f1 = _f1_fn(logits, y, masks["test"], bundle.multilabel)
+    train_gtn.last_test_acc = _acc_fn(logits, y, masks["test"], bundle.multilabel)
     print(f"  [gtn] best val_f1={best_val:.4f} test_f1={train_gtn.last_test_f1:.4f} (A3=GTN-only); "
           f"discovered H {tuple(H.shape)}", flush=True)
     # 발견된 메타패스 해석용 어텐션 가중치 저장
@@ -103,13 +120,13 @@ def train_han(bundle, x_in_builder, in_dim, edge_index_dict, y, masks, config,
         model.train()
         opt.zero_grad()
         logits = model(x_in_builder(), edge_index_dict)
-        loss = F.cross_entropy(logits[masks["train"]], y[masks["train"]])
+        loss = _loss_fn(logits, y, masks["train"], bundle.multilabel)
         loss.backward()
         opt.step()
         model.eval()
         with torch.no_grad():
             logits = model(x_in_builder(), edge_index_dict)
-            vf1 = macro_f1(logits[masks["val"]], y[masks["val"]])
+            vf1 = _f1_fn(logits, y, masks["val"], bundle.multilabel)
         if vf1 > best_val:
             best_val = vf1
             best_state = (copy.deepcopy(model.state_dict()),
@@ -123,13 +140,13 @@ def train_han(bundle, x_in_builder, in_dim, edge_index_dict, y, masks, config,
     model.eval()
     with torch.no_grad():
         logits = model(x_in_builder(), edge_index_dict)
-        test_f1 = macro_f1(logits[masks["test"]], y[masks["test"]])
-        test_acc = accuracy(logits[masks["test"]], y[masks["test"]])
-        result = {"val_macro_f1": float(best_val), "test_macro_f1": float(test_f1),
-                  "test_accuracy": float(test_acc)}
+        ml = bundle.multilabel
+        result = {"val_macro_f1": float(best_val),
+                  "test_macro_f1": float(_f1_fn(logits, y, masks["test"], ml)),
+                  "test_accuracy": float(_acc_fn(logits, y, masks["test"], ml))}
         for name, builder in (extra_eval or {}).items():
             lg = model(builder(), edge_index_dict)
-            result[f"test_macro_f1_{name}"] = float(macro_f1(lg[masks["test"]], y[masks["test"]]))
+            result[f"test_macro_f1_{name}"] = float(_f1_fn(lg, y, masks["test"], ml))
     return result
 
 

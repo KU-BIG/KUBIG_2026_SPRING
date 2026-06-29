@@ -47,6 +47,27 @@ def accuracy(logits: torch.Tensor, labels: torch.Tensor) -> float:
     return float((pred == labels).float().mean().item())
 
 
+def multilabel_macro_f1(logits: torch.Tensor, labels: torch.Tensor, thresh: float = 0.5) -> float:
+    """멀티라벨(라벨 (N,C) 0/1) macro-F1. pred = sigmoid(logits) > thresh."""
+    pred = (torch.sigmoid(logits) > thresh).int().cpu().numpy()
+    true = labels.int().cpu().numpy()
+    f1s = []
+    for c in range(true.shape[1]):
+        tp = int(((pred[:, c] == 1) & (true[:, c] == 1)).sum())
+        fp = int(((pred[:, c] == 1) & (true[:, c] == 0)).sum())
+        fn = int(((pred[:, c] == 0) & (true[:, c] == 1)).sum())
+        prec = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+        rec = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+        f1s.append(2 * prec * rec / (prec + rec) if (prec + rec) > 0 else 0.0)
+    return float(np.mean(f1s)) if f1s else 0.0
+
+
+def multilabel_accuracy(logits: torch.Tensor, labels: torch.Tensor, thresh: float = 0.5) -> float:
+    """원소 단위 정확도(모든 라벨 비트 평균)."""
+    pred = (torch.sigmoid(logits) > thresh).int()
+    return float((pred == labels.int()).float().mean().item())
+
+
 def load_json(path: str) -> Dict[str, Any]:
     with open(path, "r") as f:
         return json.load(f)
