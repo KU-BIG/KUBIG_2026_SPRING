@@ -1,0 +1,20 @@
+{
+  "dataset": "imdb_pyg",
+  "use_topology": true,
+  "seed": 2,
+  "topology_source": "random",
+  "num_nodes": 4278,
+  "num_classes": 3,
+  "random_metapath": true,
+  "node_features": "on",
+  "fusion_beta": [
+    0.18238861858844757,
+    0.35640645027160645,
+    0.22291140258312225,
+    0.2382935732603073
+  ],
+  "topo_dim": 75,
+  "val_macro_f1": 0.5174903474903475,
+  "test_macro_f1": 0.5134412212600014,
+  "test_accuracy": 0.5224267244338989
+}

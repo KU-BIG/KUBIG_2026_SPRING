@@ -1,0 +1,21 @@
+{
+  "dataset": "aifb",
+  "use_topology": true,
+  "seed": 0,
+  "topology_source": "manual",
+  "num_nodes": 2270,
+  "num_classes": 4,
+  "manual_metapaths": [
+    "r0",
+    "r1"
+  ],
+  "node_features": "on",
+  "fusion_beta": [
+    0.5285575985908508,
+    0.4714423418045044
+  ],
+  "topo_dim": 75,
+  "val_macro_f1": 0.4966666666666667,
+  "test_macro_f1": 0.572790227201992,
+  "test_accuracy": 0.694444477558136
+}

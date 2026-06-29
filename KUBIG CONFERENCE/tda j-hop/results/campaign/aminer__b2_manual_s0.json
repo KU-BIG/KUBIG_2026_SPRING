@@ -1,0 +1,21 @@
+{
+  "dataset": "aminer",
+  "use_topology": true,
+  "seed": 0,
+  "topology_source": "manual",
+  "num_nodes": 6000,
+  "num_classes": 8,
+  "manual_metapaths": [
+    "APA",
+    "APVPA"
+  ],
+  "node_features": "on",
+  "fusion_beta": [
+    0.10201836377382278,
+    0.8979816436767578
+  ],
+  "topo_dim": 75,
+  "val_macro_f1": 0.33997442964038715,
+  "test_macro_f1": 0.3351450781019747,
+  "test_accuracy": 0.6276150345802307
+}

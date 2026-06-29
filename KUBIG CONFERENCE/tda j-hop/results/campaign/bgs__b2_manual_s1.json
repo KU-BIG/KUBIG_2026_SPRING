@@ -1,0 +1,21 @@
+{
+  "dataset": "bgs",
+  "use_topology": true,
+  "seed": 1,
+  "topology_source": "manual",
+  "num_nodes": 3993,
+  "num_classes": 2,
+  "manual_metapaths": [
+    "r0",
+    "r1"
+  ],
+  "node_features": "on",
+  "fusion_beta": [
+    0.5000077486038208,
+    0.4999922215938568
+  ],
+  "topo_dim": 75,
+  "val_macro_f1": 0.4193548387096774,
+  "test_macro_f1": 0.3829787234042553,
+  "test_accuracy": 0.6206896305084229
+}

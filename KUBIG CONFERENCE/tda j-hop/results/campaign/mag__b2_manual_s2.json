@@ -1,0 +1,21 @@
+{
+  "dataset": "mag",
+  "use_topology": true,
+  "seed": 2,
+  "topology_source": "manual",
+  "num_nodes": 6000,
+  "num_classes": 349,
+  "manual_metapaths": [
+    "PcP",
+    "PAP"
+  ],
+  "node_features": "on",
+  "fusion_beta": [
+    0.4791305661201477,
+    0.5208694934844971
+  ],
+  "topo_dim": 75,
+  "val_macro_f1": 0.030620010376299682,
+  "test_macro_f1": 0.015467641843971631,
+  "test_accuracy": 0.2052401751279831
+}

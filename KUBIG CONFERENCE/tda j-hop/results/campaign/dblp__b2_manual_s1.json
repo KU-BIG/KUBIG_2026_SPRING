@@ -1,0 +1,21 @@
+{
+  "dataset": "dblp",
+  "use_topology": true,
+  "seed": 1,
+  "topology_source": "manual",
+  "num_nodes": 4057,
+  "num_classes": 4,
+  "manual_metapaths": [
+    "APA",
+    "APTPA"
+  ],
+  "node_features": "on",
+  "fusion_beta": [
+    0.905664324760437,
+    0.09433571249246597
+  ],
+  "topo_dim": 75,
+  "val_macro_f1": 0.77623033992897,
+  "test_macro_f1": 0.8076185035596013,
+  "test_accuracy": 0.8151408433914185
+}

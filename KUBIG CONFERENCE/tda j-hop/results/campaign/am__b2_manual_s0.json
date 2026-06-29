@@ -1,0 +1,21 @@
+{
+  "dataset": "am",
+  "use_topology": true,
+  "seed": 0,
+  "topology_source": "manual",
+  "num_nodes": 5967,
+  "num_classes": 11,
+  "manual_metapaths": [
+    "r0",
+    "r1"
+  ],
+  "node_features": "on",
+  "fusion_beta": [
+    0.5,
+    0.5
+  ],
+  "topo_dim": 75,
+  "val_macro_f1": 0.050081654872074034,
+  "test_macro_f1": 0.04698672114402451,
+  "test_accuracy": 0.3484848439693451
+}

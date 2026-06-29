@@ -1,0 +1,21 @@
+{
+  "dataset": "acm",
+  "use_topology": true,
+  "seed": 2,
+  "topology_source": "manual",
+  "num_nodes": 3025,
+  "num_classes": 3,
+  "manual_metapaths": [
+    "PAP",
+    "PSP"
+  ],
+  "node_features": "on",
+  "fusion_beta": [
+    0.5069962739944458,
+    0.4930037558078766
+  ],
+  "topo_dim": 75,
+  "val_macro_f1": 0.9198494020586128,
+  "test_macro_f1": 0.8836561567567728,
+  "test_accuracy": 0.8814919590950012
+}

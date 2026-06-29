@@ -1,0 +1,20 @@
+{
+  "dataset": "bgs",
+  "use_topology": true,
+  "seed": 0,
+  "topology_source": "random",
+  "num_nodes": 3993,
+  "num_classes": 2,
+  "random_metapath": true,
+  "node_features": "on",
+  "fusion_beta": [
+    0.2581097483634949,
+    0.2766196131706238,
+    0.21992206573486328,
+    0.24534855782985687
+  ],
+  "topo_dim": 75,
+  "val_macro_f1": 0.4193548387096774,
+  "test_macro_f1": 0.3958333333333333,
+  "test_accuracy": 0.6551724076271057
+}

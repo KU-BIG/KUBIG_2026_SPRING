@@ -1,0 +1,134 @@
+{
+  "dataset": "freebase",
+  "use_topology": true,
+  "seed": 0,
+  "topology_source": "gtn",
+  "num_nodes": 6000,
+  "num_classes": 7,
+  "gtn_attentions": [
+    [
+      [
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ],
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ],
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ],
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ]
+      ],
+      [
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ],
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ],
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ],
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ]
+      ]
+    ],
+    [
+      [
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ],
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ],
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ],
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ]
+      ]
+    ],
+    [
+      [
+        [
+          0.25,
+          0.25,
+          0.25,
+          0.25
+        ],
+        [
+          0.2500000298023224,
+          0.2499999701976776,
+          0.25,
+          0.2500000298023224
+        ],
+        [
+          0.25,
+          0.2499999701976776,
+          0.25,
+          0.25
+        ],
+        [
+          0.2499999850988388,
+          0.2500000298023224,
+          0.2500000298023224,
+          0.2499999850988388
+        ]
+      ]
+    ]
+  ],
+  "gtn_only_test_macro_f1": 0.0009555661729574773,
+  "gtn_only_test_accuracy": 0.003355704713612795,
+  "gtn_only_val_macro_f1": 0.0,
+  "node_features": "on",
+  "fusion_beta": [
+    0.25,
+    0.25,
+    0.25,
+    0.25
+  ],
+  "topo_dim": 75,
+  "val_macro_f1": 0.3333333333333333,
+  "test_macro_f1": 0.128558147771039,
+  "test_accuracy": 0.6073825359344482
+}

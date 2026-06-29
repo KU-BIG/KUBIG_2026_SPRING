@@ -1,0 +1,21 @@
+{
+  "dataset": "imdb",
+  "use_topology": true,
+  "seed": 2,
+  "topology_source": "manual",
+  "num_nodes": 4932,
+  "num_classes": 5,
+  "manual_metapaths": [
+    "MDM",
+    "MAM"
+  ],
+  "node_features": "on",
+  "fusion_beta": [
+    0.7967187762260437,
+    0.2032812386751175
+  ],
+  "topo_dim": 75,
+  "val_macro_f1": 0.4847690916074991,
+  "test_macro_f1": 0.4429750747625699,
+  "test_accuracy": 0.7438475489616394
+}

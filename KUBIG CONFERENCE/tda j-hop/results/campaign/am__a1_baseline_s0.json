@@ -1,0 +1,12 @@
+{
+  "dataset": "am",
+  "use_topology": false,
+  "seed": 0,
+  "topology_source": null,
+  "num_nodes": 5967,
+  "num_classes": 11,
+  "node_features": "on",
+  "val_macro_f1": 0.050081654872074034,
+  "test_macro_f1": 0.04698672114402451,
+  "test_accuracy": 0.3484848439693451
+}

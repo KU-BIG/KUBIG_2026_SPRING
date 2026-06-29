@@ -1,0 +1,68 @@
+{
+  "dataset": "imdb",
+  "use_topology": true,
+  "seed": 1,
+  "topology_source": "gtn",
+  "num_nodes": 4932,
+  "num_classes": 5,
+  "gtn_attentions": [
+    [
+      [
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ],
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ]
+      ],
+      [
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ],
+        [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ]
+      ]
+    ],
+    [
+      [
+        [
+          0.25,
+          0.25,
+          0.25,
+          0.25
+        ],
+        [
+          0.25,
+          0.25,
+          0.2499999701976776,
+          0.25
+        ]
+      ]
+    ]
+  ],
+  "gtn_only_test_macro_f1": 0.0,
+  "gtn_only_test_accuracy": 0.6541536450386047,
+  "gtn_only_val_macro_f1": 0.0,
+  "node_features": "on",
+  "fusion_beta": [
+    0.5,
+    0.5
+  ],
+  "topo_dim": 75,
+  "val_macro_f1": 0.471645572604763,
+  "test_macro_f1": 0.43679817452189623,
+  "test_accuracy": 0.7433478832244873
+}

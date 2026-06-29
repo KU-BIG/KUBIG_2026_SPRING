@@ -1,0 +1,20 @@
+{
+  "dataset": "am",
+  "use_topology": true,
+  "seed": 1,
+  "topology_source": "random",
+  "num_nodes": 5967,
+  "num_classes": 11,
+  "random_metapath": true,
+  "node_features": "on",
+  "fusion_beta": [
+    0.16279236972332,
+    0.2904634177684784,
+    0.2534211575984955,
+    0.2933230400085449
+  ],
+  "topo_dim": 75,
+  "val_macro_f1": 0.050081654872074034,
+  "test_macro_f1": 0.04698672114402451,
+  "test_accuracy": 0.3484848439693451
+}

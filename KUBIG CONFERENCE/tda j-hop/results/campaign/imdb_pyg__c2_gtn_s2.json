@@ -1,0 +1,95 @@
+{
+  "dataset": "imdb_pyg",
+  "use_topology": true,
+  "seed": 2,
+  "topology_source": "gtn",
+  "num_nodes": 4278,
+  "num_classes": 3,
+  "gtn_attentions": [
+    [
+      [
+        [
+          NaN,
+          NaN,
+          NaN
+        ],
+        [
+          NaN,
+          NaN,
+          NaN
+        ],
+        [
+          NaN,
+          NaN,
+          NaN
+        ],
+        [
+          NaN,
+          NaN,
+          NaN
+        ]
+      ],
+      [
+        [
+          NaN,
+          NaN,
+          NaN
+        ],
+        [
+          NaN,
+          NaN,
+          NaN
+        ],
+        [
+          NaN,
+          NaN,
+          NaN
+        ],
+        [
+          NaN,
+          NaN,
+          NaN
+        ]
+      ]
+    ],
+    [
+      [
+        [
+          0.3333333730697632,
+          0.333333283662796,
+          0.3333333730697632
+        ],
+        [
+          0.3333333432674408,
+          0.3333333730697632,
+          0.333333283662796
+        ],
+        [
+          0.3333333134651184,
+          0.33333340287208557,
+          0.333333283662796
+        ],
+        [
+          0.3333333730697632,
+          0.333333283662796,
+          0.3333333730697632
+        ]
+      ]
+    ]
+  ],
+  "gtn_only_test_macro_f1": 0.1431474373447731,
+  "gtn_only_test_accuracy": 0.27343302965164185,
+  "gtn_only_val_macro_f1": 0.11570247933884298,
+  "node_features": "on",
+  "fusion_beta": [
+    0.25,
+    0.25,
+    0.25,
+    0.25
+  ],
+  "topo_dim": 75,
+  "val_macro_f1": 0.5571556093947962,
+  "test_macro_f1": 0.5318999059048534,
+  "test_accuracy": 0.5405405759811401,
+  "test_macro_f1_permuted": 0.5318999059048534
+}

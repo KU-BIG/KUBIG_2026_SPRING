@@ -1,0 +1,20 @@
+{
+  "dataset": "mag",
+  "use_topology": true,
+  "seed": 1,
+  "topology_source": "random",
+  "num_nodes": 6000,
+  "num_classes": 349,
+  "random_metapath": true,
+  "node_features": "on",
+  "fusion_beta": [
+    0.002639896236360073,
+    0.9919562339782715,
+    0.0019629308953881264,
+    0.0034409568179398775
+  ],
+  "topo_dim": 75,
+  "val_macro_f1": 0.18205128205128202,
+  "test_macro_f1": 0.0,
+  "test_accuracy": 0.0
+}
