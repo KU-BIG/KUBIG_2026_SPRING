@@ -28,10 +28,19 @@ for sub in ("runs/campaign", "runs/campaign_rdf"):
 C = {os.path.basename(p)[:-5]: load(p) for p in glob.glob("results/campaign/*.json")}
 
 
+def per_seed(ds, setting, key="test_macro_f1"):
+    """{seed: value} — 가변 seed 수 자동 처리(s0..sN)."""
+    pref = f"{ds}__{setting}_s"
+    out = {}
+    for k, v in C.items():
+        rem = k[len(pref):]
+        if k.startswith(pref) and rem.isdigit() and v and v.get(key) is not None:
+            out[int(rem)] = v[key]
+    return out
+
+
 def agg(ds, setting, key="test_macro_f1"):
-    xs = [C[f"{ds}__{setting}_s{s}"][key] for s in (0, 1, 2)
-          if f"{ds}__{setting}_s{s}" in C and C[f"{ds}__{setting}_s{s}"]
-          and C[f"{ds}__{setting}_s{s}"].get(key) is not None]
+    xs = list(per_seed(ds, setting, key).values())
     return (np.mean(xs), np.std(xs), len(xs)) if xs else (None, None, 0)
 
 
@@ -57,7 +66,8 @@ def cm(ds, st, key="test_macro_f1"):   # compact mean±std
 
 # 모든 A~D 실험(+진단)을 하나의 표로. test Macro-F1, mean±std over seed 0/1/2.
 L = ["# TDA 실험 결과 — 14개 데이터셋 × A~D 통합표\n",
-     "노드 분류 **test Macro-F1, mean±std (seed 0/1/2)**. 성능 주장 아닌 실측. 원본: `results/campaign/`.",
+     "노드 분류 **test Macro-F1, mean±std (다중 seed)**. 성능 주장 아닌 실측. 원본: `results/campaign/`. "
+     "robustness(paired 유의성)는 맨 아래 표.",
      "열: A1=HAN단독, A3=GTN단독, B2=manual메타패스+EPD, **C2=GTN+PDGNN+HAN(메인)**, "
      "D2=MIN제거, D3=채널2/8, D4=깊이1/3, D5=random메타패스, topo=위상만, perm=위상셔플, "
      "Δ=C2−A1. (D1=no-kNN 은 비현실적(>2h)이라 제외.)\n",
@@ -74,9 +84,34 @@ for ds in DATASETS:
         cm(ds, "d5_random"), cm(ds, "topoonly"),
         cm(ds, "c2_gtn", "test_macro_f1_permuted"), dlt]) + " |")
 
-L += ["", f"진척: {len(C)} / {len(DATASETS)*10*3} run.",
+# --- Robustness: paired C2 vs A1 across seeds (95% CI, win-rate, Wilcoxon) ---
+from scipy import stats as st  # noqa: E402
+
+NS = max((len(per_seed(ds, "c2_gtn")) for ds in DATASETS), default=0)
+L += ["", f"## Robustness — paired C2(full) vs A1(baseline), seed별 (N≈{NS})\n",
+      "Δ_s = C2_s − A1_s (같은 seed 짝). win-rate=Δ>0 비율, p=Wilcoxon signed-rank.\n",
+      "| 데이터셋 | n | C2 | A1 | Δ mean [95% CI] | win-rate | Wilcoxon p |",
+      "|---|---|---|---|---|---|---|"]
+for ds in DATASETS:
+    a = per_seed(ds, "a1_baseline"); c = per_seed(ds, "c2_gtn")
+    seeds = sorted(set(a) & set(c))
+    if not seeds:
+        continue
+    d = np.array([c[s] - a[s] for s in seeds]); n = len(d)
+    md = float(d.mean())
+    ci = 1.96 * d.std(ddof=1) / np.sqrt(n) if n > 1 else float("nan")
+    win = float((d > 0).mean())
+    try:
+        p = st.wilcoxon(d).pvalue if (n >= 6 and np.any(d != 0)) else float("nan")
+    except Exception:
+        p = float("nan")
+    L.append(f"| {ds} | {n} | {np.mean([c[s] for s in seeds]):.3f} | "
+             f"{np.mean([a[s] for s in seeds]):.3f} | {md:+.3f} [{md-ci:+.3f}, {md+ci:+.3f}] | "
+             f"{win:.0%} | {p:.3g} |")
+
+L += ["", f"진척: {len(C)} / {len(DATASETS)*10*NS if NS else 1} run (NSEED={NS}).",
       "해석: 위상(C2)의 효용은 node feature 가 약/없을 때 큼(DBLP·AMiner·AIFB 등 Δ↑), "
       "feature 가 강하면 ≈0(ACM·dblp_pyg·IMDB). MUTAG/BGS/AM 은 featureless RDF 라 degenerate.", ""]
 open("results/SUMMARY.md", "w").write("\n".join(L) + "\n")
-print(f"{len(C)} runs aggregated")
+print(f"{len(C)} runs aggregated, NSEED={NS}")
 print("\n".join(L[:8]))
