@@ -32,6 +32,7 @@ for d in glob.glob("runs/abl/*/"):
 
 DOMAIN = {"acm": "학술/인용", "dblp": "학술/인용", "imdb": "영화(멀티라벨)",
           "freebase": "지식그래프", "aminer": "학술(대형·subsample)", "mag": "학술(대형·subsample)",
+          "dblp_pyg": "학술(PyG판)", "imdb_pyg": "영화(PyG·단일라벨)",
           "ogbmag": "학술(대형·subsample)", "rcdd": "금융/이커머스"}
 
 md = {os.path.basename(p)[:-5]: load(p) for p in glob.glob("results/multidomain/*.json")}

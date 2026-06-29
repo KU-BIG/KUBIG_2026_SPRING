@@ -39,7 +39,7 @@ python -m tda.train --config configs/acm.json --dataset acm --output-dir runs/a1
 
 ## 다른 데이터셋 쓰기
 
-ACM 만 배선돼 있지만 **데이터셋 교체가 쉽게** 설계돼 있습니다. 3단계:
+**8개 데이터셋**(아래 결과 표)이 이미 배선돼 있고, 새 데이터셋도 **교체가 쉽게** 설계돼 있습니다. 3단계:
 
 1. **로더 작성** — `tda/data/<name>.py` 에 `(PyG HeteroData, target_node_type)` 를 반환하는
    함수를 만들고 `tda/data/registry.py` 의 `DATASETS` 에 등록.
@@ -66,7 +66,27 @@ PI 범위/σ, HAN hidden/heads, lr 등). 무엇이 데이터셋별로 바꿔도 
 [`docs/design.ko.md` §4b](docs/design.ko.md) 의 "충실(고정) vs 설계(유연)" 표 참고.
 최소 예시는 `tda/data/toy.py` + `configs/toy.json`.
 
-## ACM 을 썼을 때의 결과 예시
+## 여러 도메인 결과 (8개 데이터셋)
+
+노드 분류 test Macro-F1, baseline(HAN 단독) vs full(GTN+PDGNN+HAN, attention). 원본은 `results/`.
+
+| 데이터셋 | 도메인 | baseline | full | Δ |
+|----------|--------|----------|------|---|
+| ACM | 학술/인용 | 0.9000 | 0.8961 | −0.0039 |
+| DBLP | 학술/인용 | 0.7991 | 0.8737 | **+0.0746** |
+| DBLP_pyg | 학술(PyG판) | 0.9341 | 0.9323 | −0.0018 |
+| AMiner | 학술(대형·subsample, featureless) | 0.3535 | 0.4024 | **+0.0489** |
+| ogbn-mag | 학술(대형·subsample) | 0.0155 | 0.0424 | +0.0268 |
+| IMDB | 영화(멀티라벨) | 0.4422 | 0.4296 | −0.0126 |
+| IMDB_pyg | 영화(단일라벨) | 0.5125 | 0.5200 | +0.0075 |
+| Freebase | 지식그래프(featureless) | 0.1258 | 0.1286 | +0.0027 |
+
+**핵심:** 위상(full)의 효용은 **node feature 가 약하거나 sparse 한 데이터셋에서 크다** —
+DBLP +0.075, AMiner(featureless) +0.049, MAG +0.027. 반대로 feature 가 이미 강하면 ≈null —
+ACM −0.004, DBLP_pyg(baseline 0.93) −0.002. (Freebase·MAG 는 featureless / 349클래스·subsample
+이라 절대값 자체가 낮음 — 비교는 Δ 로.) RCDD(금융)는 PyG 다운로드 링크가 404 라 제외.
+
+## ACM 을 썼을 때의 결과 예시 (ablation 포함)
 
 ACM(paper 3 클래스, Macro-F1), seed 0/1/2 평균 (성능 주장이 아니라 실측치). 메인 + ablation 통합:
 
