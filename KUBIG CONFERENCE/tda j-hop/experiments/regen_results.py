@@ -11,6 +11,7 @@ ROOT = os.path.join(os.path.dirname(__file__), "..")
 os.chdir(os.path.abspath(ROOT))
 os.makedirs("results/multidomain", exist_ok=True)
 os.makedirs("results/acm_ablation", exist_ok=True)
+os.makedirs("results/multidomain_ablation", exist_ok=True)
 
 
 def load(p):
@@ -29,6 +30,10 @@ for d in glob.glob("runs/abl/*/"):
     n = os.path.basename(d.rstrip("/"))
     if os.path.exists(f"{d}/metrics.json"):
         shutil.copy(f"{d}/metrics.json", f"results/acm_ablation/{n}.json")
+for d in glob.glob("runs/abl_multi/*/"):
+    n = os.path.basename(d.rstrip("/"))
+    if os.path.exists(f"{d}/metrics.json"):
+        shutil.copy(f"{d}/metrics.json", f"results/multidomain_ablation/{n}.json")
 
 DOMAIN = {"acm": "학술/인용", "dblp": "학술/인용", "imdb": "영화(멀티라벨)",
           "freebase": "지식그래프", "aminer": "학술(대형·subsample)", "mag": "학술(대형·subsample)",
@@ -70,6 +75,23 @@ pm = col("c2_gtn", "test_macro_f1_permuted")
 if pm[2]:
     lines.append(f"| permutation(위상셔플) | {pm[0]:.4f} |")
 lines.append("| D1 no-kNN | 측정불가(>2h) → kNN 필수 |")
+
+# --- 3. per-dataset B/D ablation ---
+am = {os.path.basename(p)[:-5]: load(p) for p in glob.glob("results/multidomain_ablation/*.json")}
+def cell(ds, suf):
+    k = f"{ds}__{suf}"
+    return f"{am[k]['test_macro_f1']:.4f}" if k in am and am[k] else "—"
+def mdcell(ds, mode):
+    k = f"{ds}_{mode}"
+    return f"{md[k]['test_macro_f1']:.4f}" if k in md and md[k] else "—"
+if am:
+    lines += ["", "## 3. 데이터셋별 B/D ablation (test Macro-F1, seed 0)\n",
+              "| 데이터셋 | A1 base | C2 full | B2 manual | D5 random | D2 no-MIN | D3 ch8 | D4 L1 |",
+              "|----------|---------|---------|-----------|-----------|-----------|--------|-------|"]
+    for ds in datasets:
+        lines.append(f"| {ds} | {mdcell(ds,'baseline')} | {mdcell(ds,'full')} | "
+                     f"{cell(ds,'b2_manual')} | {cell(ds,'d5_random')} | {cell(ds,'d2_nomin')} | "
+                     f"{cell(ds,'d3_ch8')} | {cell(ds,'d4_l1')} |")
 
 open("results/SUMMARY.md", "w").write("\n".join(lines) + "\n")
 print("\n".join(lines))
