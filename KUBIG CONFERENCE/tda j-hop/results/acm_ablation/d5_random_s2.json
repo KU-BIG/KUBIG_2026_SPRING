@@ -1,0 +1,20 @@
+{
+  "dataset": "acm",
+  "use_topology": true,
+  "seed": 2,
+  "topology_source": "random",
+  "num_nodes": 3025,
+  "num_classes": 3,
+  "random_metapath": true,
+  "node_features": "on",
+  "fusion_beta": [
+    0.06609128415584564,
+    0.30628615617752075,
+    0.44595783948898315,
+    0.18166476488113403
+  ],
+  "topo_dim": 75,
+  "val_macro_f1": 0.9423902894491129,
+  "test_macro_f1": 0.8880370677506745,
+  "test_accuracy": 0.8862134218215942
+}

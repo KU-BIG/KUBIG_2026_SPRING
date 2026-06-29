@@ -1,0 +1,12 @@
+{
+  "dataset": "dblp",
+  "use_topology": false,
+  "seed": 0,
+  "topology_source": null,
+  "num_nodes": 4057,
+  "num_classes": 4,
+  "node_features": "on",
+  "val_macro_f1": 0.7863733936314582,
+  "test_macro_f1": 0.7990502376836411,
+  "test_accuracy": 0.8059858679771423
+}
