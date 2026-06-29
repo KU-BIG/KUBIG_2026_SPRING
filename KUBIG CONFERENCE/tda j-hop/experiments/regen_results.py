@@ -51,35 +51,32 @@ DOMAIN = {"acm": "학술/인용", "dblp": "학술/인용", "dblp_pyg": "학술(P
 
 DATASETS = [ds for ds in DATASETS if any(k.startswith(ds + "__") for k in C)]  # 결과 있는 것만
 
-L = ["# TDA 실험 결과 (통합 캠페인)\n",
-     "노드 분류 test Macro-F1, **mean±std over seed 0/1/2** (성능 주장 아닌 실측). 원본: `results/campaign/`.\n",
-     "## 1. 여러 도메인: baseline(A1) vs full(C2)\n",
-     "| 데이터셋 | 도메인 | A1 baseline | C2 full | Δmean |",
-     "|----------|--------|-------------|---------|-------|"]
-for ds in DATASETS:
-    a = agg(ds, "a1_baseline"); c = agg(ds, "c2_gtn")
-    dm = f"{c[0]-a[0]:+.4f}" if (a[2] and c[2]) else "—"
-    L.append(f"| {ds} | {DOMAIN[ds]} | {cell(ds,'a1_baseline')} | {cell(ds,'c2_gtn')} | {dm} |")
+def cm(ds, st, key="test_macro_f1"):   # compact mean±std
+    m, s, n = agg(ds, st, key)
+    return f"{m:.3f}±{s:.2f}" if n else "—"
 
-L += ["", "## 2. 데이터셋별 A~D ablation (mean±std)\n",
-      "| 데이터셋 | A3 GTN단독 | B2 manual | D2 noMIN | D3 ch2 | D3 ch8 | D4 L1 | D4 L3 | D5 random | topo-only |",
-      "|---|---|---|---|---|---|---|---|---|---|"]
+# 모든 A~D 실험(+진단)을 하나의 표로. test Macro-F1, mean±std over seed 0/1/2.
+L = ["# TDA 실험 결과 — 14개 데이터셋 × A~D 통합표\n",
+     "노드 분류 **test Macro-F1, mean±std (seed 0/1/2)**. 성능 주장 아닌 실측. 원본: `results/campaign/`.",
+     "열: A1=HAN단독, A3=GTN단독, B2=manual메타패스+EPD, **C2=GTN+PDGNN+HAN(메인)**, "
+     "D2=MIN제거, D3=채널2/8, D4=깊이1/3, D5=random메타패스, topo=위상만, perm=위상셔플, "
+     "Δ=C2−A1. (D1=no-kNN 은 비현실적(>2h)이라 제외.)\n",
+     "| 데이터셋 | 도메인 | A1 | A3 | B2 | **C2** | D2 | D3=2 | D3=8 | D4=1 | D4=3 | D5 | topo | perm | Δ(C2−A1) |",
+     "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
 for ds in DATASETS:
-    L.append("| " + " | ".join([ds,
-        cell(ds, "c2_gtn", "gtn_only_test_macro_f1"), cell(ds, "b2_manual"),
-        cell(ds, "d2_nomin"), cell(ds, "d3_ch2"), cell(ds, "d3_ch8"),
-        cell(ds, "d4_l1"), cell(ds, "d4_l3"), cell(ds, "d5_random"),
-        cell(ds, "topoonly")]) + " |")
+    a1 = agg(ds, "a1_baseline"); c2 = agg(ds, "c2_gtn")
+    dlt = f"**{c2[0]-a1[0]:+.3f}**" if (a1[2] and c2[2]) else "—"
+    L.append("| " + " | ".join([
+        ds, DOMAIN[ds],
+        cm(ds, "a1_baseline"), cm(ds, "c2_gtn", "gtn_only_test_macro_f1"),
+        cm(ds, "b2_manual"), cm(ds, "c2_gtn"), cm(ds, "d2_nomin"),
+        cm(ds, "d3_ch2"), cm(ds, "d3_ch8"), cm(ds, "d4_l1"), cm(ds, "d4_l3"),
+        cm(ds, "d5_random"), cm(ds, "topoonly"),
+        cm(ds, "c2_gtn", "test_macro_f1_permuted"), dlt]) + " |")
 
-L += ["", "## 3. 진단: permutation (위상 셔플 시 C2)\n",
-      "| 데이터셋 | C2 | C2(permuted) | Δ |", "|---|---|---|---|"]
-for ds in DATASETS:
-    c = agg(ds, "c2_gtn"); p = agg(ds, "c2_gtn", "test_macro_f1_permuted")
-    d = f"{c[0]-p[0]:+.4f}" if (c[2] and p[2]) else "—"
-    L.append(f"| {ds} | {cell(ds,'c2_gtn')} | {cell(ds,'c2_gtn','test_macro_f1_permuted')} | {d} |")
-
-L += ["", "주: D1(no-kNN)은 ego 폭증으로 비현실적(>2h)이라 제외 → kNN 필수.",
-      f"진척: {len(C)} / {len(DATASETS)*10*3} run 완료.", ""]
+L += ["", f"진척: {len(C)} / {len(DATASETS)*10*3} run.",
+      "해석: 위상(C2)의 효용은 node feature 가 약/없을 때 큼(DBLP·AMiner·AIFB 등 Δ↑), "
+      "feature 가 강하면 ≈0(ACM·dblp_pyg·IMDB). MUTAG/BGS/AM 은 featureless RDF 라 degenerate.", ""]
 open("results/SUMMARY.md", "w").write("\n".join(L) + "\n")
 print(f"{len(C)} runs aggregated")
 print("\n".join(L[:8]))
