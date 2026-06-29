@@ -66,6 +66,32 @@ PI 범위/σ, HAN hidden/heads, lr 등). 무엇이 데이터셋별로 바꿔도 
 [`docs/design.ko.md` §4b](docs/design.ko.md) 의 "충실(고정) vs 설계(유연)" 표 참고.
 최소 예시는 `tda/data/toy.py` + `configs/toy.json`.
 
+## 전체 실험(A~D) 한 번에 돌리기
+
+A~D 를 **따로따로 입력할 필요 없습니다** — 전부 **config 플래그**로 정의되고 생성기가 자동으로
+만듭니다. 한 명령으로 12개 데이터셋 × 전체 A~D(× seed 0/1/2)를 실행:
+
+```bash
+bash experiments/run_campaign.sh   # config 자동생성 + SLURM 청크 제출(GPU 포화) + 집계
+```
+
+실험 매트릭스 (각 설정 = config 한 줄, `experiments/gen_full_campaign.py` 참조):
+
+| 그룹 | 설정 | config 플래그 |
+|------|------|---------------|
+| A1 | HAN 단독 (baseline) | `use_topology=false` |
+| A3 | GTN 단독 (EPD 없음) | C2 run 안에 `gtn_only_*` 로 기록 |
+| B2 | manual 메타패스 + EPD | `topology_source=manual` |
+| C2 | GTN + PDGNN + HAN (메인) | `topology_source=gtn` |
+| D2 | MIN 집계 제거 | `pdgnn.agg=sum` |
+| D3 | 채널수 {2, 8} | `gtn.num_channels` |
+| D4 | GTN 깊이 {1, 3} | `gtn.num_layers` |
+| D5 | random 메타패스 | `topology_source=random` |
+| 진단 | topology-only / permutation | `node_features=off` / `permute_topology` |
+
+(D1=no-kNN 은 ego 폭증으로 비현실적이라 제외.) 끝나면 `results/SUMMARY.md` 에 mean±std 로 모입니다.
+단일 데이터셋만: `python -m tda.train --config configs/<ds>.json --dataset <ds> [--no-topology|--topology-source ...]`.
+
 ## 여러 도메인 결과 (8개 데이터셋)
 
 노드 분류 test Macro-F1, baseline(HAN 단독) vs full(GTN+PDGNN+HAN, attention). 원본은 `results/`.
