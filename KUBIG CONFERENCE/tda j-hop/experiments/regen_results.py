@@ -19,10 +19,11 @@ def load(p):
         return None
 
 
-for d in glob.glob("runs/campaign/*/"):
-    n = os.path.basename(d.rstrip("/"))
-    if os.path.exists(f"{d}/metrics.json"):
-        shutil.copy(f"{d}/metrics.json", f"results/campaign/{n}.json")
+for sub in ("runs/campaign", "runs/campaign_rdf"):
+    for d in glob.glob(f"{sub}/*/"):
+        n = os.path.basename(d.rstrip("/"))
+        if os.path.exists(f"{d}/metrics.json"):
+            shutil.copy(f"{d}/metrics.json", f"results/campaign/{n}.json")
 
 C = {os.path.basename(p)[:-5]: load(p) for p in glob.glob("results/campaign/*.json")}
 
@@ -39,10 +40,15 @@ def cell(ds, setting, key="test_macro_f1"):
     return f"{m:.4f}±{s:.4f}" if n else "—"
 
 
-DATASETS = ["acm", "dblp", "dblp_pyg", "aminer", "mag", "imdb", "imdb_pyg", "freebase"]
+DATASETS = ["acm", "dblp", "dblp_pyg", "aminer", "mag", "imdb", "imdb_pyg", "freebase",
+            "aifb", "mutag", "bgs", "am"]
 DOMAIN = {"acm": "학술/인용", "dblp": "학술/인용", "dblp_pyg": "학술(PyG판)",
           "aminer": "학술(대형·subsample·featureless)", "mag": "학술(대형·subsample)",
-          "imdb": "영화(멀티라벨)", "imdb_pyg": "영화(단일라벨)", "freebase": "지식그래프(featureless)"}
+          "imdb": "영화(멀티라벨)", "imdb_pyg": "영화(단일라벨)", "freebase": "지식그래프(featureless)",
+          "aifb": "RDF·연구기관", "mutag": "RDF·화학", "bgs": "RDF·지질", "am": "RDF·박물관"}
+# 캠페인에 아직 안 들어온(결과 없는) 데이터셋은 표에서 자동 생략
+
+DATASETS = [ds for ds in DATASETS if any(k.startswith(ds + "__") for k in C)]  # 결과 있는 것만
 
 L = ["# TDA 실험 결과 (통합 캠페인)\n",
      "노드 분류 test Macro-F1, **mean±std over seed 0/1/2** (성능 주장 아닌 실측). 원본: `results/campaign/`.\n",

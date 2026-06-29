@@ -10,3 +10,4 @@ configs/ablation/
 .DS_Store
 configs/abl_multi/
 configs/campaign/
+configs/campaign_rdf/
