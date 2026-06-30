@@ -25,7 +25,7 @@ from tda.data import get_dataset
 from tda.models.fusion import SemanticAttentionFusion
 from tda.models.gtn import GTN, GTConv
 from tda.models.han import HAN
-from tda.topology.epd import compute_channel_topology
+from tda.topology.cache import compute_channel_topology_cached
 from tda.utils import (Timer, accuracy, get_device, load_json, macro_f1,
                        multilabel_accuracy, multilabel_macro_f1, save_json, set_seed)
 
@@ -207,9 +207,16 @@ def run(config: dict, dataset: str, data_root: str, device=None,
             raise ValueError(f"unknown topology_source '{topo_source}' (gtn|manual|random)")
 
         with Timer("stage2_pdgnn_topology"):
+            # 재실험용 위상 캐시(기본 OFF). config["topology_cache"]=디렉토리 면 채널별 위상을
+            # 입력 해시로 저장/재사용 → 다운스트림만 바꾸는 재실험에서 stage2 건너뜀.
+            topo_cache = config.get("topology_cache")
+            topo_verify = config.get("topology_cache_verify", False)
             topo_channels: List[torch.Tensor] = []
             for c, adj in enumerate(channel_adjs):
-                feat = compute_channel_topology(adj, config, seed, device=device, verbose=verbose)
+                feat = compute_channel_topology_cached(
+                    adj, config, seed, device=device, verbose=verbose,
+                    cache_dir=topo_cache, verify=topo_verify,
+                    tag=f"{dataset}__{topo_source}__ch{c}")
                 topo_channels.append(torch.tensor(feat, dtype=torch.float32, device=device))
                 print(f"  [stage2] channel {c} topo {tuple(topo_channels[-1].shape)}", flush=True)
             topo_dim = topo_channels[0].size(1)

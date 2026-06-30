@@ -4,7 +4,7 @@ __pycache__/
 .ipynb_checkpoints/
 runs/
 slurm_logs/
-data/
+/data/
 configs/ablation/
 *.egg-info/
 .DS_Store

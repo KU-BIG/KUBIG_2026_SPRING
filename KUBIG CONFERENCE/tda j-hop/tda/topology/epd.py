@@ -104,11 +104,11 @@ def gen_training_samples(g: nx.Graph, hks: np.ndarray, hop: int, max_nodes: int,
     rng = np.random.RandomState(seed)
     n, K = hks.shape
     nodes = rng.choice(n, size=min(n_samples, n), replace=False)
+    filts_by_k = [{nd: float(hks[nd, k]) for nd in g.nodes()} for k in range(K)]  # 채널당 1번만
     samples = []
     for v in nodes:
         for k in range(K):
-            node_filt = {nd: float(hks[nd, k]) for nd in g.nodes()}
-            res = _ego_filt_edges(g, int(v), hop, node_filt, max_nodes)
+            res = _ego_filt_edges(g, int(v), hop, filts_by_k[k], max_nodes)
             if res is None:
                 continue
             filt, ei, _ = res
