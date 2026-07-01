@@ -230,6 +230,37 @@ def run(config: dict, dataset: str, data_root: str, device=None,
               "backbone": backbone, "topology_source": topo_source if use_topo else None,
               "num_nodes": bundle.num_nodes, "num_classes": bundle.num_classes}
 
+    # B1/D1: 위상 슬롯을 랜덤 노이즈로 채우는 대조군 (GTN/PDGNN 생략 → feature-addition 효과만 측정).
+    if use_topo and config.get("topology_noise") == "random":
+        pc = config["pdgnn"]
+        topo_dim = pc["pi_resolution"] ** 2 * pc["hks_K"]     # 실제 위상 특징과 같은 차원
+        noise = torch.randn(bundle.num_nodes, topo_dim, device=device)
+        nf = config.get("node_features", "on")
+        x_base = x if nf == "on" else torch.zeros_like(x)
+        record.update({"node_features": nf, "topo_dim": topo_dim,
+                       "topology_noise": "random", "topology_source": None})
+
+        def _xin():
+            return torch.cat([x_base, noise], dim=1)
+
+        with Timer(f"stage3_{backbone}_noise_random"):
+            if backbone == "rgcn":
+                rei, ret, nrel = _build_rgcn_edges(bundle, device)
+                metrics = train_rgcn(bundle, _xin, x.size(1) + topo_dim, rei, ret, nrel,
+                                     y, masks, config, device, verbose=verbose)
+            else:
+                metrics = train_han(bundle, _xin, x.size(1) + topo_dim, edge_index_dict,
+                                    y, masks, config, device, verbose=verbose)
+        record.update(metrics)
+        print(f"[result] noise=random backbone={backbone} "
+              f"test_macro_f1={metrics['test_macro_f1']:.4f}", flush=True)
+        if output_dir:
+            os.makedirs(output_dir, exist_ok=True)
+            save_json(config, os.path.join(output_dir, "config.json"))
+            save_json(record, os.path.join(output_dir, "metrics.json"))
+            print(f"[saved] {output_dir}/metrics.json", flush=True)
+        return record
+
     if use_topo:
         # Stage 1: 채널(=메타패스) 인접행렬 확보 — GTN 자동발견(C) 또는 고정 수동메타패스(B).
         if topo_source == "gtn":
