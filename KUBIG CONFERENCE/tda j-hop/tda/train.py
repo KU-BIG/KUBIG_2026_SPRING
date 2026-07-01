@@ -25,6 +25,7 @@ from tda.data import get_dataset
 from tda.models.fusion import SemanticAttentionFusion
 from tda.models.gtn import GTN, GTConv
 from tda.models.han import HAN
+from tda.models.rgcn import RGCN
 from tda.topology.cache import compute_channel_topology_cached
 from tda.utils import (Timer, accuracy, get_device, load_json, macro_f1,
                        multilabel_accuracy, multilabel_macro_f1, save_json, set_seed)
@@ -57,6 +58,63 @@ def _build_A_stack(bundle, device) -> torch.Tensor:
 def _build_edge_index_dict(bundle, device) -> Dict:
     return {(bundle.target, mp, bundle.target): ei.to(device)
             for mp, ei in bundle.han_metapaths.items()}
+
+
+def _build_rgcn_edges(bundle, device):
+    """기저 관계(타겟-타겟 이진 인접)들 -> (edge_index (2,E), edge_type (E,), num_relations).
+    각 base relation 이 하나의 RGCN 관계 타입. RGCN 은 self-loop 를 root_weight 로 처리."""
+    eis, ets = [], []
+    for ridx, name in enumerate(bundle.base_relations):
+        ei = bundle.base_relations[name].nonzero(as_tuple=False).t().contiguous()  # (2, E_r)
+        eis.append(ei)
+        ets.append(torch.full((ei.size(1),), ridx, dtype=torch.long))
+    edge_index = torch.cat(eis, dim=1).to(device) if eis else torch.zeros((2, 0), dtype=torch.long, device=device)
+    edge_type = torch.cat(ets, dim=0).to(device) if ets else torch.zeros((0,), dtype=torch.long, device=device)
+    return edge_index, edge_type, len(bundle.base_relations)
+
+
+def train_rgcn(bundle, x_in_builder, in_dim, edge_index, edge_type, num_relations, y, masks,
+               config, device, extra_params=None, extra_eval=None, verbose=False) -> Dict:
+    """RGCN downstream 학습 (train_han 과 동일 구조, HAN 대신 RGCN). test macro-F1/acc 반환."""
+    rc = config["rgcn"]
+    model = RGCN(in_dim=in_dim, hidden_dim=rc["hidden_dim"], num_classes=bundle.num_classes,
+                 num_relations=num_relations, num_bases=rc.get("num_bases"),
+                 num_layers=rc["num_layers"], dropout=rc["dropout"]).to(device)
+    params = list(model.parameters())
+    for m in (extra_params or []):
+        params += list(m.parameters())
+    opt = torch.optim.Adam(params, lr=rc["lr"], weight_decay=rc["weight_decay"])
+    best_val, best_state = -1.0, None
+    for ep in range(1, rc["epochs"] + 1):
+        model.train()
+        opt.zero_grad()
+        loss = _loss_fn(model(x_in_builder(), edge_index, edge_type), y, masks["train"], bundle.multilabel)
+        loss.backward()
+        opt.step()
+        model.eval()
+        with torch.no_grad():
+            vf1 = _f1_fn(model(x_in_builder(), edge_index, edge_type), y, masks["val"], bundle.multilabel)
+        if vf1 > best_val:
+            best_val = vf1
+            best_state = (copy.deepcopy(model.state_dict()),
+                          [copy.deepcopy(m.state_dict()) for m in extra_params] if extra_params else None)
+        if verbose and (ep % 20 == 0 or ep == 1):
+            print(f"  [rgcn] ep {ep:3d} loss={loss.item():.4f} val_f1={vf1:.4f}", flush=True)
+    model.load_state_dict(best_state[0])
+    if extra_params and best_state[1] is not None:
+        for m, s in zip(extra_params, best_state[1]):
+            m.load_state_dict(s)
+    model.eval()
+    with torch.no_grad():
+        ml = bundle.multilabel
+        logits = model(x_in_builder(), edge_index, edge_type)
+        result = {"val_macro_f1": float(best_val),
+                  "test_macro_f1": float(_f1_fn(logits, y, masks["test"], ml)),
+                  "test_accuracy": float(_acc_fn(logits, y, masks["test"], ml))}
+        for name, builder in (extra_eval or {}).items():
+            result[f"test_macro_f1_{name}"] = float(_f1_fn(
+                model(builder(), edge_index, edge_type), y, masks["test"], ml))
+    return result
 
 
 def train_gtn(bundle, A_stack, x, y, masks, config, device, verbose=False) -> torch.Tensor:
@@ -167,8 +225,9 @@ def run(config: dict, dataset: str, data_root: str, device=None,
           f"base_rel={list(bundle.base_relations)} han_mp={list(bundle.han_metapaths)}", flush=True)
 
     topo_source = config.get("topology_source", "gtn")  # 'gtn' (C) | 'manual' (B)
+    backbone = config.get("backbone", "han")  # 'han' (a/c) | 'rgcn' (d/f)
     record = {"dataset": dataset, "use_topology": use_topo, "seed": seed,
-              "topology_source": topo_source if use_topo else None,
+              "backbone": backbone, "topology_source": topo_source if use_topo else None,
               "num_nodes": bundle.num_nodes, "num_classes": bundle.num_classes}
 
     if use_topo:
@@ -237,19 +296,38 @@ def run(config: dict, dataset: str, data_root: str, device=None,
             perm = torch.randperm(bundle.num_nodes, device=device)
             extra_eval = {"permuted": lambda: torch.cat([x_base, fusion(topo_channels)[perm]], dim=1)}
 
-        with Timer("stage3_han"):
-            metrics = train_han(bundle, x_in_builder, x.size(1) + topo_dim, edge_index_dict,
-                                y, masks, config, device, extra_params=[fusion],
-                                extra_eval=extra_eval, verbose=verbose)
+        with Timer(f"stage3_{backbone}"):
+            if backbone == "rgcn":
+                rei, ret, nrel = _build_rgcn_edges(bundle, device)
+                metrics = train_rgcn(bundle, x_in_builder, x.size(1) + topo_dim, rei, ret, nrel,
+                                     y, masks, config, device, extra_params=[fusion],
+                                     extra_eval=extra_eval, verbose=verbose)
+            else:
+                metrics = train_han(bundle, x_in_builder, x.size(1) + topo_dim, edge_index_dict,
+                                    y, masks, config, device, extra_params=[fusion],
+                                    extra_eval=extra_eval, verbose=verbose)
         record["fusion_beta"] = getattr(fusion, "last_beta", torch.zeros(0)).cpu().tolist()
         record["topo_dim"] = topo_dim
+        # 자동 시각화 저장(메타패스 + EPD persistence image). post-hoc 이라 학습/수치 영향 없음.
+        if output_dir and config.get("save_viz", True):
+            try:
+                from tda.viz import save_run_figures
+                save_run_figures(record, topo_channels, output_dir, dataset, config)
+                print(f"[viz] saved metapath.png/epd_pi.png/topo_pi.npy -> {output_dir}", flush=True)
+            except Exception as e:
+                print(f"[viz] skipped ({e})", flush=True)
     else:
         nf = config.get("node_features", "on")
         x_base = x if nf == "on" else torch.zeros_like(x)
         record["node_features"] = nf
-        with Timer("stage3_han_baseline"):
-            metrics = train_han(bundle, lambda: x_base, x.size(1), edge_index_dict,
-                                y, masks, config, device, extra_params=None, verbose=verbose)
+        with Timer(f"stage3_{backbone}_baseline"):
+            if backbone == "rgcn":
+                rei, ret, nrel = _build_rgcn_edges(bundle, device)
+                metrics = train_rgcn(bundle, lambda: x_base, x.size(1), rei, ret, nrel,
+                                     y, masks, config, device, extra_params=None, verbose=verbose)
+            else:
+                metrics = train_han(bundle, lambda: x_base, x.size(1), edge_index_dict,
+                                    y, masks, config, device, extra_params=None, verbose=verbose)
 
     record.update(metrics)
     print(f"[result] test_macro_f1={metrics['test_macro_f1']:.4f} "
