@@ -134,83 +134,108 @@ def epd_full(filt, ei):
     return np.array(pts, dtype=np.float64), ncap, loops
 
 
-# 유한·비capping 점 + 루프가 많은 (node, scale) 탐색 → 의미있는 위상 예시
-rng = np.random.RandomState(0)
-sample = list(sub.nodes) + rng.choice(H.size(1), size=min(300, H.size(1)), replace=False).tolist()
-best = None
-for vv in sample:
-    for kk in range(K):
-        r = _ego_filt_edges(g_ch, int(vv), cfg["pdgnn"]["hop"], filts_by_k[kk], cfg["pdgnn"]["max_nodes"])
-        if r is None or r[1].shape[1] == 0:
-            continue
-        pts, ncap, loops = epd_full(r[0], r[1])
-        score = ncap + 2 * loops
-        if best is None or score > best[4]:
-            best = (int(vv), kk, r, pts, score)
-    if best is not None and best[4] >= 20:
-        break
-v, k, res, gt, _ = best
-filt, eei, nodes = res
-node_filt = filts_by_k[k]
-print(f"[viz] EPD example: node {v}, scale {k}, ego {len(nodes)} nodes/{eei.shape[1]//2} edges, "
-      f"{len(gt)} pts (score={best[4]})", flush=True)
+# ===== 랜덤 100개 노드 각각의 EPD 그림을 *개별 파일*로 저장 (ego + PD + PI) =====
 res = cfg["pdgnn"]["pi_resolution"]
-max_filt = float(filt.max())
-births, deaths = gt[:, 0], gt[:, 1]
-persg = deaths - births
-capped = deaths >= max_filt - 1e-6        # essential components (capped at max_filt)
-# persistence image (range fit to actual point spread, so structure is visible)
-img_t = PersistenceImage(resolution=res, sigma=max(persg.max() / 6, 0.05),
-                         birth_range=(float(births.min()), float(births.max())),
-                         pers_range=(0.0, float(max(persg.max(), 1e-3))))
-pi = img_t.transform(gt).reshape(res, res)
+epddir = os.path.join(OUT, "epd")
+os.makedirs(epddir, exist_ok=True)
 
-ego = nx.Graph(); ego.add_nodes_from(range(len(nodes)))
-for a_, b_ in zip(eei[0], eei[1]):
-    ego.add_edge(int(a_), int(b_))
-fig, ax = plt.subplots(1, 3, figsize=(15, 5))
-# (1) ego subgraph colored by HKS filter value
-posE = nx.spring_layout(ego, seed=0)
-nx.draw_networkx_edges(ego, posE, ax=ax[0], alpha=0.35, width=0.6)
-sc = nx.draw_networkx_nodes(ego, posE, ax=ax[0], node_size=90, node_color=filt, cmap="coolwarm")
-plt.colorbar(sc, ax=ax[0], fraction=0.046, label="HKS filter f(v)")
-ax[0].set_title(f"(1) node {v} ego ({len(nodes)} nodes, {eei.shape[1]//2} edges)\ncolor = HKS filtration value",
-                fontsize=10); ax[0].axis("off")
-# (2) persistence diagram: finite (red) vs essential/capped (gray)
-ax[1].scatter(births[~capped], deaths[~capped], s=45, c="crimson", zorder=3, label=f"finite ({int((~capped).sum())})")
-ax[1].scatter(births[capped], deaths[capped], s=25, c="gray", alpha=0.6, zorder=2, label=f"essential ({int(capped.sum())})")
-lim = [float(births.min()) - 0.2, float(deaths.max()) + 0.2]
-ax[1].plot(lim, lim, "k--", alpha=0.5); ax[1].legend(fontsize=8)
-ax[1].set_xlabel("birth"); ax[1].set_ylabel("death")
-ax[1].set_title(f"(2) persistence diagram ({len(gt)} points)\nmax persistence = {persg.max():.2f}", fontsize=10)
-# (3) persistence image (vectorized EPD -> model feature; range fit to data)
-im = ax[2].imshow(pi, cmap="magma", origin="lower")
-ax[2].set_title(f"(3) persistence image (res {res})\nvectorized EPD -> model feature", fontsize=10)
-ax[2].set_xticks([]); ax[2].set_yticks([]); plt.colorbar(im, ax=ax[2], fraction=0.046)
-fig.suptitle(f"{DS} channel {ch}, scale {k}: channel graph -> node ego + HKS -> EPD -> persistence image",
-             fontsize=12)
-fig.tight_layout(rect=[0, 0, 1, 0.93])
-fig.savefig(f"{OUT}/epd_process.png", dpi=130, bbox_inches="tight"); plt.close(fig)
 
-# ===== EPD gallery: ~100 random nodes' persistence images (scale 0) =====
-rng2 = np.random.RandomState(1)
-gal = rng2.choice(H.size(1), size=min(100, H.size(1)), replace=False)
-imgr = PersistenceImage(resolution=res, sigma=0.4, birth_range=(-3.0, 3.0), pers_range=(0.0, 0.5))
-ncol = 10
-nrow = int(np.ceil(len(gal) / ncol))
-figg, axg = plt.subplots(nrow, ncol, figsize=(ncol * 1.2, nrow * 1.2))
-nemp = 0
-for ax_, vv in zip(axg.flat, gal):
-    r = _ego_filt_edges(g_ch, int(vv), cfg["pdgnn"]["hop"], filts_by_k[0], cfg["pdgnn"]["max_nodes"])
+def save_epd_figure(vv, kk, out_path):
+    """노드 vv 의 ego + persistence diagram + persistence image 를 한 파일로 저장."""
+    r = _ego_filt_edges(g_ch, int(vv), cfg["pdgnn"]["hop"], filts_by_k[kk], cfg["pdgnn"]["max_nodes"])
     if r is None or r[1].shape[1] == 0:
-        ax_.axis("off"); nemp += 1; continue
-    pts, _, _ = epd_full(r[0], r[1])
-    img = imgr.transform(pts).reshape(res, res) if len(pts) else np.zeros((res, res))
-    ax_.imshow(img, cmap="magma", origin="lower"); ax_.set_xticks([]); ax_.set_yticks([])
-for ax_ in axg.flat[len(gal):]:
-    ax_.axis("off")
-figg.suptitle(f"{DS} channel {ch}: persistence images of {len(gal)} random nodes (scale 0)", fontsize=12)
-figg.tight_layout(rect=[0, 0, 1, 0.97])
-figg.savefig(f"{OUT}/epd_gallery.png", dpi=110, bbox_inches="tight"); plt.close(figg)
-print(f"[viz] saved epd_gallery.png ({len(gal)} nodes, {nemp} empty egos)", flush=True)
-print(f"[viz] saved epd_process.png  (node {v}, ego {len(nodes)} nodes, EPD {len(gt)} pts)", flush=True)
+        return False
+    filt, eei, nodes = r
+    gt, _, _ = epd_full(filt, eei)
+    if not len(gt):
+        return False
+    births, deaths = gt[:, 0], gt[:, 1]
+    persg = deaths - births
+    mx = float(filt.max())
+    capped = deaths >= mx - 1e-6
+    img_t = PersistenceImage(resolution=res, sigma=max(persg.max() / 6, 0.05),
+                             birth_range=(float(births.min()), float(births.max())),
+                             pers_range=(0.0, float(max(persg.max(), 1e-3))))
+    pi = img_t.transform(gt).reshape(res, res)
+    ego = nx.Graph(); ego.add_nodes_from(range(len(nodes)))
+    for a_, b_ in zip(eei[0], eei[1]):
+        ego.add_edge(int(a_), int(b_))
+    fig, ax = plt.subplots(1, 3, figsize=(15, 5))
+    posE = nx.spring_layout(ego, seed=0)
+    nx.draw_networkx_edges(ego, posE, ax=ax[0], alpha=0.35, width=0.6)
+    sc = nx.draw_networkx_nodes(ego, posE, ax=ax[0], node_size=90, node_color=filt, cmap="coolwarm")
+    plt.colorbar(sc, ax=ax[0], fraction=0.046, label="HKS filter f(v)")
+    ax[0].set_title(f"(1) node {int(vv)} ego ({len(nodes)} nodes, {eei.shape[1]//2} edges)\ncolor = HKS value",
+                    fontsize=10); ax[0].axis("off")
+    ax[1].scatter(births[~capped], deaths[~capped], s=45, c="crimson", zorder=3, label=f"finite ({int((~capped).sum())})")
+    ax[1].scatter(births[capped], deaths[capped], s=25, c="gray", alpha=0.6, zorder=2, label=f"essential ({int(capped.sum())})")
+    lim = [float(births.min()) - 0.2, float(deaths.max()) + 0.2]
+    ax[1].plot(lim, lim, "k--", alpha=0.5); ax[1].legend(fontsize=8)
+    ax[1].set_xlabel("birth"); ax[1].set_ylabel("death")
+    ax[1].set_title(f"(2) persistence diagram ({len(gt)} pts)\nmax persistence = {persg.max():.2f}", fontsize=10)
+    im = ax[2].imshow(pi, cmap="magma", origin="lower")
+    ax[2].set_title(f"(3) persistence image (res {res})", fontsize=10)
+    ax[2].set_xticks([]); ax[2].set_yticks([]); plt.colorbar(im, ax=ax[2], fraction=0.046)
+    fig.suptitle(f"{DS} ch{ch} node {int(vv)}: ego + HKS -> EPD -> persistence image", fontsize=12)
+    fig.tight_layout(rect=[0, 0, 1, 0.93])
+    fig.savefig(out_path, dpi=120, bbox_inches="tight"); plt.close(fig)
+    return True
+
+
+_, _cnt = np.unique(y[y >= 0], return_counts=True)
+RAND_HOMO = float(((_cnt / _cnt.sum()) ** 2).sum())   # 무작위 same-class 기대치
+
+
+def save_metapath_figure(vv, out_path):
+    """노드 vv 의 메타패스 이웃을 metapath_result 스타일 3패널로:
+    (A) node-link(클래스색) (B) 클래스정렬 인접(블록) (C) same-class edge 비율 vs 무작위."""
+    egon = list(nx.ego_graph(g_ch, int(vv), radius=cfg["pdgnn"]["hop"]).nodes())
+    if len(egon) < 3:
+        return False
+    sg = g_ch.subgraph(egon)
+    fig, ax = plt.subplots(1, 3, figsize=(16, 5))
+    # (A) node-link colored by class
+    pos = nx.spring_layout(sg, seed=0)
+    nx.draw_networkx_edges(sg, pos, ax=ax[0], alpha=0.3, width=0.6)
+    nc = nx.draw_networkx_nodes(sg, pos, ax=ax[0], node_size=80,
+                                node_color=[int(y[n]) for n in sg.nodes()], cmap="tab10",
+                                vmin=0, vmax=bundle.num_classes - 1)
+    nx.draw_networkx_nodes(sg, pos, ax=ax[0], nodelist=[int(vv)], node_size=230,
+                           node_color="none", edgecolors="black", linewidths=2)
+    ax[0].set_title(f"(A) node {int(vv)} meta-path neighborhood ({len(egon)} nodes)\nnode color = class label",
+                    fontsize=10); ax[0].axis("off")
+    plt.colorbar(nc, ax=ax[0], fraction=0.046, ticks=range(bundle.num_classes), label="class")
+    # (B) adjacency sorted by class -> block-diagonal = same-class linked
+    order = sorted(sg.nodes(), key=lambda n: int(y[n]))
+    A_ = nx.to_numpy_array(sg, nodelist=order)
+    ax[1].imshow(A_, cmap="Greys", interpolation="nearest")
+    ys = np.array([int(y[n]) for n in order])
+    for b in (np.where(np.diff(ys) != 0)[0] + 0.5):
+        ax[1].axhline(b, color="red", lw=0.6, alpha=0.7); ax[1].axvline(b, color="red", lw=0.6, alpha=0.7)
+    ax[1].set_title(f"(B) adjacency sorted by class ({len(order)} nodes)\nblock-diagonal = same-class linked",
+                    fontsize=10); ax[1].set_xticks([]); ax[1].set_yticks([])
+    # (C) homophily of this neighborhood vs random baseline
+    same = float(np.mean([y[u] == y[w] for u, w in sg.edges()])) if sg.number_of_edges() else 0.0
+    ax[2].bar(["meta-path", "random"], [same, RAND_HOMO], color=["crimson", "gray"])
+    for i, val in enumerate([same, RAND_HOMO]):
+        ax[2].text(i, val + 0.01, f"{val:.2f}", ha="center", fontsize=11)
+    ax[2].set_ylim(0, 1); ax[2].set_ylabel("same-class edge fraction")
+    ax[2].set_title(f"(C) homophily {same:.2f} vs {RAND_HOMO:.2f} random", fontsize=10)
+    fig.suptitle(f"{DS} ch{ch} node {int(vv)}: meta-path RESULT (neighborhood grouping)", fontsize=12)
+    fig.tight_layout(rect=[0, 0, 1, 0.94])
+    fig.savefig(out_path, dpi=120, bbox_inches="tight"); plt.close(fig)
+    return True
+
+
+mpdir = os.path.join(OUT, "metapath")
+os.makedirs(mpdir, exist_ok=True)
+rng2 = np.random.RandomState(1)
+epd_made = mp_made = 0
+for vv in rng2.permutation(H.size(1)).tolist():
+    if epd_made >= 100 and mp_made >= 100:
+        break
+    if epd_made < 100 and save_epd_figure(vv, 0, os.path.join(epddir, f"epd_node{int(vv)}.png")):
+        epd_made += 1
+    if mp_made < 100 and save_metapath_figure(vv, os.path.join(mpdir, f"metapath_node{int(vv)}.png")):
+        mp_made += 1
+print(f"[viz] saved {epd_made} EPD + {mp_made} meta-path per-node figures -> {OUT}/{{epd,metapath}}", flush=True)
