@@ -31,8 +31,18 @@
 | **HAN** | **(a)** | (b)\* | **(c)** |
 | **RGCN** | **(d)** | (e)\* | (f) |
 
+- **(a) HAN only** — node feature만으로 HAN 분류 (위상 없음, baseline).
+- **(b) HAN + noisy topology** — 위상 자리에 무작위/노이즈 특징을 넣은 **대조군**.
+- **(c) HAN + GTN-PDGNN** — GTN이 발견한 메타패스의 PDGNN EPD 위상 특징을 더함.
+- **(d) RGCN only** — node feature만으로 RGCN 분류 (baseline).
+- **(e) RGCN + noisy topology** — (b)의 RGCN판 대조군.
+- **(f) RGCN + GTN-PDGNN** — (c)의 RGCN판 (위상 특징을 더함).
+
+세 조건의 의도: **없음(a,d) → noisy(b,e) → 진짜 위상(c,f)** 을 비교해서, 성능 향상이 *위상
+신호* 때문인지 아니면 *단순히 특징 차원이 늘어서*인지 구분한다 (c가 b를 넘어야 위상 신호가 의미).
+
 \* (b)(e) noisy는 미실행. 현재 **(a)(c)(d) 완료**, (f) 코드·config 준비됨. `backbone ∈ {han, rgcn}`
-config 플래그 하나로 전환.
+config 플래그 하나로 백본 전환.
 
 ## 결과 (7개 데이터셋 · test Macro-F1 · random seed 10개)
 
