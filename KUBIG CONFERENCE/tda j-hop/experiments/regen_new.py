@@ -58,26 +58,27 @@ def nn(ds, setting):
 seedline = " ".join(sorted((str(x) for x in SEEDS), key=int)) if SEEDS else "(seeds.txt 없음)"
 L = ["# 새 실험 결과 — 7개 데이터셋 × (a)~(f)\n",
      f"노드 분류 **test Macro-F1, mean±std** (random seed 10개: {seedline}).\n",
-     "(a)=HAN-only, (c)=HAN+GTN-PDGNN, (d)=RGCN-only, (f)=RGCN+GTN-PDGNN. "
-     "(b)(e) noisy-topology 는 미실행.\n",
+     "(a)=HAN-only, (b)=HAN+noisy(random), (c)=HAN+GTN-PDGNN, "
+     "(d)=RGCN-only, (e)=RGCN+noisy(random), (f)=RGCN+GTN-PDGNN. class-mix(B2/D2)는 별도.\n",
      "| 데이터셋 | 도메인 | (a) HAN | (b) HAN+noisy | (c) HAN+GTN-PDGNN | (d) RGCN | (e) RGCN+noisy | (f) RGCN+GTN-PDGNN |",
      "|---|---|---|---|---|---|---|---|"]
 for ds in DATASETS:
     a, c, d, f = nn(ds, "a1_baseline"), nn(ds, "c2_gtn"), nn(ds, "d_rgcn"), nn(ds, "f_rgcn")
+    b, e = nn(ds, "b1_noise"), nn(ds, "d1_noise")
     L.append("| " + " | ".join([
         ds, DOMAIN[ds],
-        f"{cell(ds, 'a1_baseline')} (n={a})", "—(미실행)",
+        f"{cell(ds, 'a1_baseline')} (n={a})",
+        f"{cell(ds, 'b1_noise')} (n={b})",
         f"{cell(ds, 'c2_gtn')} (n={c})",
-        f"{cell(ds, 'd_rgcn')} (n={d})", "—(미실행)",
+        f"{cell(ds, 'd_rgcn')} (n={d})",
+        f"{cell(ds, 'd1_noise')} (n={e})",
         f"{cell(ds, 'f_rgcn')} (n={f})"]) + " |")
 
-da = sum(1 for ds in DATASETS if nn(ds, "a1_baseline") > 0)
-dc = sum(1 for ds in DATASETS if nn(ds, "c2_gtn") > 0)
-dd = sum(1 for ds in DATASETS if nn(ds, "d_rgcn") > 0)
-df_ = sum(1 for ds in DATASETS if nn(ds, "f_rgcn") > 0)
+cnt = lambda st: sum(1 for ds in DATASETS if nn(ds, st) > 0)
 L += ["",
-      f"진척: **(a) {da}/7, (c) {dc}/7, (d) {dd}/7, (f) {df_}/7** 데이터셋 완료 (각 최대 10 seed). "
-      "(b)(e) noisy-topology 미실행.",
+      f"진척: **(a) {cnt('a1_baseline')}/7, (b) {cnt('b1_noise')}/7, (c) {cnt('c2_gtn')}/7, "
+      f"(d) {cnt('d_rgcn')}/7, (e) {cnt('d1_noise')}/7, (f) {cnt('f_rgcn')}/7** "
+      "데이터셋 완료 (각 최대 10 seed). (b)(e)는 noisy=random; class-mix(B2/D2)는 별도.",
       "",
       "## 매핑 / 상태",
       "- (a) HAN only = `a1_baseline`  ·  (c) HAN+GTN-PDGNN = `c2_gtn`  (backbone=han)",
