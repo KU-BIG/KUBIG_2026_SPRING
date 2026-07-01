@@ -16,7 +16,7 @@ from __future__ import annotations
 import argparse
 import copy
 import os
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 import torch
 import torch.nn.functional as F
@@ -71,6 +71,92 @@ def _build_rgcn_edges(bundle, device):
     edge_index = torch.cat(eis, dim=1).to(device) if eis else torch.zeros((2, 0), dtype=torch.long, device=device)
     edge_type = torch.cat(ets, dim=0).to(device) if ets else torch.zeros((0,), dtype=torch.long, device=device)
     return edge_index, edge_type, len(bundle.base_relations)
+
+
+def _class_keys(y: torch.Tensor, multilabel: bool, fallback: str = "auto") -> Tuple[List[Tuple], str]:
+    """Class-wise topology mixing key.
+
+    Multilabel data first uses the full label-vector signature. If that produces too many singleton
+    groups, fallback="auto" switches to the dominant positive label so that the ablation still
+    actually permutes a meaningful fraction of nodes.
+    """
+    yc = y.detach().cpu()
+    if not multilabel:
+        return [(int(v),) for v in yc.tolist()], "class"
+
+    sig_keys = [tuple(int(v) for v in row.tolist()) for row in yc.int()]
+    if fallback == "signature":
+        return sig_keys, "signature"
+
+    counts: Dict[Tuple, int] = {}
+    for k in sig_keys:
+        counts[k] = counts.get(k, 0) + 1
+    eligible = sum(n for n in counts.values() if n >= 2)
+    if fallback == "auto" and eligible >= max(2, int(0.5 * len(sig_keys))):
+        return sig_keys, "signature"
+
+    dom_keys = []
+    for row in yc.float():
+        if row.numel() == 0 or float(row.sum().item()) <= 0.0:
+            dom_keys.append((-1,))
+        else:
+            dom_keys.append((int(torch.argmax(row).item()),))
+    return dom_keys, "dominant_label"
+
+
+def _shuffle_topology_within_class_and_split(topo_channels: List[torch.Tensor], y: torch.Tensor,
+                                             masks: Dict[str, torch.Tensor], multilabel: bool,
+                                             seed: int, config: dict) -> Tuple[List[torch.Tensor], Dict]:
+    """Return topology channels permuted within same class and split.
+
+    Each eligible group gets a donor permutation with no fixed points, so a node receives another
+    same-class node's topology feature. Singleton groups are left unchanged.
+    """
+    if not topo_channels:
+        return topo_channels, {"enabled": False}
+
+    fallback = config.get("class_wise_mixing_multilabel_fallback", "auto")
+    keys, key_mode = _class_keys(y, multilabel, fallback=fallback)
+    by_split = config.get("class_wise_mixing_by_split", True)
+    split_names = ("train", "val", "test") if by_split else ("all",)
+    n = topo_channels[0].size(0)
+    perm = torch.arange(n, dtype=torch.long)
+    gen = torch.Generator(device="cpu")
+    gen.manual_seed(int(seed) + int(config.get("class_wise_mixing_seed_offset", 7919)))
+    mixed_nodes = 0
+    groups_total = 0
+    groups_mixed = 0
+
+    for split in split_names:
+        if split == "all":
+            split_idx = torch.arange(n, dtype=torch.long)
+        else:
+            split_idx = masks[split].detach().cpu().nonzero(as_tuple=False).view(-1)
+        buckets: Dict[Tuple, List[int]] = {}
+        for idx in split_idx.tolist():
+            buckets.setdefault(keys[idx], []).append(idx)
+        for idxs in buckets.values():
+            groups_total += 1
+            if len(idxs) < 2:
+                continue
+            idx_t = torch.tensor(idxs, dtype=torch.long)
+            order = idx_t[torch.randperm(len(idxs), generator=gen)]
+            perm[order] = order.roll(1)
+            mixed_nodes += len(idxs)
+            groups_mixed += 1
+
+    perm_dev = perm.to(topo_channels[0].device)
+    mixed = [feat[perm_dev] for feat in topo_channels]
+    stats = {
+        "enabled": True,
+        "key_mode": key_mode,
+        "by_split": bool(by_split),
+        "mixed_nodes": int(mixed_nodes),
+        "unchanged_nodes": int(n - mixed_nodes),
+        "groups_total": int(groups_total),
+        "groups_mixed": int(groups_mixed),
+    }
+    return mixed, stats
 
 
 def train_rgcn(bundle, x_in_builder, in_dim, edge_index, edge_type, num_relations, y, masks,
@@ -214,7 +300,11 @@ def run(config: dict, dataset: str, data_root: str, device=None,
     set_seed(seed)
     device = device or get_device()
     use_topo = config.get("use_topology", True)
-    print(f"[run] dataset={dataset} use_topology={use_topo} device={device} seed={seed}", flush=True)
+    topology_mode = config.get("topology_mode", "original")
+    if topology_mode not in ("original", "class_wise_mixing"):
+        raise ValueError(f"unknown topology_mode '{topology_mode}' (original|class_wise_mixing)")
+    print(f"[run] dataset={dataset} use_topology={use_topo} topology_mode={topology_mode} "
+          f"device={device} seed={seed}", flush=True)
 
     bundle = get_dataset(dataset, config, data_root)
     x = bundle.x.to(device)
@@ -228,6 +318,7 @@ def run(config: dict, dataset: str, data_root: str, device=None,
     backbone = config.get("backbone", "han")  # 'han' (a/c) | 'rgcn' (d/f)
     record = {"dataset": dataset, "use_topology": use_topo, "seed": seed,
               "backbone": backbone, "topology_source": topo_source if use_topo else None,
+              "topology_mode": topology_mode if use_topo else None,
               "num_nodes": bundle.num_nodes, "num_classes": bundle.num_classes}
 
     # B1/D1: 위상 슬롯을 랜덤 노이즈로 채우는 대조군 (GTN/PDGNN 생략 → feature-addition 효과만 측정).
@@ -311,6 +402,15 @@ def run(config: dict, dataset: str, data_root: str, device=None,
                 print(f"  [stage2] channel {c} topo {tuple(topo_channels[-1].shape)}", flush=True)
             topo_dim = topo_channels[0].size(1)
 
+        if topology_mode == "class_wise_mixing":
+            topo_channels, mix_stats = _shuffle_topology_within_class_and_split(
+                topo_channels, y, masks, bundle.multilabel, seed, config)
+            record["class_wise_mixing"] = mix_stats
+            print("  [topology_mode] class_wise_mixing "
+                  f"key={mix_stats['key_mode']} by_split={mix_stats['by_split']} "
+                  f"mixed={mix_stats['mixed_nodes']}/{bundle.num_nodes} "
+                  f"groups={mix_stats['groups_mixed']}/{mix_stats['groups_total']}", flush=True)
+
         fusion = SemanticAttentionFusion(topo_dim).to(device)
 
         # 진단: node_features=off → 위상만으로 분류(topology-only). 기본은 'on'.
@@ -382,6 +482,8 @@ def main():
     ap.add_argument("--no-topology", action="store_true", help="baseline A1 (HAN 단독)")
     ap.add_argument("--topology-source", choices=["gtn", "manual", "random"], default=None,
                     help="gtn=C(GTN 발견) | manual=B(고정 수동) | random=D5(무작위) 메타패스")
+    ap.add_argument("--topology-mode", choices=["original", "class_wise_mixing"], default=None,
+                    help="original=기존 GTN-PDGNN | class_wise_mixing=split/class 내부 위상 feature shuffle")
     ap.add_argument("--node-features", choices=["on", "off"], default=None,
                     help="off=topology-only 진단")
     ap.add_argument("--permute-topology", action="store_true", help="permutation 진단 평가 추가")
@@ -395,6 +497,8 @@ def main():
         config["use_topology"] = False
     if args.topology_source is not None:
         config["topology_source"] = args.topology_source
+    if args.topology_mode is not None:
+        config["topology_mode"] = args.topology_mode
     if args.node_features is not None:
         config["node_features"] = args.node_features
     if args.permute_topology:

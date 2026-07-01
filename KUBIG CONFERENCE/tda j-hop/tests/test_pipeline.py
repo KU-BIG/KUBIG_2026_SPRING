@@ -7,7 +7,7 @@ from tda.data import get_dataset, list_datasets
 from tda.models.gtn import GTN
 from tda.models.fusion import SemanticAttentionFusion
 from tda.models.han import HAN
-from tda.train import run, _build_A_stack, _build_edge_index_dict
+from tda.train import run, _build_A_stack, _build_edge_index_dict, _shuffle_topology_within_class_and_split
 from tda.utils import load_json
 
 CFG = os.path.join(os.path.dirname(__file__), "..", "configs", "toy.json")
@@ -130,3 +130,43 @@ def test_run_manual_topology_source_B(tmp_path):
     # manual 모드엔 GTN 산출물 없음
     assert "gtn_only_test_macro_f1" not in rec
     assert len(rec["fusion_beta"]) == len(cfg["han_metapaths"])
+
+
+def test_class_wise_mixing_helper_shuffles_within_split_and_class():
+    topo = [torch.arange(6, dtype=torch.float32).view(6, 1)]
+    y = torch.tensor([0, 0, 1, 1, 0, 0])
+    masks = {
+        "train": torch.tensor([1, 1, 1, 1, 0, 0], dtype=torch.bool),
+        "val": torch.tensor([0, 0, 0, 0, 1, 1], dtype=torch.bool),
+        "test": torch.tensor([0, 0, 0, 0, 0, 0], dtype=torch.bool),
+    }
+    mixed, stats = _shuffle_topology_within_class_and_split(topo, y, masks, False, 3, {})
+    out = mixed[0].view(-1).long()
+    assert stats["mixed_nodes"] == 6
+    assert stats["by_split"] is True
+    for i in range(6):
+        donor = int(out[i].item())
+        assert donor != i
+        assert int(y[donor].item()) == int(y[i].item())
+        assert any(bool(masks[name][donor] and masks[name][i]) for name in ("train", "val", "test"))
+
+
+def test_run_class_wise_mixing_topology_mode():
+    cfg = _cfg(); cfg["use_topology"] = True; cfg["topology_mode"] = "class_wise_mixing"
+    rec = run(cfg, "toy", data_root="./data", device=torch.device("cpu"), verbose=False)
+    assert rec["topology_mode"] == "class_wise_mixing"
+    assert rec["class_wise_mixing"]["enabled"] is True
+    assert rec["class_wise_mixing"]["mixed_nodes"] > 0
+    assert 0.0 <= rec["test_macro_f1"] <= 1.0
+
+
+def test_run_rgcn_class_wise_mixing_topology_mode():
+    cfg = _cfg(); cfg["use_topology"] = True; cfg["topology_mode"] = "class_wise_mixing"
+    cfg["backbone"] = "rgcn"
+    cfg["rgcn"] = {"hidden_dim": 16, "num_layers": 2, "num_bases": None,
+                    "lr": 0.01, "weight_decay": 0.001, "dropout": 0.3, "epochs": 6}
+    rec = run(cfg, "toy", data_root="./data", device=torch.device("cpu"), verbose=False)
+    assert rec["backbone"] == "rgcn"
+    assert rec["topology_mode"] == "class_wise_mixing"
+    assert rec["class_wise_mixing"]["enabled"] is True
+    assert 0.0 <= rec["test_macro_f1"] <= 1.0
