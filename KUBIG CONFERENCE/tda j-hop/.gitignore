@@ -12,3 +12,5 @@ configs/abl_multi/
 configs/campaign/
 configs/campaign_rdf/
 _archive_AtoD/
+results/figures/
+experiments/dataset_stats.*

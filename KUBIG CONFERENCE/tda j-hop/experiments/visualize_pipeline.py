@@ -4,6 +4,7 @@
 저장된 gtn_attentions 로 채널 인접행렬 H 를 *복원*(재학습 X). CPU 전용."""
 import glob
 import json
+import os
 import sys
 
 import matplotlib
@@ -23,8 +24,9 @@ from tda.train import _build_A_stack  # noqa: E402
 from tda.utils import load_json, set_seed  # noqa: E402
 
 DATA_ROOT = "/mnt/data/users/junyoungpark/code/hetero_pdg_lp/data"
-OUT = "/tmp/claude-10002/-mnt-data-users-junyoungpark/18f53b7d-732e-4fd4-8b49-95fe5e45a33b/scratchpad"
-DS = "acm"
+DS = sys.argv[1] if len(sys.argv) > 1 else "acm"   # 데이터셋 인자 (기본 acm)
+OUT = os.environ.get("VIZ_OUT", f"results/figures/{DS}")
+os.makedirs(OUT, exist_ok=True)
 dev = torch.device("cpu")
 
 mfile = sorted(glob.glob(f"runs/campaign/{DS}__c2_gtn_s*/metrics.json"))[0]
@@ -189,4 +191,26 @@ fig.suptitle(f"{DS} channel {ch}, scale {k}: channel graph -> node ego + HKS -> 
              fontsize=12)
 fig.tight_layout(rect=[0, 0, 1, 0.93])
 fig.savefig(f"{OUT}/epd_process.png", dpi=130, bbox_inches="tight"); plt.close(fig)
+
+# ===== EPD gallery: ~100 random nodes' persistence images (scale 0) =====
+rng2 = np.random.RandomState(1)
+gal = rng2.choice(H.size(1), size=min(100, H.size(1)), replace=False)
+imgr = PersistenceImage(resolution=res, sigma=0.4, birth_range=(-3.0, 3.0), pers_range=(0.0, 0.5))
+ncol = 10
+nrow = int(np.ceil(len(gal) / ncol))
+figg, axg = plt.subplots(nrow, ncol, figsize=(ncol * 1.2, nrow * 1.2))
+nemp = 0
+for ax_, vv in zip(axg.flat, gal):
+    r = _ego_filt_edges(g_ch, int(vv), cfg["pdgnn"]["hop"], filts_by_k[0], cfg["pdgnn"]["max_nodes"])
+    if r is None or r[1].shape[1] == 0:
+        ax_.axis("off"); nemp += 1; continue
+    pts, _, _ = epd_full(r[0], r[1])
+    img = imgr.transform(pts).reshape(res, res) if len(pts) else np.zeros((res, res))
+    ax_.imshow(img, cmap="magma", origin="lower"); ax_.set_xticks([]); ax_.set_yticks([])
+for ax_ in axg.flat[len(gal):]:
+    ax_.axis("off")
+figg.suptitle(f"{DS} channel {ch}: persistence images of {len(gal)} random nodes (scale 0)", fontsize=12)
+figg.tight_layout(rect=[0, 0, 1, 0.97])
+figg.savefig(f"{OUT}/epd_gallery.png", dpi=110, bbox_inches="tight"); plt.close(figg)
+print(f"[viz] saved epd_gallery.png ({len(gal)} nodes, {nemp} empty egos)", flush=True)
 print(f"[viz] saved epd_process.png  (node {v}, ego {len(nodes)} nodes, EPD {len(gt)} pts)", flush=True)

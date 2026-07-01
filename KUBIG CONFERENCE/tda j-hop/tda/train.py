@@ -308,8 +308,9 @@ def run(config: dict, dataset: str, data_root: str, device=None,
                                     extra_eval=extra_eval, verbose=verbose)
         record["fusion_beta"] = getattr(fusion, "last_beta", torch.zeros(0)).cpu().tolist()
         record["topo_dim"] = topo_dim
-        # 자동 시각화 저장(메타패스 + EPD persistence image). post-hoc 이라 학습/수치 영향 없음.
-        if output_dir and config.get("save_viz", True):
+        # 자동 시각화 저장은 기본 OFF (용량 절약). 필요시 config["save_viz"]=true.
+        # 시각화는 온디맨드 experiments/visualize_pipeline.py (랜덤 ~100노드) 로 본다.
+        if output_dir and config.get("save_viz", False):
             try:
                 from tda.viz import save_run_figures
                 save_run_figures(record, topo_channels, output_dir, dataset, config)
