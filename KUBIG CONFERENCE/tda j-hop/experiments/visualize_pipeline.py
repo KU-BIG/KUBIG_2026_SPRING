@@ -146,16 +146,17 @@ def save_epd_figure(vv, kk, out_path):
     if r is None or r[1].shape[1] == 0:
         return False
     filt, eei, nodes = r
-    gt, _, _ = epd_full(filt, eei)
-    if not len(gt):
+    gt, ncap, loops = epd_full(filt, eei)
+    if ncap < 3:        # 유한 위상점이 너무 적으면(near-clique → 평평한 HKS) degenerate → skip
         return False
     births, deaths = gt[:, 0], gt[:, 1]
     persg = deaths - births
     mx = float(filt.max())
     capped = deaths >= mx - 1e-6
+    bpad = max((float(births.max()) - float(births.min())) * 0.1, 0.3)  # PI birth축 zero-width 방지
     img_t = PersistenceImage(resolution=res, sigma=max(persg.max() / 6, 0.05),
-                             birth_range=(float(births.min()), float(births.max())),
-                             pers_range=(0.0, float(max(persg.max(), 1e-3))))
+                             birth_range=(float(births.min()) - bpad, float(births.max()) + bpad),
+                             pers_range=(0.0, float(max(persg.max(), 1e-2))))
     pi = img_t.transform(gt).reshape(res, res)
     ego = nx.Graph(); ego.add_nodes_from(range(len(nodes)))
     for a_, b_ in zip(eei[0], eei[1]):
@@ -229,13 +230,14 @@ def save_metapath_figure(vv, out_path):
 
 mpdir = os.path.join(OUT, "metapath")
 os.makedirs(mpdir, exist_ok=True)
+N_FIG = int(sys.argv[2]) if len(sys.argv) > 2 else 100   # 노드당 그림 수 (기본 100)
 rng2 = np.random.RandomState(1)
 epd_made = mp_made = 0
 for vv in rng2.permutation(H.size(1)).tolist():
-    if epd_made >= 100 and mp_made >= 100:
+    if epd_made >= N_FIG and mp_made >= N_FIG:
         break
-    if epd_made < 100 and save_epd_figure(vv, 0, os.path.join(epddir, f"epd_node{int(vv)}.png")):
+    if epd_made < N_FIG and save_epd_figure(vv, 0, os.path.join(epddir, f"epd_node{int(vv)}.png")):
         epd_made += 1
-    if mp_made < 100 and save_metapath_figure(vv, os.path.join(mpdir, f"metapath_node{int(vv)}.png")):
+    if mp_made < N_FIG and save_metapath_figure(vv, os.path.join(mpdir, f"metapath_node{int(vv)}.png")):
         mp_made += 1
 print(f"[viz] saved {epd_made} EPD + {mp_made} meta-path per-node figures -> {OUT}/{{epd,metapath}}", flush=True)
