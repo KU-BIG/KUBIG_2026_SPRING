@@ -26,40 +26,46 @@
 
 ## 실험 설계 — 2 백본 × 3 위상 조건
 
-| | topology 없음 | noisy topology | GTN-PDGNN topology |
-|---|:---:|:---:|:---:|
-| **HAN** | **(a)** | (b)\* | **(c)** |
-| **RGCN** | **(d)** | (e)\* | (f) |
+| | topology 없음 | noise (random) | noise (class-mix) | GTN-PDGNN topology |
+|---|:---:|:---:|:---:|:---:|
+| **HAN** | **(a)** | **(b1)** | (b2) | **(c)** |
+| **RGCN** | **(d)** | **(e1)** | (e2) | (f) |
 
-- **(a) HAN only** — node feature만으로 HAN 분류 (위상 없음, baseline).
-- **(b) HAN + noisy topology** — 위상 자리에 무작위/노이즈 특징을 넣은 **대조군**.
-- **(c) HAN + GTN-PDGNN** — GTN이 발견한 메타패스의 PDGNN EPD 위상 특징을 더함.
-- **(d) RGCN only** — node feature만으로 RGCN 분류 (baseline).
-- **(e) RGCN + noisy topology** — (b)의 RGCN판 대조군.
-- **(f) RGCN + GTN-PDGNN** — (c)의 RGCN판 (위상 특징을 더함).
+- **(a)/(d) baseline** — node feature만으로 분류 (위상 없음).
+- **(b1)/(e1) random noise** — 위상 자리에 **같은 차원(res²×K)의 랜덤 가우시안**을 concat.
+  GTN/PDGNN을 아예 안 돌림 → 성능 변화가 *단순 차원 추가* 때문인지 격리하는 대조군.
+- **(b2)/(e2) class-wise mixing** — **실제 GTN-PDGNN 위상**을 계산하되, **같은 class·같은
+  split(train/val/test) 안에서 노드 간 shuffle** (`topology_mode=class_wise_mixing`).
+  class-level 위상 분포는 보존하고 *per-node 위상↔노드 매칭만* 파괴 → "노드별 위상 정보가
+  class 정보 이상으로 기여하는가"를 격리. (cf. within-class feature shuffle,
+  [Lee et al., ICML 2024](https://arxiv.org/abs/2402.04621); conditional permutation
+  importance, Strobl et al. 2008)
+- **(c)/(f) real topology** — GTN이 발견한 메타패스에서 PDGNN이 근사한 EPD 위상을 concat.
 
-세 조건의 의도: **없음(a,d) → noisy(b,e) → 진짜 위상(c,f)** 을 비교해서, 성능 향상이 *위상
-신호* 때문인지 아니면 *단순히 특징 차원이 늘어서*인지 구분한다 (c가 b를 넘어야 위상 신호가 의미).
+해석 논리: **real(c/f)이 random(b1/e1)과 class-mix(b2/e2)를 둘 다 이겨야** GTN-PDGNN 위상이
+per-node 수준에서 진짜 의미 있다고 주장 가능. real≈class-mix>random이면 위상 가치는
+class-level 분포뿐(개별 노드 매칭은 잉여)이라는 결론.
 
-\* (b)(e) noisy는 미실행. 현재 **(a)(c)(d) 완료**, (f) 코드·config 준비됨. `backbone ∈ {han, rgcn}`
-config 플래그 하나로 백본 전환.
+`backbone ∈ {han, rgcn}` config 플래그로 백본 전환. 현재 **(a)(b1)(c)(d)(e1) 완료**, (b2)(e2)(f) 대기.
 
 ## 결과 (7개 데이터셋 · test Macro-F1 · random seed 10개)
 
-미실행 조건((b)(e)(f))은 `–`.
+미실행 조건((b2)(e2)(f))은 `–`.
 
-| 데이터셋 | 도메인 | (a) HAN | (b) HAN+noisy | (c) HAN+위상 | (d) RGCN | (e) RGCN+noisy | (f) RGCN+위상 |
-|---|---|---|---|---|---|---|---|
-| acm | 학술/인용 | 0.895 | – | 0.894 | **0.925** | – | – |
-| dblp | 학술/인용 | 0.786 | – | 0.862 | **0.934** | – | – |
-| imdb | 영화(멀티라벨) | 0.438 | – | 0.450 | **0.636** | – | – |
-| freebase | 지식그래프 | 0.146 | – | 0.144 | **0.209** | – | – |
-| mag | 학술(초대형) | 0.017 | – | 0.023 | **0.104** | – | – |
-| aifb | RDF | 0.451 | – | 0.575 | **0.752** | – | – |
-| yelp | business(멀티라벨) | 0.110 | – | 0.091 | 0.055 | – | – |
+| 데이터셋 | 도메인 | (a) HAN | (b1) +noise | (b2) +mix | (c) +위상 | (d) RGCN | (e1) +noise | (e2) +mix | (f) +위상 |
+|---|---|---|---|---|---|---|---|---|---|
+| acm | 학술/인용 | 0.895 | 0.887 | – | 0.894 | **0.925** | 0.919 | – | – |
+| dblp | 학술/인용 | 0.786 | 0.776 | – | **0.862** | **0.934** | 0.930 | – | – |
+| imdb | 영화(멀티라벨) | 0.438 | 0.441 | – | 0.450 | **0.636** | 0.579 | – | – |
+| freebase | 지식그래프 | 0.146 | 0.160 | – | 0.144 | **0.209** | 0.158 | – | – |
+| mag | 학술(초대형) | 0.017 | 0.026 | – | 0.023 | **0.104** | 0.090 | – | – |
+| aifb | RDF | 0.451 | 0.478 | – | **0.575** | **0.752** | 0.673 | – | – |
+| yelp | business(멀티라벨) | 0.110 | 0.094 | – | 0.091 | 0.055 | 0.056 | – | – |
 
-- **위상 효용 (c vs a)**: node feature가 약/없을 때 큼 (dblp +0.08, aifb +0.12), 강하면 ≈0.
+- **noise 대조 (b1 vs a, e1 vs d)**: random noise는 baseline과 비슷하거나 아래 (RGCN에선 imdb/freebase/aifb에서 뚜렷이 ↓) → 단순 차원 추가는 이득 없음.
+- **위상 효용 (c vs b1)**: feature 약한 데이터셋에서 real 위상이 noise를 뚜렷이 이김 (dblp +0.086, aifb +0.097) → 위상 신호 실재. feature 강하면 ≈0.
 - **백본 (d vs a)**: RGCN이 HAN을 6/7에서 크게 상회 (yelp 제외).
+- **MAG·yelp 절대값 주의**: macro-F1이 낮은 건 metric 특성(MAG=349클래스 subsample 평균, yelp=희귀 멀티라벨·featureless). accuracy는 MAG 0.28, yelp 0.87(RGCN)로 정상 학습 — 이 둘은 데이터셋 내 조건 간 Δ로만 해석.
 
 전체 표·진행률·매핑은 [`results/SUMMARY.md`](results/SUMMARY.md), 데이터셋 특징은
 [`results/DATASETS.md`](results/DATASETS.md).

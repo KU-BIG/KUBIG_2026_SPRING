@@ -58,33 +58,32 @@ def nn(ds, setting):
 seedline = " ".join(sorted((str(x) for x in SEEDS), key=int)) if SEEDS else "(seeds.txt 없음)"
 L = ["# 새 실험 결과 — 7개 데이터셋 × (a)~(f)\n",
      f"노드 분류 **test Macro-F1, mean±std** (random seed 10개: {seedline}).\n",
-     "(a)=HAN-only, (b)=HAN+noisy(random), (c)=HAN+GTN-PDGNN, "
-     "(d)=RGCN-only, (e)=RGCN+noisy(random), (f)=RGCN+GTN-PDGNN. class-mix(B2/D2)는 별도.\n",
-     "| 데이터셋 | 도메인 | (a) HAN | (b) HAN+noisy | (c) HAN+GTN-PDGNN | (d) RGCN | (e) RGCN+noisy | (f) RGCN+GTN-PDGNN |",
-     "|---|---|---|---|---|---|---|---|"]
+     "(a)=HAN-only, (b1)=HAN+noise(random), (b2)=HAN+class-mix, (c)=HAN+GTN-PDGNN, "
+     "(d)=RGCN-only, (e1)=RGCN+noise(random), (e2)=RGCN+class-mix, (f)=RGCN+GTN-PDGNN.\n",
+     "| 데이터셋 | 도메인 | (a) HAN | (b1) +noise | (b2) +class-mix | (c) +GTN-PDGNN | (d) RGCN | (e1) +noise | (e2) +class-mix | (f) +GTN-PDGNN |",
+     "|---|---|---|---|---|---|---|---|---|---|"]
+COLS = ["a1_baseline", "b1_noise", "b2_mix", "c2_gtn", "d_rgcn", "d1_noise", "e2_mix", "f_rgcn"]
 for ds in DATASETS:
-    a, c, d, f = nn(ds, "a1_baseline"), nn(ds, "c2_gtn"), nn(ds, "d_rgcn"), nn(ds, "f_rgcn")
-    b, e = nn(ds, "b1_noise"), nn(ds, "d1_noise")
-    L.append("| " + " | ".join([
-        ds, DOMAIN[ds],
-        f"{cell(ds, 'a1_baseline')} (n={a})",
-        f"{cell(ds, 'b1_noise')} (n={b})",
-        f"{cell(ds, 'c2_gtn')} (n={c})",
-        f"{cell(ds, 'd_rgcn')} (n={d})",
-        f"{cell(ds, 'd1_noise')} (n={e})",
-        f"{cell(ds, 'f_rgcn')} (n={f})"]) + " |")
+    L.append("| " + " | ".join(
+        [ds, DOMAIN[ds]] + [f"{cell(ds, st)} (n={nn(ds, st)})" for st in COLS]) + " |")
 
 cnt = lambda st: sum(1 for ds in DATASETS if nn(ds, st) > 0)
 L += ["",
-      f"진척: **(a) {cnt('a1_baseline')}/7, (b) {cnt('b1_noise')}/7, (c) {cnt('c2_gtn')}/7, "
-      f"(d) {cnt('d_rgcn')}/7, (e) {cnt('d1_noise')}/7, (f) {cnt('f_rgcn')}/7** "
-      "데이터셋 완료 (각 최대 10 seed). (b)(e)는 noisy=random; class-mix(B2/D2)는 별도.",
+      "진척: " + ", ".join(f"**({lab}) {cnt(st)}/7**" for lab, st in
+                          zip(["a", "b1", "b2", "c", "d", "e1", "e2", "f"], COLS)) +
+      " 데이터셋 완료 (각 최대 10 seed).",
       "",
       "## 매핑 / 상태",
-      "- (a) HAN only = `a1_baseline`  ·  (c) HAN+GTN-PDGNN = `c2_gtn`  (backbone=han)",
-      "- (d) RGCN only = `d_rgcn`  ·  (f) RGCN+GTN-PDGNN = `f_rgcn`  (backbone=rgcn, RGCNConv)",
-      "- (b)(e) noisy topological → 정의 확정 필요 (미실행)",
+      "- (a)=`a1_baseline` · (c)=`c2_gtn` (backbone=han) · (d)=`d_rgcn` · (f)=`f_rgcn` (backbone=rgcn)",
+      "- (b1)=`b1_noise` · (e1)=`d1_noise`: 위상 슬롯에 **같은 차원(res²×K)의 랜덤 가우시안** — 차원추가 효과 대조군",
+      "- (b2)=`b2_mix` · (e2)=`e2_mix`: 실제 GTN-PDGNN 위상을 **같은 class·같은 split 안에서 shuffle** "
+      "(`topology_mode=class_wise_mixing`) — per-node 위상↔노드 매칭만 파괴, class-level 분포 보존",
       "",
-      "원본 per-run: `runs/campaign/<ds>__{a1_baseline,c2_gtn}_s<seed>/metrics.json`", ""]
+      "**주의(MAG·yelp 절대값):** macro-F1 이 낮은 건 모델 실패가 아니라 metric 특성 — "
+      "MAG 는 349클래스를 6000노드 subsample 에서 평균(대부분 클래스가 test 표본 거의 0 → F1=0 다수), "
+      "yelp 는 featureless 멀티라벨(16)에서 희귀 라벨 F1≈0. accuracy 로는 MAG 0.14→0.28(HAN→RGCN), "
+      "yelp 0.62→0.87 로 정상 학습. 이 두 데이터셋은 절대값 비교 대신 **같은 데이터셋 내 조건 간 Δ**로만 해석.",
+      "",
+      "원본 per-run: `runs/campaign/<ds>__<setting>_s<seed>/metrics.json`", ""]
 open("results/SUMMARY.md", "w").write("\n".join(L) + "\n")
 print("\n".join(L))
