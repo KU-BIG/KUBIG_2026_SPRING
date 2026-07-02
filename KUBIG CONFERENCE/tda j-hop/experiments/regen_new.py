@@ -29,7 +29,8 @@ def _metric(d):
     return None
 
 
-def per_seed(ds, setting):
+def per_seed(ds, setting, key=None):
+    """key=None 이면 macro-F1(KEYS 폴백), 아니면 그 지표(예: test_accuracy)."""
     out = {}
     for p in glob.glob(f"runs/campaign/{ds}__{setting}_s*/metrics.json"):
         try:
@@ -38,16 +39,17 @@ def per_seed(ds, setting):
             continue
         if SEEDS is None or s in SEEDS:
             try:
-                v = _metric(json.load(open(p)))
+                d = json.load(open(p))
+                v = _metric(d) if key is None else d.get(key)
             except Exception:
                 v = None
-            if v is not None:
+            if v is not None and np.isfinite(v):
                 out[s] = v
     return out
 
 
-def cell(ds, setting):
-    xs = list(per_seed(ds, setting).values())
+def cell(ds, setting, key=None):
+    xs = list(per_seed(ds, setting, key).values())
     return f"{np.mean(xs):.3f}±{np.std(xs):.3f}" if xs else "(미완)"
 
 
@@ -68,6 +70,17 @@ for ds in DATASETS:
         [ds, DOMAIN[ds]] + [f"{cell(ds, st)} (n={nn(ds, st)})" for st in COLS]) + " |")
 
 cnt = lambda st: sum(1 for ds in DATASETS if nn(ds, st) > 0)
+L += ["",
+      "## 보조 지표 — test Accuracy (mean±std)",
+      "",
+      "macro-F1 이 붕괴하는 MAG(349클래스 subsample)·yelp(희귀 멀티라벨) 해석 보조용. "
+      "멀티라벨(imdb·yelp)은 element-wise accuracy.",
+      "",
+      "| 데이터셋 | (a) HAN | (b1) +noise | (b2) +class-mix | (c) +GTN-PDGNN | (d) RGCN | (e1) +noise | (e2) +class-mix | (f) +GTN-PDGNN |",
+      "|---|---|---|---|---|---|---|---|---|"]
+for ds in DATASETS:
+    L.append("| " + " | ".join(
+        [ds] + [cell(ds, st, "test_accuracy") for st in COLS]) + " |")
 L += ["",
       "진척: " + ", ".join(f"**({lab}) {cnt(st)}/7**" for lab, st in
                           zip(["a", "b1", "b2", "c", "d", "e1", "e2", "f"], COLS)) +
