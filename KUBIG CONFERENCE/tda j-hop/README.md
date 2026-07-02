@@ -46,7 +46,7 @@
 per-node 수준에서 진짜 의미 있다고 주장 가능. real≈class-mix>random이면 위상 가치는
 class-level 분포뿐(개별 노드 매칭은 잉여)이라는 결론.
 
-`backbone ∈ {han, rgcn}` config 플래그로 백본 전환. 현재 **(a)(b1)(c)(d)(e1) 완료**, (b2)(e2)(f) 대기.
+`backbone ∈ {han, rgcn}` config 플래그로 백본 전환. 현재 **(a)(b1)(c)(d)(e1) 완료**이고, class-wise mixing **(b2)(e2)는 진행 중**이다.
 
 ## 결과 (7개 데이터셋 · test Macro-F1 · random seed 10개)
 
@@ -69,6 +69,22 @@ class-level 분포뿐(개별 노드 매칭은 잉여)이라는 결론.
 
 전체 표·진행률·매핑은 [`results/SUMMARY.md`](results/SUMMARY.md), 데이터셋 특징은
 [`results/DATASETS.md`](results/DATASETS.md).
+
+## Class-wise Mixing Topology Ablation
+
+Class-wise mixing is a structured topology control inspired by within-class feature mixing. It first computes the real GTN-PDGNN topology feature, then replaces each node's topology feature with another topology feature from the same class and, when masks are available, the same train/val/test split. This keeps class-level topology-feature distribution partly intact while breaking node-specific topology-feature alignment. Smoke-test seed `0` is excluded from the summary below.
+
+Status: **in progress**. Current completed official runs: **100/140** (ACM, DBLP, IMDB, Freebase, and MAG complete for HAN/RGCN; AIFB and Yelp missing). Detailed tables, per-run diagnostics, missing runs, and reproduction commands are in [`results/CLASS_WISE_MIXING.md`](results/CLASS_WISE_MIXING.md).
+
+| dataset | HAN test Macro-F1 | RGCN test Macro-F1 | notes |
+|---|---:|---:|---|
+| acm | 0.8990±0.0060 | 0.9232±0.0119 | n=10 each |
+| dblp | 0.8776±0.0176 | 0.9386±0.0048 | n=10 each |
+| imdb | 0.4468±0.0205 | 0.6341±0.0044 | n=10 each; GTN attention NaN diagnostic present |
+| freebase | 0.1618±0.0268 | 0.2067±0.0564 | n=9 finite metrics per backbone; GTN attention NaN caveat |
+| mag | 0.0186±0.0091 | 0.0881±0.0483 | n=10 each; many-class subsampled macro-F1 caveat |
+| aifb | in progress | in progress | missing |
+| yelp | in progress | in progress | missing |
 
 ## 시각화
 
