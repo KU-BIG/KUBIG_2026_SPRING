@@ -7,5 +7,6 @@ numpy>=1.24
 pandas>=2.2,<2.3
 scipy>=1.10
 networkx>=2.8
+rdflib>=7,<8
 # 주: 원본 PDGNN 의 torch_scatter 의존성은 torch 기본 scatter 로 대체하여 불필요.
 #     persistence image 도 cython(sg2dgm) 대신 순수 numpy 로 재구현 → 추가 빌드 불필요.
