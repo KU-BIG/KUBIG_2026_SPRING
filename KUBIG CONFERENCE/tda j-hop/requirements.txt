@@ -4,6 +4,7 @@ torch==2.1.0
 torch_geometric==2.5.3
 gudhi>=3.9
 numpy>=1.24
+pandas>=2.2,<2.3
 scipy>=1.10
 networkx>=2.8
 # 주: 원본 PDGNN 의 torch_scatter 의존성은 torch 기본 scatter 로 대체하여 불필요.
