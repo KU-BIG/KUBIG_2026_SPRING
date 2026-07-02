@@ -25,6 +25,9 @@ for CFG in "${CFGS[@]}"; do
       continue
     fi
     mkdir -p "$OUT"
+    if [ -f "$LOG" ]; then
+      mv "$LOG" "${LOG}.$(date +%Y%m%d_%H%M%S).partial"
+    fi
     echo "[run_class_wise_mixing] ds=$DS backbone=$BACKBONE mode=$MODE seed=$SEED out=$OUT"
     python -m tda.train --config "$CFG" --dataset "$DS"       --data-root "$DATA_ROOT" --output-dir "$OUT" --seed "$SEED" 2>&1 | tee "$LOG"
   done

@@ -29,6 +29,7 @@ for ds in DATASETS:
             "use_topology": True,
             "topology_source": "gtn",
             "topology_mode": "class_wise_mixing",
+            "topology_cache": f"cache/topology_gtn_pdgnn/{ds}",
             "class_wise_mixing_by_split": True,
             "class_wise_mixing_multilabel_fallback": "auto",
         })

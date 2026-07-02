@@ -27,18 +27,42 @@ import torch
 from tda.topology.epd import compute_channel_topology
 
 
-def topo_cache_key(adj: torch.Tensor, pdgnn_cfg: dict, seed: int, tag: str,
-                   device_type: str) -> str:
-    """위상 출력에 영향을 주는 모든 입력의 SHA1. adj 내용·전체 pdgnn 설정·seed·device 포함."""
+TOPOLOGY_CACHE_SCHEMA_VERSION = "gtn_pdgnn_topology_v3_device_independent"
+
+
+def _rng_metadata(device) -> dict:
+    meta = {"torch_rng_state": torch.get_rng_state().cpu().tolist()}
+    dev = device or (torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu"))
+    if getattr(dev, "type", str(dev)) == "cuda" and torch.cuda.is_available():
+        meta["cuda_rng_state"] = torch.cuda.get_rng_state(dev).cpu().tolist()
+    return meta
+
+
+def _restore_rng_metadata(meta: dict, device) -> bool:
+    state = meta.get("torch_rng_state")
+    if state is None:
+        return False
+    torch.set_rng_state(torch.tensor(state, dtype=torch.uint8))
+    cuda_state = meta.get("cuda_rng_state")
+    dev = device or (torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu"))
+    if getattr(dev, "type", str(dev)) == "cuda" and torch.cuda.is_available():
+        if cuda_state is None:
+            return False
+        torch.cuda.set_rng_state(torch.tensor(cuda_state, dtype=torch.uint8), device=dev)
+    return True
+
+
+def topo_cache_key(adj: torch.Tensor, pdgnn_cfg: dict, seed: int, tag: str) -> str:
+    """위상 출력에 영향을 주는 실험 정의의 SHA1. device/backbone 은 포함하지 않는다."""
     a = np.ascontiguousarray(adj.detach().cpu().numpy())
     h = hashlib.sha1()
+    h.update(TOPOLOGY_CACHE_SCHEMA_VERSION.encode())
     h.update(str(tag).encode())
     h.update(str(a.dtype).encode())
     h.update(str(a.shape).encode())
     h.update(a.tobytes())
     h.update(json.dumps(pdgnn_cfg, sort_keys=True, default=str).encode())
     h.update(str(int(seed)).encode())
-    h.update(str(device_type).encode())
     return h.hexdigest()
 
 
@@ -56,34 +80,43 @@ def compute_channel_topology_cached(adj: torch.Tensor, config: dict, seed: int,
     dev = device or (torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu"))
     device_type = getattr(dev, "type", str(dev))
     os.makedirs(cache_dir, exist_ok=True)
-    key = topo_cache_key(adj, config.get("pdgnn", {}), seed, tag, device_type)
+    key = topo_cache_key(adj, config.get("pdgnn", {}), seed, tag)
     path = os.path.join(cache_dir, key + ".npy")
 
     if os.path.exists(path):
         arr = np.load(path)
+        meta_path = os.path.join(cache_dir, key + ".json")
+        meta = json.load(open(meta_path)) if os.path.exists(meta_path) else {}
         if verify:
             fresh = compute_channel_topology(adj, config, seed, device=device, verbose=verbose)
             if fresh.shape != arr.shape:
-                raise ValueError(f"[topo-cache] shape mismatch cached={arr.shape} "
+                raise ValueError(f"[topology_cache] shape mismatch cached={arr.shape} "
                                  f"fresh={fresh.shape} (key {key[:12]})")
             md = float(np.max(np.abs(fresh - arr))) if arr.size else 0.0
-            print(f"[topo-cache] HIT+verify key={key[:12]} max|Δ|={md:.2e} (tol={tol})", flush=True)
+            restored = _restore_rng_metadata(meta, dev)
+            suffix = "" if restored else " rng_state=missing"
+            print(f"[topology_cache] hit+verify key={key[:12]} max|Δ|={md:.2e} (tol={tol}){suffix}", flush=True)
             if md > tol:
-                raise ValueError(f"[topo-cache] verify FAILED max|Δ|={md:.2e} > tol {tol} "
+                raise ValueError(f"[topology_cache] verify FAILED max|Δ|={md:.2e} > tol {tol} "
                                  f"(key {key[:12]})")
-        elif verbose:
-            print(f"[topo-cache] HIT key={key[:12]}", flush=True)
+        else:
+            restored = _restore_rng_metadata(meta, dev)
+            if verbose:
+                suffix = "" if restored else " rng_state=missing"
+                print(f"[topology_cache] hit key={key[:12]} path={path}{suffix}", flush=True)
         return arr
 
-    arr = compute_channel_topology(adj, config, seed, device=device, verbose=verbose)
+    arr = np.asarray(compute_channel_topology(adj, config, seed, device=device, verbose=verbose))
     tmp = path + ".tmp"
     with open(tmp, "wb") as f:          # np.save(파일객체) 는 확장자를 붙이지 않음
         np.save(f, arr)
     os.replace(tmp, path)               # 원자적 교체(부분 기록 방지)
-    json.dump({"tag": tag, "seed": int(seed), "shape": list(arr.shape),
-               "dtype": str(arr.dtype), "device": device_type,
-               "pdgnn": config.get("pdgnn", {})},
-              open(os.path.join(cache_dir, key + ".json"), "w"), indent=2, default=str)
+    meta = {"schema_version": TOPOLOGY_CACHE_SCHEMA_VERSION,
+            "tag": tag, "seed": int(seed), "shape": list(arr.shape),
+            "dtype": str(arr.dtype), "computed_device": device_type,
+            "pdgnn": config.get("pdgnn", {})}
+    meta.update(_rng_metadata(dev))
+    json.dump(meta, open(os.path.join(cache_dir, key + ".json"), "w"), indent=2, default=str)
     if verbose:
-        print(f"[topo-cache] MISS->save key={key[:12]} {arr.shape}", flush=True)
+        print(f"[topology_cache] miss key={key[:12]} saved={path} shape={arr.shape}", flush=True)
     return arr
