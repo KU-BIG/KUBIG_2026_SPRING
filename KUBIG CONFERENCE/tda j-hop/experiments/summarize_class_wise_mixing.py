@@ -171,21 +171,43 @@ def missing_table(missing: list[dict[str, Any]]) -> list[str]:
 
 
 def diagnostics(rows: list[dict[str, Any]]) -> list[str]:
+    grouped = group_rows(rows)
+    lines: list[str] = []
+    nan_groups = []
+    for ds in DATASETS:
+        for bb in BACKBONES:
+            xs = grouped.get((ds, bb), [])
+            n_nan = sum(1 for r in xs if r["nan_gtn_attention"])
+            if n_nan:
+                nan_groups.append(f"{ds}/{bb.upper()} {n_nan}/{len(xs)}")
+    if nan_groups:
+        lines.append("- GTN attention NaN diagnostics by affected group: " + "; ".join(nan_groups) + ".")
+    else:
+        lines.append("- GTN attention NaN diagnostics: none detected in official runs.")
+
+    bad_final = [r for r in rows if not r["final_metrics_finite"]]
+    if bad_final:
+        paths = ", ".join(f"`{r['path']}`" for r in bad_final)
+        lines.append(f"- Final metric NaN exceptions: {len(bad_final)}/{len(rows)} official runs have at least one NaN final metric: {paths}.")
+    else:
+        lines.append(f"- Final metrics are finite for all {len(rows)} official runs.")
+
     freebase = [r for r in rows if r["dataset"] == "freebase"]
     fb_nan = sum(1 for r in freebase if r["nan_gtn_attention"])
     fb_finite = sum(1 for r in freebase if r["final_metrics_finite"])
     fb_ratios = [r["mixed_ratio"] for r in freebase if is_finite_number(r.get("mixed_ratio"))]
-    lines = [
-        "- Freebase GTN attention diagnostic: "
-        f"{fb_nan}/{len(freebase)} completed Freebase runs contain NaN values in `gtn_attentions`; "
-        f"{fb_finite}/{len(freebase)} have finite final `test_macro_f1`, `test_accuracy`, and `val_macro_f1`.",
-    ]
+    lines.append(
+        "- Freebase GTN attention caveat: "
+        f"{fb_nan}/{len(freebase)} Freebase runs contain NaN values in `gtn_attentions`; "
+        f"{fb_finite}/{len(freebase)} have finite final `test_macro_f1`, `test_accuracy`, and `val_macro_f1`. "
+        "NaN saved attentions suggest GTN-stage instability or degenerate attention and should be reported rather than hidden."
+    )
     if fb_ratios:
         lines.append(f"- Freebase mixed ratio: {fmt_mean_std(fb_ratios)} across completed Freebase runs.")
     lines += [
-        "- NaN values in saved GTN attentions suggest GTN-stage instability or degenerate attention on Freebase. These runs are retained when final metrics are finite, but the attention diagnostics should not be hidden.",
+        "- IMDB also has NaN values in saved `gtn_attentions` for these official runs, while final metrics remain finite; treat this as a diagnostic caveat for the GTN attention artifact rather than silently filtering runs.",
         "- Class-wise mixing can be weak when same-class same-split groups are small; singleton groups remain unchanged and are reported through `unchanged_nodes` and mixed ratio.",
-        "- MAG has many classes and uses subsampled nodes, so macro-F1 can be very low. Interpret MAG primarily through within-dataset deltas rather than absolute macro-F1.",
+        "- MAG has many classes and uses subsampled nodes, so macro-F1 can be very low. Yelp is multilabel and sparse-label/featureless in this HNE setting, so macro-F1 should be interpreted carefully; use within-dataset deltas rather than absolute macro-F1 alone.",
     ]
     return lines
 
@@ -205,6 +227,7 @@ def build_markdown(rows: list[dict[str, Any]], missing: list[dict[str, Any]]) ->
         f"Generated: {generated}",
         "",
         f"Status: **{status}**. Completed official runs: **{total}/140**; finite final metrics: **{finite_total}/{total}**.",
+        f"Completion check: `completed={total} missing={len(missing)} expected=140`.",
         "",
         "Smoke-test seed `0` is excluded from all summaries. Official seeds: " + ", ".join(str(s) for s in SEEDS) + ".",
         "",
@@ -247,7 +270,7 @@ def build_markdown(rows: list[dict[str, Any]], missing: list[dict[str, Any]]) ->
         "## Diagnostics / Caveats",
         "",
         *diagnostics(rows),
-        "- If this document reports fewer than 140 completed runs, the table is interim and should be regenerated after resume completes.",
+        *( ["- If this document reports fewer than 140 completed runs, the table is interim and should be regenerated after resume completes."] if len(rows) < 140 else [] ),
         "",
         "## Reproduction Commands",
         "",

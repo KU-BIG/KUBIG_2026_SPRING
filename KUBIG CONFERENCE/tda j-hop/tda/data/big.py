@@ -5,6 +5,8 @@
 """
 from __future__ import annotations
 
+from pathlib import Path
+
 import torch
 
 from tda.data._subsample import labels_from_y_index, subsample_hetero_graph, synth_splits
@@ -101,9 +103,19 @@ def load_hne(name: str, data_root: str = "./data", cap: int = 6000):
     import torch
     from torch_geometric.data import HeteroData
 
-    base = f"{data_root}/HNE/{name}"
+    base = Path(data_root) / "HNE" / name
+    required = ["node.dat", "link.dat", "label.dat", "label.dat.test"]
+    missing = [fname for fname in required if not (base / fname).is_file()]
+    if missing:
+        missing_list = ", ".join(missing)
+        raise FileNotFoundError(
+            f"HNE {name} raw files are missing: {missing_list}. "
+            f"Expected directory: {base}. "
+            "Place the HNE-format files node.dat, link.dat, label.dat, and "
+            "label.dat.test in that directory before running this dataset."
+        )
     per_type, attrs = {}, {}
-    with open(f"{base}/node.dat") as f:
+    with open(base / "node.dat") as f:
         for line in f:
             p = line.rstrip("\n").split("\t")
             gid, nt = int(p[0]), int(p[2])
@@ -125,7 +137,7 @@ def load_hne(name: str, data_root: str = "./data", cap: int = 6000):
             hd[tn].num_nodes = len(ids)
 
     edges = {}
-    with open(f"{base}/link.dat") as f:
+    with open(base / "link.dat") as f:
         for line in f:
             p = line.rstrip("\n").split("\t")
             s, d, lt = int(p[0]), int(p[1]), int(p[2])
@@ -144,8 +156,8 @@ def load_hne(name: str, data_root: str = "./data", cap: int = 6000):
                 p = line.rstrip("\n").split("\t")
                 rows.append((int(p[0]), int(p[2]), p[3]))
         return rows
-    tr_rows = read_labels(f"{base}/label.dat")
-    te_rows = read_labels(f"{base}/label.dat.test")
+    tr_rows = read_labels(base / "label.dat")
+    te_rows = read_labels(base / "label.dat.test")
     ltype = tr_rows[0][1]
     tn = f"t{ltype}"
     n = len(per_type[ltype])
