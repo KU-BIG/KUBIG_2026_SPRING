@@ -46,54 +46,29 @@
 per-node 수준에서 진짜 의미 있다고 주장 가능. real≈class-mix>random이면 위상 가치는
 class-level 분포뿐(개별 노드 매칭은 잉여)이라는 결론.
 
-`backbone ∈ {han, rgcn}` config 플래그로 백본 전환. 현재 **(a)(b1)(c)(d)(e1) 완료**이고, class-wise mixing **(b2)(e2)는 진행 중**이다.
+`backbone ∈ {han, rgcn}` config 플래그로 백본 전환. 현재 **(a)(b1)(b2)(c)(d)(e1)(e2) 완료**이고, **(f)는 미완**이다.
 
 ## 결과 (7개 데이터셋 · test Macro-F1 · random seed 10개)
 
-미실행 조건((b2)(e2)(f))은 `–`.
+미실행 조건((f))은 `–`.
 
 | 데이터셋 | 도메인 | (a) HAN | (b1) +noise | (b2) +mix | (c) +위상 | (d) RGCN | (e1) +noise | (e2) +mix | (f) +위상 |
 |---|---|---|---|---|---|---|---|---|---|
-| acm | 학술/인용 | 0.895 | 0.887 | – | 0.894 | **0.925** | 0.919 | – | – |
-| dblp | 학술/인용 | 0.786 | 0.776 | – | **0.862** | **0.934** | 0.930 | – | – |
-| imdb | 영화(멀티라벨) | 0.438 | 0.441 | – | 0.450 | **0.636** | 0.579 | – | – |
-| freebase | 지식그래프 | 0.146 | 0.160 | – | 0.144 | **0.209** | 0.158 | – | – |
-| mag | 학술(초대형) | 0.017 | 0.026 | – | 0.023 | **0.104** | 0.090 | – | – |
-| aifb | RDF | 0.451 | 0.478 | – | **0.575** | **0.752** | 0.673 | – | – |
-| yelp | business(멀티라벨) | 0.110 | 0.094 | – | 0.091 | 0.055 | 0.056 | – | – |
+| acm | 학술/인용 | 0.895 | 0.887 | 0.899 | 0.894 | **0.925** | 0.919 | 0.923 | – |
+| dblp | 학술/인용 | 0.786 | 0.776 | **0.878** | 0.862 | 0.934 | 0.930 | **0.939** | – |
+| imdb | 영화(멀티라벨) | 0.438 | 0.441 | 0.447 | 0.450 | **0.636** | 0.579 | 0.634 | – |
+| freebase | 지식그래프 | 0.146 | 0.160 | 0.162 | 0.144 | **0.209** | 0.158 | 0.207 | – |
+| mag | 학술(초대형) | 0.017 | 0.026 | 0.019 | 0.023 | **0.104** | 0.090 | 0.088 | – |
+| aifb | RDF | 0.451 | 0.478 | 0.538 | 0.575 | **0.752** | 0.673 | 0.720 | – |
+| yelp | business(멀티라벨) | 0.110 | 0.094 | 0.079 | 0.091 | 0.055 | 0.056 | 0.067 | – |
 
 - **noise 대조 (b1 vs a, e1 vs d)**: random noise는 baseline과 비슷하거나 아래 (RGCN에선 imdb/freebase/aifb에서 뚜렷이 ↓) → 단순 차원 추가는 이득 없음.
-- **위상 효용 (c vs b1)**: feature 약한 데이터셋에서 real 위상이 noise를 뚜렷이 이김 (dblp +0.086, aifb +0.097) → 위상 신호 실재. feature 강하면 ≈0.
+- **class-mix 대조 (b2/e2)**: class-level 위상 분포는 유지하고 node별 위상 정렬을 깨뜨린 대조군. real 위상이 class-mix보다 항상 크지는 않아, 데이터셋별로 node-specific 위상 정렬의 기여를 별도 해석해야 함.
 - **백본 (d vs a)**: RGCN이 HAN을 6/7에서 크게 상회 (yelp 제외).
-- **MAG·yelp 절대값 주의**: macro-F1이 낮은 건 metric 특성(MAG=349클래스 subsample 평균, yelp=희귀 멀티라벨·featureless). accuracy는 MAG 0.28, yelp 0.87(RGCN)로 정상 학습 — 이 둘은 데이터셋 내 조건 간 Δ로만 해석.
+- **MAG·yelp 절대값 주의**: macro-F1이 낮은 건 metric 특성(MAG=349클래스 subsample 평균, yelp=희귀 멀티라벨·featureless). accuracy는 MAG 0.28, yelp 0.83(RGCN class-mix)로 정상 학습 — 이 둘은 데이터셋 내 조건 간 Δ로만 해석.
 
 전체 표·진행률·매핑은 [`results/SUMMARY.md`](results/SUMMARY.md), 데이터셋 특징은
 [`results/DATASETS.md`](results/DATASETS.md).
-
-## Class-wise Mixing Topology Ablation
-
-Class-wise mixing is a structured topology control: it computes the real GTN-PDGNN topology feature, then before concatenation replaces each node's topology feature with another topology feature from the same class and, when masks are available, the same train/val/test split. This partly preserves class-level topology-feature distribution while breaking node-specific topology-feature alignment.
-
-Status: **complete**. Official runs: **140/140** = 7 datasets x 2 backbones x 10 seeds. Smoke-test seed `0` is excluded. Detailed per-run tables, diagnostics, missing-run checks, and reproduction commands are in [`results/CLASS_WISE_MIXING.md`](results/CLASS_WISE_MIXING.md).
-
-| dataset | backbone | n | test_macro_f1 mean±std | test_accuracy mean±std | val_macro_f1 mean±std | mixed ratio mean±std | NaN GTN attention runs |
-|---|---|---:|---:|---:|---:|---:|---:|
-| acm | HAN | 10 | 0.8990±0.0060 | 0.8974±0.0062 | 0.9281±0.0129 | 1.0000±0.0000 | 0 |
-| acm | RGCN | 10 | 0.9232±0.0119 | 0.9223±0.0120 | 0.9442±0.0181 | 1.0000±0.0000 | 0 |
-| dblp | HAN | 10 | 0.8776±0.0176 | 0.8818±0.0178 | 0.8825±0.0206 | 1.0000±0.0000 | 0 |
-| dblp | RGCN | 10 | 0.9386±0.0048 | 0.9433±0.0044 | 0.9482±0.0053 | 1.0000±0.0000 | 0 |
-| imdb | HAN | 10 | 0.4468±0.0205 | 0.7068±0.1152 | 0.4831±0.0158 | 0.9254±0.0000 | 10 |
-| imdb | RGCN | 10 | 0.6341±0.0044 | 0.7912±0.0015 | 0.6807±0.0029 | 0.9254±0.0000 | 10 |
-| freebase | HAN | 10 | 0.1618±0.0268 | 0.6239±0.0418 | 0.3832±0.0373 | 0.0990±0.0362 | 9 |
-| freebase | RGCN | 10 | 0.2067±0.0564 | 0.6428±0.0326 | 0.3901±0.0745 | 0.0990±0.0362 | 9 |
-| mag | HAN | 10 | 0.0186±0.0091 | 0.1420±0.0667 | 0.0336±0.0152 | 0.9839±0.0025 | 0 |
-| mag | RGCN | 10 | 0.0881±0.0483 | 0.2829±0.1009 | 0.0883±0.0205 | 0.9839±0.0025 | 0 |
-| aifb | HAN | 10 | 0.5379±0.1064 | 0.6778±0.0418 | 0.5018±0.0368 | 0.0771±0.0000 | 0 |
-| aifb | RGCN | 10 | 0.7199±0.1335 | 0.7917±0.0810 | 0.6433±0.0403 | 0.0771±0.0000 | 0 |
-| yelp | HAN | 10 | 0.0786±0.0238 | 0.7415±0.1530 | 0.0782±0.0233 | 0.9367±0.0000 | 0 |
-| yelp | RGCN | 10 | 0.0666±0.0192 | 0.8271±0.0704 | 0.0676±0.0196 | 0.9367±0.0000 | 0 |
-
-Caveats: Freebase has NaN GTN attention diagnostics in 18/20 runs and two Freebase seed `15092` final metrics contain NaN; these are documented rather than hidden. IMDB also has NaN saved GTN attentions while final metrics are finite. MAG and Yelp macro-F1 should be interpreted carefully because MAG has many classes and Yelp is multilabel/sparse-label in this HNE setup. Class-wise mixing can be weaker when same-class same-split groups are small, which lowers mixed ratio.
 
 ## 시각화
 
