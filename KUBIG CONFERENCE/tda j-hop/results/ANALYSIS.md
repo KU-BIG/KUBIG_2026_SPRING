@@ -161,6 +161,14 @@ acm +0.029, dblp **+0.148**, imdb **+0.198**, freebase +0.063, mag +0.087, aifb 
    (멀티라벨 미지원이 원인 아님 — freebase 는 단일라벨인데 NaN, yelp 는 멀티라벨인데 정상.)
    **파급**: 이 두 데이터셋의 (c)/(f) GTN 채널은 사실상 초기(미학습) 혼합 — 채널 품질 caveat.
    수정안: `deg.clamp(min=ε)` / GTN grad clipping / 고립 노드 제거.
+   **후속 검증(로그) — 실제로는 "0벡터 위상"**: NaN run 의 stage-2 로그에서 HKS 고유값이
+   전부 λ=1(=엣지 0개 그래프), PDGNN 학습 라인 없음, stage2 3~5초(정상 ~1,000초). 즉
+   H(NaN)→kNN 이웃 0→빈 채널→HKS 상수→ego 빈 그래프→**위상 특징 전량 0**. 따라서
+   **imdb·freebase 의 위상 조건 결과는 위상에 대한 증거가 아니며**(silent failure),
+   imdb (c)−(a) 경계 유의(+0.012, p=0.049)는 허위 신호로 기각, freebase (f) 무붕괴 관찰도
+   무효. 핵심 결론(acm·dblp·aifb 기반 mix>real·f<d·커버리지 분해)은 GTN 정상이라 불변.
+   미해결: 협업자 imdb e2 vs f 유의차(0.634 vs 0.622)는 둘 다 0벡터라면 불가능 — 협업
+   환경 로그 확인 필요.
 5. **e2>d (dblp +0.005)**: 셔플된 위상조차 RGCN 을 살짝 올리는 유일한 사례 — class-level 위상
    분포가 순수 feature 로서 미미하게 기여할 수 있음을 시사(유의성 미검정).
 
