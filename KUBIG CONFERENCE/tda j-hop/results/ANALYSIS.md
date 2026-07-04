@@ -153,9 +153,14 @@ acm +0.029, dblp **+0.148**, imdb **+0.198**, freebase +0.063, mag +0.087, aifb 
    자신의 위상 정렬은 파괴되므로 "own-feature 정렬" 검정으로는 유효.
 3. **freebase 붕괴 seed** — (a)(c)(d)에 macro-F1=0.000 seed 존재(멀티클래스 전붕괴). freebase 의
    모든 조건 비교는 신뢰도 낮음. (f)만 붕괴 없음(min 0.153)은 흥미로우나 평균이 낮아 해석 보류.
-4. **imdb·freebase 의 GTN attention NaN** (협업 진단): imdb 10/10, freebase 9/10 run 에서 GTN
-   stage-1 attention 에 NaN — GTN 분류기가 멀티라벨 미지원(CE 학습)인 것과 연관. stage-2 이후
-   위상값은 유한하나, 해당 데이터셋의 GTN 채널 품질에 물음표.
+4. **imdb·freebase 의 GTN attention NaN — 근본 원인 규명**: NaN 은 정확히 **모든 base relation
+   에서 완전 고립된 타겟 노드가 있는 두 데이터셋**(imdb 61개=1.2%, freebase 97개=1.6%; 나머지는
+   0개)에서만 발생. 로그상 ep1 loss 정상 → ep10 내 NaN. 메커니즘: 고립 노드는 identity 관계의
+   softmax 가중치로만 채널 degree 를 갖는데, 학습 중 그 가중치가 줄면 deg→0 → `_gtn_norm` 의
+   `1/deg` 폭발(+`torch.where` backward 0×inf=NaN) → GTConv 가중치 전체 NaN 고착.
+   (멀티라벨 미지원이 원인 아님 — freebase 는 단일라벨인데 NaN, yelp 는 멀티라벨인데 정상.)
+   **파급**: 이 두 데이터셋의 (c)/(f) GTN 채널은 사실상 초기(미학습) 혼합 — 채널 품질 caveat.
+   수정안: `deg.clamp(min=ε)` / GTN grad clipping / 고립 노드 제거.
 5. **e2>d (dblp +0.005)**: 셔플된 위상조차 RGCN 을 살짝 올리는 유일한 사례 — class-level 위상
    분포가 순수 feature 로서 미미하게 기여할 수 있음을 시사(유의성 미검정).
 
