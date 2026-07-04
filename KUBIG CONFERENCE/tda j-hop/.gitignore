@@ -17,3 +17,4 @@ experiments/dataset_stats.*
 *.pyc
 *.log
 cache/
+_archive_nan_runs/

@@ -46,12 +46,13 @@ def test_cache_hit_equals_fresh():
 
 
 def test_cache_key_sensitivity():
+    # 키 시그니처는 device-독립 버전(topo_cache_key(adj, pdgnn_cfg, seed, tag)) 기준
     adj, cfg = _toy_adj(), _cfg()
-    k0 = topo_cache_key(adj, cfg["pdgnn"], 7, "t", "cpu")
-    assert topo_cache_key(adj, cfg["pdgnn"], 8, "t", "cpu") != k0          # seed 다름
-    assert topo_cache_key(adj, dict(PDGNN, hks_K=3), 7, "t", "cpu") != k0  # 설정 다름
-    assert topo_cache_key(_toy_adj(seed=1), cfg["pdgnn"], 7, "t", "cpu") != k0  # adj 다름
-    assert topo_cache_key(adj, cfg["pdgnn"], 7, "t", "cpu") == k0          # 동일 입력 → 동일 키
+    k0 = topo_cache_key(adj, cfg["pdgnn"], 7, "t")
+    assert topo_cache_key(adj, cfg["pdgnn"], 8, "t") != k0          # seed 다름
+    assert topo_cache_key(adj, dict(PDGNN, hks_K=3), 7, "t") != k0  # 설정 다름
+    assert topo_cache_key(_toy_adj(seed=1), cfg["pdgnn"], 7, "t") != k0  # adj 다름
+    assert topo_cache_key(adj, cfg["pdgnn"], 7, "t") == k0          # 동일 입력 → 동일 키
 
 
 def test_no_cache_dir_passthrough():

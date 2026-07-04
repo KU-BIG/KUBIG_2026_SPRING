@@ -35,7 +35,11 @@ def _gtn_norm(H: torch.Tensor, add: bool) -> torch.Tensor:
     if add:
         Ht = Ht + eye          # 자기 루프(최종 GCN conv 에만)
     deg = Ht.sum(dim=1, keepdim=True)
-    deg_inv = torch.where(deg > 0, 1.0 / deg, torch.zeros_like(deg))
+    # 버그픽스(수치 동일): `1.0/deg` 는 deg=0 행(모든 base relation 에서 고립된 노드가
+    # 대각 제거 후 갖게 됨)에서 forward 로는 where 가 0 을 선택해 안전해 보이지만,
+    # backward 에서 0×inf=NaN 이 GTConv 가중치 전체를 오염시킴(imdb/freebase 전 run NaN).
+    # clamp 는 deg>0 경로의 수치를 바꾸지 않고 미선택 분기의 grad 만 유한하게 만든다.
+    deg_inv = torch.where(deg > 0, 1.0 / deg.clamp(min=1e-12), torch.zeros_like(deg))
     Ht = deg_inv * Ht
     return Ht.t()
 
