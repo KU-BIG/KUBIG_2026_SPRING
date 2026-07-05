@@ -127,15 +127,39 @@ def build_topology(bundle, mp_rels: Dict[str, torch.Tensor], config: dict, devic
 # ---------- LP 모델 ----------
 
 class LPHead(nn.Module):
-    """대칭 pair 스코어: MLP([z_u⊙z_v, |z_u−z_v|])."""
+    """대칭 pair 스코어: MLP([z_u⊙z_v, |z_u−z_v| (⊕ pair 위상)]).
+    pair_dim>0 이면 TLC-GNN 식으로 pair 특징을 decoder 에 concat (LP Level 2)."""
 
-    def __init__(self, dim: int, hidden: int = 64):
+    def __init__(self, dim: int, hidden: int = 64, pair_dim: int = 0):
         super().__init__()
-        self.mlp = nn.Sequential(nn.Linear(2 * dim, hidden), nn.ReLU(), nn.Linear(hidden, 1))
+        self.mlp = nn.Sequential(nn.Linear(2 * dim + pair_dim, hidden), nn.ReLU(),
+                                 nn.Linear(hidden, 1))
 
-    def forward(self, z: torch.Tensor, pairs: torch.Tensor) -> torch.Tensor:
+    def forward(self, z: torch.Tensor, pairs: torch.Tensor, pf: torch.Tensor = None) -> torch.Tensor:
         zu, zv = z[pairs[:, 0]], z[pairs[:, 1]]
-        return self.mlp(torch.cat([zu * zv, (zu - zv).abs()], dim=-1)).squeeze(-1)
+        h = torch.cat([zu * zv, (zu - zv).abs()], dim=-1)
+        if pf is not None:
+            h = torch.cat([h, pf], dim=-1)
+        return self.mlp(h).squeeze(-1)
+
+
+def cn_counts(A: torch.Tensor, pairs: torch.Tensor) -> torch.Tensor:
+    """train 그래프 기준 공통이웃 수 (pair 별)."""
+    return (A[pairs[:, 0]] * A[pairs[:, 1]]).sum(1)
+
+
+def cn_bucket_mix(feats: torch.Tensor, cn: torch.Tensor, seed: int) -> torch.Tensor:
+    """CN bucket(0/1/2/3+) 내에서 pair 특징 행 셔플 — 'CN 으로 설명되는 것 이상'을 격리."""
+    bucket = cn.clamp(max=3).long()
+    perm = torch.arange(len(feats))
+    gen = torch.Generator().manual_seed(int(seed) + 9173)
+    for b in range(4):
+        idx = (bucket == b).nonzero(as_tuple=False).view(-1)
+        if idx.numel() < 2:
+            continue
+        shuffled = idx[torch.randperm(idx.numel(), generator=gen)]
+        perm[shuffled] = shuffled.roll(1)
+    return feats[perm]
 
 
 def _build_edges(rels: Dict[str, torch.Tensor], device):
@@ -179,7 +203,42 @@ def run_lp(config: dict, dataset: str, data_root: str, device=None,
               "n_train_pos": len(train_pos), "n_val_pos": len(val_pos), "n_test_pos": len(test_pos),
               "use_topology": bool(config.get("use_topology", True)),
               "topology_noise": config.get("topology_noise"),
-              "topology_mode": config.get("topology_mode", "original")}
+              "topology_mode": config.get("topology_mode", "original"),
+              "pair_feature": lp.get("pair_feature", "none")}
+
+    # ---- LP Level 2: pair-vicinity 위상 (TLC-GNN 식 decoder 주입) ----
+    pair_kind = lp.get("pair_feature", "none")          # none | real | noise | mix
+    pair_feats, pair_dim, tn_fixed = None, 0, None
+    if pair_kind != "none" or lp.get("fixed_train_neg", False):
+        # 고정 train negative pool (특징 사전계산 위해; split_seed 로 고정 → run 간 동일.
+        # L2 base 조건도 fixed_train_neg=true 로 같은 프로토콜을 씀)
+        prng = np.random.RandomState(int(lp.get("split_seed", 20260705)) + 2)
+        forbid = pos_set | {tuple(e) for e in val_neg.tolist()} | {tuple(e) for e in test_neg.tolist()}
+        tn_fixed = sample_negatives(len(train_pos), n, forbid, prng)
+    if pair_kind != "none":
+        all_pairs = torch.cat([train_pos, tn_fixed, val_pos, val_neg, test_pos, test_neg])
+        pc = config["pdgnn"]
+        pair_dim = pc["pi_resolution"] ** 2 * pc["hks_K"]
+        cn = cn_counts(A_train, all_pairs)
+        record["test_auc_cn"] = auc_score(          # CN 휴리스틱 단독 baseline (진단)
+            cn[-2 * len(test_pos):-len(test_pos)].float(), cn[-len(test_pos):].float())
+        if pair_kind == "noise":
+            pair_feats = torch.randn(len(all_pairs), pair_dim, device=device)
+        else:
+            from tda.topology.pair_epd import compute_pair_topology_cached
+            with Timer("lp_pair_topology"):
+                arr = compute_pair_topology_cached(
+                    A_train, all_pairs.numpy(), config, int(lp.get("topo_seed", 777)),
+                    lp.get("pair_cache", "cache/pair_epd"),
+                    tag=f"lp2__{dataset}__{tgt_rel}", device=device, verbose=verbose)
+            pair_feats = torch.tensor(arr, dtype=torch.float32, device=device)
+            if pair_kind == "mix":
+                pair_feats = cn_bucket_mix(pair_feats.cpu(), cn.cpu(), seed).to(device)
+        # 구간 인덱스 (all_pairs 순서: tp | tn | vp | vn | sp | sn)
+        ofs = np.cumsum([0, len(train_pos), len(tn_fixed), len(val_pos),
+                         len(val_neg), len(test_pos), len(test_neg)])
+        pf_slice = {k: pair_feats[ofs[i]:ofs[i + 1]]
+                    for i, k in enumerate(["tp", "tn", "vp", "vn", "sp", "sn"])}
 
     # 3) 입력 특징 (조건 분기)
     fusion, topo_channels = None, []
@@ -210,7 +269,7 @@ def run_lp(config: dict, dataset: str, data_root: str, device=None,
     enc = RGCN(in_dim=x.size(1) + topo_dim, hidden_dim=hc, num_classes=hc,  # num_classes=출력 임베딩 차원
                num_relations=nrel, num_layers=int(lp.get("num_layers", 2)),
                dropout=float(lp.get("dropout", 0.5))).to(device)
-    head = LPHead(hc, hidden=hc).to(device)
+    head = LPHead(hc, hidden=hc, pair_dim=pair_dim).to(device)
     params = list(enc.parameters()) + list(head.parameters())
     if fusion is not None:
         params += list(fusion.parameters())
@@ -218,21 +277,30 @@ def run_lp(config: dict, dataset: str, data_root: str, device=None,
                            weight_decay=float(lp.get("weight_decay", 5e-4)))
     tp, vp, sp = train_pos.to(device), val_pos.to(device), test_pos.to(device)
     vn, sn = val_neg.to(device), test_neg.to(device)
+    if tn_fixed is not None:
+        tn_fixed = tn_fixed.to(device)
+
+    def score(z, pairs, key):
+        pf = pf_slice[key] if pair_kind != "none" else None
+        return head(z, pairs, pf)
+
     nrng = np.random.RandomState(seed + 7)
     best_val, best_state = -1.0, None
     for ep in range(1, int(lp.get("epochs", 200)) + 1):
         enc.train(); head.train()
-        tn = sample_negatives(len(train_pos), n, pos_set, nrng).to(device)   # 매 epoch 재샘플
+        # L2(pair 특징)에선 특징이 사전계산된 고정 pool 사용, L1 은 매 epoch 재샘플
+        tn = tn_fixed if tn_fixed is not None \
+            else sample_negatives(len(train_pos), n, pos_set, nrng).to(device)
         opt.zero_grad()
         z = enc(x_in(), ei, et)
-        logits = torch.cat([head(z, tp), head(z, tn)])
+        logits = torch.cat([score(z, tp, "tp"), score(z, tn, "tn")])
         y = torch.cat([torch.ones(len(tp), device=device), torch.zeros(len(tn), device=device)])
         loss = F.binary_cross_entropy_with_logits(logits, y)
         loss.backward(); opt.step()
         enc.eval(); head.eval()
         with torch.no_grad():
             z = enc(x_in(), ei, et)
-            v_auc = auc_score(head(z, vp), head(z, vn))
+            v_auc = auc_score(score(z, vp, "vp"), score(z, vn, "vn"))
         if v_auc > best_val:
             best_val = v_auc
             best_state = (copy.deepcopy(enc.state_dict()), copy.deepcopy(head.state_dict()),
@@ -245,7 +313,7 @@ def run_lp(config: dict, dataset: str, data_root: str, device=None,
     enc.eval(); head.eval()
     with torch.no_grad():
         z = enc(x_in(), ei, et)
-        ps, ns = head(z, sp), head(z, sn)
+        ps, ns = score(z, sp, "sp"), score(z, sn, "sn")
     record.update({"val_auc": float(best_val), "test_auc": auc_score(ps, ns),
                    "test_ap": ap_score(ps, ns)})
     print(f"[result] lp {dataset} kind={record.get('topo_kind','none')} "

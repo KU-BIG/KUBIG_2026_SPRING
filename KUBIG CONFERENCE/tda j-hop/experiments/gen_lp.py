@@ -36,4 +36,19 @@ cfg = json.load(open(f"{OUT}/dblp__lp_c.json"))
 cfg["lp"]["topo_exclude_target"] = True
 json.dump(cfg, open(f"{OUT}/dblp__lp_cx.json", "w"), indent=2)
 names.append(f"{OUT}/dblp__lp_cx.json")
-print(f"wrote {len(names)} LP configs")
+
+# ---- Level 2 (pair-vicinity EPD, TLC-GNN 식 decoder 주입) ----
+# encoder 는 위상 없음(use_topology=false) — pair 특징 효과만 격리. base 도 fixed-neg 프로토콜.
+COND2 = [("lp2_base", "none"), ("lp2_real", "real"),
+         ("lp2_noise", "noise"), ("lp2_mix", "mix")]
+for ds, tgt in TARGET.items():
+    base = json.load(open(f"configs/{ds}.json"))
+    for suf, pk in COND2:
+        cfg = copy.deepcopy(base)
+        cfg["lp"] = dict(LP, target_relation=tgt, pair_feature=pk,
+                         fixed_train_neg=True, pair_cache="cache/pair_epd")
+        cfg["use_topology"] = False
+        cfg.pop("topology_source", None)
+        json.dump(cfg, open(f"{OUT}/{ds}__{suf}.json", "w"), indent=2)
+        names.append(f"{OUT}/{ds}__{suf}.json")
+print(f"wrote {len(names)} LP configs (L1 13 + L2 12)")
