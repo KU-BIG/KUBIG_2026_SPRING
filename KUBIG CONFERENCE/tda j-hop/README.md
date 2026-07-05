@@ -70,6 +70,11 @@ mean±std (10 seed). **(f)는 4/7 완료** (mag·aifb·yelp 진행중 `–`, 출
 전체 표·진행률·매핑은 [`results/SUMMARY.md`](results/SUMMARY.md), 데이터셋 특징은
 [`results/DATASETS.md`](results/DATASETS.md).
 
+**후속 실험**: 주입 방식 factorial(concat vs PEGN식 gate, 2백본 — [`results/GATED.md`](results/GATED.md))과
+link prediction(node/pair 위상 — [`results/LP.md`](results/LP.md)) 완료. 요지: 게이팅은 위상 유해를 중화하고
+RGCN에선 정렬 신호가 유일하게 유의(+0.006~+0.029*), LP는 통제 시 실질 신호 없음 —
+종합 분석은 [`results/ANALYSIS.md`](results/ANALYSIS.md).
+
 ## 시각화
 
 ```bash
