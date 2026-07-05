@@ -37,6 +37,21 @@ def test_gate_off_equals_plain():
     assert not torch.allclose(out1, out3)
 
 
+def test_seed_diversity_survives_topology_cache(tmp_path):
+    """회귀: 캐시 적중이 전역 RNG 를 복원해도 run seed 재시드로 seed 간 결과가 달라야 함.
+    (버그: *_real 조건 std=0.000 — 10 seed 가 전부 동일 run 이 됐던 사고)"""
+    base = _cfg()
+    base["gated"].update(injection="concat", content="real",
+                         topo_cache=str(tmp_path / "cache"))
+    outs = []
+    for s in (0, 1):
+        cfg = copy.deepcopy(base)
+        cfg["seed"] = s
+        outs.append(run_gated(cfg, "toy", "./data", device=CPU, verbose=False)["test_macro_f1"])
+    # seed 0 이 캐시를 쓰고 seed 1 이 적중 → 그래도 결과는 달라야 함
+    assert outs[0] != outs[1], f"seed 0/1 결과 동일({outs[0]}) — RNG 복원 오염 재발"
+
+
 def test_run_gated_all_conditions():
     base = _cfg()
     res = {}

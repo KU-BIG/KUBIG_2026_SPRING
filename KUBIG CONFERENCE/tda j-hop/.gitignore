@@ -18,3 +18,4 @@ experiments/dataset_stats.*
 *.log
 cache/
 _archive_nan_runs/
+_archive_rng_bug/

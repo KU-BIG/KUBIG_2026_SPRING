@@ -75,6 +75,9 @@ def run_gated(config: dict, dataset: str, data_root: str, device=None,
                 channels, mix_stats = _shuffle_topology_within_class_and_split(
                     channels, y, masks, bundle.multilabel, seed, config)
                 record["class_wise_mixing"] = mix_stats
+        # 중요: topology 캐시가 적중 시 전역 RNG 를 저장 시점 상태로 복원함 → 그대로 두면
+        # 모든 seed 의 모델 초기화가 동일해짐(std=0 사고). run seed 로 재시드해 무력화.
+        set_seed(seed)
         fusion = SemanticAttentionFusion(topo_dim).to(device)
 
         def fused_builder():

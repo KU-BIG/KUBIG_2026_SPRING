@@ -260,6 +260,10 @@ def run_lp(config: dict, dataset: str, data_root: str, device=None,
                 record["topo_kind"] = "degree_mix"
         fusion = SemanticAttentionFusion(topo_dim).to(device)
 
+    # 중요: topology 캐시(compute_channel_topology_cached)가 적중 시 전역 RNG 를 복원함 →
+    # 모델 초기화가 seed 와 무관해지는 사고 방지 위해 run seed 로 재시드.
+    set_seed(seed)
+
     def x_in():
         return torch.cat([x, fusion(topo_channels)], dim=1) if topo_channels else x
 
