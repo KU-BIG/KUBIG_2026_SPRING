@@ -39,6 +39,17 @@ for ds in DS:
         m, s, n = agg(ds, c)
         row.append(f"{m:.3f}±{s:.3f} (n={n})" if n else "(미완)")
     L.append("| " + " | ".join(row) + " |")
+# HAN 백본 판 (gh_*)
+COND_H = [c.replace("gt_", "gh_") for c in COND]
+L += ["", "## HAN 백본 (동일 factorial, gh_*)\n",
+      "| 데이터셋 | " + " | ".join(LAB[c] for c in COND) + " |",
+      "|---|" + "---|" * len(COND)]
+for ds in DS:
+    row = [ds]
+    for c in COND_H:
+        m, s_, n = agg(ds, c)
+        row.append(f"{m:.3f}\u00b1{s_:.3f} (n={n})" if n else "(\ubbf8\uc644)")
+    L.append("| " + " | ".join(row) + " |")
 L += ["", "판정 가이드: cat_real<base 이면서 gate_real≥base ⇒ 하락은 주입(concat) 탓. "
       "gate_real>gate_mix ⇒ 게이팅에선 per-node 정렬 기여 존재.", ""]
 open("results/GATED.md", "w").write("\n".join(L) + "\n")

@@ -17,7 +17,8 @@ unset PYTHONPATH || true
 cd /mnt/data/users/junyoungpark/code/TDA
 DATA_ROOT=/mnt/data/users/junyoungpark/code/hetero_pdg_lp/data
 
-mapfile -t CFGS < configs/campaign/gated_manifest.txt
+# 캠페인별 manifest 를 env 로 고정 (공유 파일 race 방지)
+mapfile -t CFGS < "${GATED_MANIFEST:-configs/campaign/gated_manifest.txt}"
 mapfile -t SEEDS < experiments/seeds.txt
 NSEED=${#SEEDS[@]}
 CFG=${CFGS[$((SLURM_ARRAY_TASK_ID / NSEED))]}

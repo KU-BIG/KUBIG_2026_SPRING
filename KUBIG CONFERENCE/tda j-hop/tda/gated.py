@@ -85,12 +85,25 @@ def run_gated(config: dict, dataset: str, data_root: str, device=None,
 
     # ---- 모델 (모든 조건 동일 구현; gate 조건만 게이트 경로 사용) ----
     gc_ = gt
+    backbone = gt.get("backbone", "rgcn")            # rgcn | han
+    record["backbone"] = backbone
     in_dim = x.size(1) + (topo_dim if injection == "concat" else 0)
-    model = GatedRGCN(in_dim=in_dim, hidden_dim=gc_.get("hidden", 64),
-                      num_classes=bundle.num_classes, num_relations=nrel,
-                      num_layers=gc_.get("num_layers", 2), dropout=gc_.get("dropout", 0.5),
-                      gate_dim=(topo_dim if injection == "gate" else None),
-                      gate_hidden=gc_.get("gate_hidden", 64)).to(device)
+    if backbone == "han":
+        from tda.models.gated_han import GatedHAN
+        mp_eis = [v.to(device) for v in bundle.han_metapaths.values()]
+        model = GatedHAN(in_dim=in_dim, hidden_dim=gc_.get("hidden", 64),
+                         num_classes=bundle.num_classes, num_metapaths=len(mp_eis),
+                         heads=gc_.get("heads", 4), dropout=gc_.get("dropout", 0.5),
+                         gate_dim=(topo_dim if injection == "gate" else None),
+                         gate_hidden=gc_.get("gate_hidden", 64)).to(device)
+        graph_args = (mp_eis,)
+    else:
+        model = GatedRGCN(in_dim=in_dim, hidden_dim=gc_.get("hidden", 64),
+                          num_classes=bundle.num_classes, num_relations=nrel,
+                          num_layers=gc_.get("num_layers", 2), dropout=gc_.get("dropout", 0.5),
+                          gate_dim=(topo_dim if injection == "gate" else None),
+                          gate_hidden=gc_.get("gate_hidden", 64)).to(device)
+        graph_args = (ei, et)
     params = list(model.parameters())
     if fusion is not None:
         params += list(fusion.parameters())
@@ -99,10 +112,10 @@ def run_gated(config: dict, dataset: str, data_root: str, device=None,
 
     def forward():
         if injection == "concat":
-            return model(torch.cat([x, fused_builder()], dim=1), ei, et)
+            return model(torch.cat([x, fused_builder()], dim=1), *graph_args)
         if injection == "gate":
-            return model(x, ei, et, gate_feat=fused_builder())
-        return model(x, ei, et)
+            return model(x, *graph_args, gate_feat=fused_builder())
+        return model(x, *graph_args)
 
     best_val, best_state = -1.0, None
     for ep in range(1, gc_.get("epochs", 100) + 1):

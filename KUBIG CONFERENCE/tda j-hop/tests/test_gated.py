@@ -52,6 +52,27 @@ def test_seed_diversity_survives_topology_cache(tmp_path):
     assert outs[0] != outs[1], f"seed 0/1 결과 동일({outs[0]}) — RNG 복원 오염 재발"
 
 
+def test_gated_han_backbone_toy():
+    """HAN 백본: 게이트 on/off 동작 + base/gate_real end-to-end (toy)."""
+    from tda.models.gated_han import GatedHAN
+    torch.manual_seed(0)
+    n = 15
+    x = torch.randn(n, 6)
+    eis = [torch.randint(0, n, (2, 40)), torch.randint(0, n, (2, 30))]
+    m = GatedHAN(6, 16, 3, num_metapaths=2, heads=4, dropout=0.0, gate_dim=5)
+    m.eval()
+    o1 = m(x, eis)
+    o2 = m(x, eis, gate_feat=torch.randn(n, 5))
+    assert torch.isfinite(o1).all() and not torch.allclose(o1, o2)
+    base = _cfg()
+    for inj, cont in [("none", "real"), ("gate", "real"), ("concat", "noise")]:
+        cfg = copy.deepcopy(base)
+        cfg["gated"].update(injection=inj, content=cont, backbone="han", heads=4)
+        cfg["seed"] = 0
+        r = run_gated(cfg, "toy", "./data", device=CPU, verbose=False)
+        assert np.isfinite(r["test_macro_f1"]) and r["backbone"] == "han"
+
+
 def test_run_gated_all_conditions():
     base = _cfg()
     res = {}

@@ -24,4 +24,10 @@ for ds in ["acm", "dblp", "aifb"]:
         cfg["gated"] = dict(GATED, injection=inj, content=cont)
         json.dump(cfg, open(f"{OUT}/{ds}__{suf}.json", "w"), indent=2)
         names.append(f"{OUT}/{ds}__{suf}.json")
-print(f"wrote {len(names)} gated configs")
+        # HAN 백본 판 (gh_*) — 동일 factorial, backbone 만 교체
+        cfg2 = copy.deepcopy(cfg)
+        cfg2["gated"]["backbone"] = "han"
+        suf2 = suf.replace("gt_", "gh_")
+        json.dump(cfg2, open(f"{OUT}/{ds}__{suf2}.json", "w"), indent=2)
+        names.append(f"{OUT}/{ds}__{suf2}.json")
+print(f"wrote {len(names)} gated configs (rgcn gt_* + han gh_*)")
