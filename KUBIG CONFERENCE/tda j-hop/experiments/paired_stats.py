@@ -48,6 +48,13 @@ for sec in re.split(r"\n## ", txt)[1:]:
         if s in SEEDS:
             M["f"][name][s] = float(m.group(2))
 
+# ---- 4) NaN 버그픽스 후 로컬 재실행분이 있으면 md 값을 덮어씀 (imdb·freebase b2/e2/f) ----
+for key, setting in [("b2", "b2_mix"), ("e2", "e2_mix"), ("f", "f_rgcn")]:
+    loc = load_local(setting)
+    for ds in DS:
+        if loc[ds]:
+            M[key][ds] = loc[ds]
+
 # ---- paired 대조 ----
 def paired(ds, x, y):
     """Δ = M[y] − M[x] per seed."""
