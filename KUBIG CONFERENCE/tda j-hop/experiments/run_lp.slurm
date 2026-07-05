@@ -17,7 +17,8 @@ unset PYTHONPATH || true
 cd /mnt/data/users/junyoungpark/code/TDA
 DATA_ROOT=/mnt/data/users/junyoungpark/code/hetero_pdg_lp/data
 
-mapfile -t CFGS < configs/campaign/lp_manifest.txt
+# 캠페인별 파일을 env 로 고정 (공유 파일 race 방지 — L1/L2 가 서로 덮어쓰던 사고 재발 금지)
+mapfile -t CFGS < "${LP_MANIFEST:-configs/campaign/lp_manifest.txt}"
 mapfile -t SEEDS < "${LP_SEEDS:-experiments/seeds_lp.txt}"
 NSEED=${#SEEDS[@]}
 CFG=${CFGS[$((SLURM_ARRAY_TASK_ID / NSEED))]}

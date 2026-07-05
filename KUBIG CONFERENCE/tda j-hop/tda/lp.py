@@ -320,7 +320,8 @@ def run_lp(config: dict, dataset: str, data_root: str, device=None,
         ps, ns = score(z, sp, "sp"), score(z, sn, "sn")
     record.update({"val_auc": float(best_val), "test_auc": auc_score(ps, ns),
                    "test_ap": ap_score(ps, ns)})
-    print(f"[result] lp {dataset} kind={record.get('topo_kind','none')} "
+    print(f"[result] lp {dataset} node_topo={record.get('topo_kind','none')} "
+          f"pair={record.get('pair_feature','none')} "
           f"test_auc={record['test_auc']:.4f} test_ap={record['test_ap']:.4f}", flush=True)
     if output_dir:
         os.makedirs(output_dir, exist_ok=True)
