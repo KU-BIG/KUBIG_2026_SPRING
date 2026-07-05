@@ -1,11 +1,11 @@
-# 종합 분석 — 위상 특징 × 이종 그래프 노드분류 (전 조건 · paired 검정)
+# 최종 분석 — 위상 특징 · 메타패스 · 이종 그래프 노드분류
 
-> 조건: (a)=HAN, (b1)=HAN+random noise, (b2)=HAN+class-mix, (c)=HAN+real 위상,
-> (d)=RGCN, (e1)=RGCN+noise, (e2)=RGCN+class-mix, (f)=RGCN+real 위상.
-> random seed 10개, mean±std. **(f)는 5/7** (aifb·yelp 미완; mag 는 요약치만).
-> 수치: `SUMMARY.md` · per-seed paired 검정: **`paired_stats.md`** (Wilcoxon signed-rank, 95% CI, win-rate).
+> **설계**: 2 백본(HAN/RGCN) × 4 위상조건(없음 / random-noise / class-mix / real GTN-PDGNN) × 7 데이터셋 × 10 random seed.
+> (a)=HAN, (b1)=+noise, (b2)=+class-mix, (c)=+real | (d)=RGCN, (e1)=+noise, (e2)=+class-mix, (f)=+real.
+> imdb·freebase 의 위상 조건은 GTN NaN 버그(§5-F7) 수정 후 재실행한 유효값. (f)의 aifb·yelp 만 미완.
+> `*` = paired Wilcoxon signed-rank p<0.05 (seed 짝, n=10; `paired_stats.md`). 표: `SUMMARY.md`.
 
-## 0. 최종 결과표 (test Macro-F1)
+## 0. 결과 요약표 (test Macro-F1, mean±std)
 
 | 데이터셋 | (a) HAN | (b1) +noise | (b2) +mix | (c) +real | (d) RGCN | (e1) +noise | (e2) +mix | (f) +real |
 |---|---|---|---|---|---|---|---|---|
@@ -17,202 +17,189 @@
 | aifb | 0.451±0.040 | 0.478±0.100 | 0.538±0.106 | 0.575±0.145 | **0.752±0.018** | 0.673±0.071 | 0.720±0.134 | – |
 | yelp | 0.110±0.028 | 0.094±0.026 | 0.079±0.024 | 0.091±0.024 | 0.055±0.006 | 0.056±0.006 | 0.067±0.019 | – |
 
-(accuracy 보조표는 `SUMMARY.md` §보조 지표. mag: acc 0.14→0.28, yelp: 0.62→0.87 로 두 데이터셋의
-낮은 macro-F1 은 metric 특성 — 349클래스 subsample 평균 / 희귀 멀티라벨.)
+accuracy 보조표는 `SUMMARY.md` (MAG·yelp 의 낮은 macro-F1 은 metric 특성 — acc 로는 각각 0.28 / 0.87 로 정상 학습).
 
 ---
 
-## 1. Q1 — 위상 특징은 성능 이점을 주는가?
+## 1. Q1 — 위상 특징은 노드분류에 어떤 영향을 주었나? 왜 성능·robustness 가 나빠졌나?
 
-### 1.1 Macro-F1: paired per-seed 검정 결과 (`paired_stats.md`)
+### 1.1 영향의 전모 (paired 검정 기준)
 
-**HAN 위 (c)−(a):** 유의한 **이득 2개** — dblp **+0.076** (win 100%, p=0.002), aifb **+0.124**
-(win 90%, p=0.020). 유의한 **손해 1개** — **imdb −0.036 (win 0%, p=0.002)** (NaN 픽스 후
-재실행값). acm/freebase/mag/yelp 는 무효과. 특히 imdb 에선 **(c)−(b1) = −0.039\*, freebase
-−0.022\*** — 진짜 위상이 **random noise 보다도 유의하게 나쁨**: 구조화된-그러나-무관한
-특징은 등방 noise 보다 모델을 더 오도한다.
+| 방향 | 근거 |
+|---|---|
+| **이득 (2곳, HAN 만)** | dblp (c)−(a)=+0.076\*, aifb +0.124\* |
+| **무효과 (다수)** | acm·mag·yelp (HAN), freebase(≈0) |
+| **손해 (일관, RGCN 전부 + HAN imdb)** | (f)−(d): acm −0.022\*, dblp −0.075\*, imdb −0.070\*, freebase −0.040(p=.066), mag −0.038 · HAN imdb (c)−(a)=−0.036\* |
+| **per-node 정렬 무기여** | mix≥real: (e2)−(f) acm +0.021\*, dblp +0.079\*; (b2)−(c) dblp +0.016\*; 그 외 Δ≈0. **real 이 mix 를 유의하게 이긴 곳 = 0/7** |
 
-**RGCN 위 (f)−(d):** 유의/일관되게 음수 — acm −0.022\*, dblp −0.075\*, **imdb −0.070\***
-(픽스 후), freebase −0.040(p=0.066), mag −0.038(요약치). **강한 백본에는 위상 주입이
-확실한 손해.**
+그리고 이득 2곳조차 분해하면 위상 고유의 공이 아니다(§3.2): dblp = 관계 커버리지 누출, aifb = featureless 구조 인코딩.
 
-**대조군이 이득의 '정체'를 밝힘:**
-- (b1)−(a) noise: 이득 없음 (acm 은 오히려 유의한 −0.008) → 차원 추가 효과 배제.
-- **(b2)−(c) mix−real (HAN): dblp +0.016 (p=0.027)** — 정렬을 깨면 오히려 유의하게 좋아짐.
-  imdb/freebase(픽스 후)는 mix≈real (Δ≈0.000, p>0.9) — 정렬 기여 없음 재확인.
-- **(e2)−(f) mix−real (RGCN): acm +0.021, dblp +0.079 (p=0.002·win 100%)**;
-  imdb/freebase(픽스 후) +0.009/+0.000 (비유의) — 어느 쪽이든 real 이 mix 를 이기는 곳은 없음.
+### 1.2 성능이 나빠진 이유 — 증거로 지지되는 4개 메커니즘
 
-→ per-node 정렬은 **기여 0 또는 음(音)의 기여**. 위상 이득이 있는 곳에서도 그 가치는
-class-level 분포다 ([Lee et al., ICML 2024](https://arxiv.org/abs/2402.04621) 의 A–X 의존성
-노이즈 제거 패턴과 정합).
+**(i) 무게이트(gating 없는) 백본의 노이즈 채널 효과.** 순수 random noise 만으로 RGCN 이 유의하게 하락
+((e1)−(d): imdb −0.057\*, freebase −0.051\*, aifb −0.079\*). RGCNConv 는 concat 입력 전체를 관계별
+선형변환에 통과시켜 무의미한 75차원이 모든 메시지에 분산을 주입한다. 반면 HAN 은 projection+
+attention 이 등방 noise 를 걸러 (b1)≈(a). → 하락분의 일부는 "위상"이 아니라 **차원 추가 자체**.
 
-### 1.2 Accuracy 관점
-방향 동일: dblp acc +0.073(c vs a), aifb +0.045. mag/yelp 는 조건 간 차이가 분산 내.
-imdb 는 위상 조건에서 accuracy std 0.002→0.110 — 일부 seed 학습 붕괴(불안정성 신호).
+**(ii) 구조-상관 잡음은 등방 잡음보다 해롭다.** imdb 에서 real 위상이 **noise 보다도 유의하게 나쁨**
+((c)−(b1)=−0.039\*, freebase −0.022\*). 등방 noise 는 이웃 집계에서 평균화되어 소거되지만, 위상
+특징은 그래프 구조와 상관(같은 이웃권 노드는 비슷한 ego EPD)이라 **집계 후에도 살아남아** 잘못된
+결정 규칙을 만든다. 이는 구조–특징(A–X) 의존성이 그래프 컨볼루션의 실효 잡음을 늘리고, within-class
+shuffle 로 그 의존성을 줄이면 성능이 오른다는 Lee et al. (ICML 2024) 의 예측과 정확히 일치 —
+실제로 우리 (e2)>(f)\*, (b2)>(c)\*(dblp) 가 그 패턴이다.
 
-### 1.3 Robustness 관점 — 이점 없음
-- **seed 분산(std)**: 개선 1~2 / 악화 2~3 / 나머지 ≈. aifb 는 (c)에서 std **3.6×** 악화(0.040→0.145).
-- **worst-seed(최악 seed 성능)**: dblp 는 개선(0.766→0.838)이나 aifb 는 악화(0.438→0.387).
-  freebase 는 (a)(c)(d) 모두 **macro-F1=0.000 인 붕괴 seed** 존재 — 유일하게 (f)만 붕괴 없음(min 0.153),
-  그러나 평균은 (f)<(d)라 "위상=안정화" 주장으로는 부족.
-- 초기 3-seed 의 "위상=분산 감소" 힌트는 10-seed 에서 재현 안 됨.
-- (여기서의 robustness = seed 분산. 입력 교란/적대 내성은 미실험.)
+**(iii) 신호 자체의 빈곤.** 시각화 실측에서 대부분 노드의 ego EPD 는 위상적으로 퇴화(near-clique →
+유한 위상점 0). 남는 정보도 class-level 분포뿐임이 mix 대조로 확인됨(§1.1). 즉 유효 신호가 이미
+백본이 소비하는 구조 정보와 중복 → 순기여 없이 (i)(ii)의 비용만 남는다.
 
-### 1.4 판정
-**무조건적 이점: 없음. 조건부 이점: "HAN × (dblp, aifb)" 두 곳뿐이고, 그 실체도 per-node
-위상 정보가 아니다** (dblp=관계 커버리지 누출 §2.2-A, aifb=featureless 구조 인코딩 §2.2-B).
-강한 백본(RGCN)에서는 유의한 손해. Robustness 이점도 없음.
+**(iv) 표현(featurization) 병목.** persistence image 의 pers_range(0,6)가 실측 persistence(~0–0.3)
+대비 ~20배 넓어 25차원 중 유효 해상도가 크게 저하(실측 진단). 채널 자체는 문제 아님 — 픽스 후
+imdb 에서 **GTN-only F1=0.525 > HAN 0.438** 인데도 그 채널의 EPD 를 HAN 에 주입하면 0.402 로
+하락: **손실은 채널→EPD→PI→concat 경로에서 발생**한다.
+
+### 1.3 robustness(=seed 분산)가 나빠진 이유
+
+관측: aifb (c) std 0.145 vs (a) 0.040 (**3.6×**), worst-seed 0.387<0.438; imdb (f) std 0.035 vs (d)
+0.004 (**~9×**), worst-seed 0.475<0.631; dblp (f) 0.017 vs (d) 0.004. 초기 3-seed 의 "위상=분산 감소"
+힌트는 10-seed 에서 기각.
+
+메커니즘: 위상 특징은 **그 자체가 seed 의존 확률변수**다 — GTN 초기화/학습(채널), PDGNN 샘플링/
+학습, fusion 이 모두 seeded 라 *입력 표현*에 추가 확률성이 곱해진다(stage 3단 파이프라인의 분산
+합성). 모델이 그 특징에 의존할수록(featureless aifb) 또는 백본이 입력에 민감할수록(RGCN) 이 분산이
+출력으로 전파된다. 특징을 무시하는 곳(feature 포화 acm)은 분산 불변 — 의존도와 분산 악화가 정확히
+동행한다는 점이 이 설명의 근거.
 
 ---
 
-## 2. Q2 — 데이터셋별 차이와 그 원인
+## 2. Q2 — 메타패스(HAN) 는 노드분류에 이득을 주었나?
 
-### 2.1 특성 ↔ 효과 대응표
+**아니오 — 관계-완전(relation-complete) 메시지패싱(RGCN)에 전면 지배(dominated)된다.**
 
-| 데이터셋 | feature | 타겟 N | 클래스 | 라벨 | 특이사항 | HAN 위상효과(paired) | 원인 분류 |
-|---|---|---|---|---|---|---|---|
-| acm | **강(1902d)** | 3,025 | 3 | 단일 | 인용, homophily 2.0× | ≈0 (p=0.92) | C. feature 포화 |
-| dblp | 중(334d) | 4,057 | 4 | 단일 | venue 가 클래스 결정 | **+0.076\*** | **A. 커버리지 누출** |
-| imdb | 강(3489d) | 4,932 | 5 | **멀티** | GTN NaN 진단, acc 불안정 | +0.012 (경계) | C. feature 포화 |
-| freebase | 없음 | 40k→6k sub | 7 | 단일 | **붕괴 seed(F1=0) 존재**, mixed 9.9% | ≈0 | E. 분산 지배 |
-| mag | 중(128d) | 12k→3k sub | **349** | 단일 | macro-F1 붕괴 | ≈0 | D. metric 붕괴 |
-| aifb | **없음** | 2,270 | 4 | 단일 | 소형·깨끗한 RDF, mixed 7.7% | **+0.124\*** | **B. 구조 인코딩** |
-| yelp | 없음 | 5,484 | 16 | **멀티** | 3.9M 엣지 초밀집 | −0.020 | D+E |
+- (d)−(a) paired: **7/7 유의** (dblp +0.148\*, imdb +0.198\*, aifb +0.301\*, …; yelp 만 macro-F1 −0.055\*
+  이나 accuracy 0.624→0.871 로 지표 착시). **accuracy 기준 RGCN ≥ HAN 7/7.**
+- 열세의 최대 원인 = **메타패스 '선택'**: dblp 클래스(연구분야)를 결정하는 venue 관계(APVPA)가 HAN
+  메타패스(APA·APTPA)에 누락 — RGCN(전 관계+관계별 W_r)이 이를 직접 사용. 같은 위상 파이프라인을
+  HAN 의 2개 메타패스 위에서만 돌리면 이득이 +0.004 로 소멸(§3.2)하는 것이 정량 증거.
+- GTN 으로 메타패스를 **학습**해도 구제 불가: acm 에서 GTN(0.894) ≈ 수동(0.896); GTN 의 실질 기여는
+  경로 발견이 아니라 **전 관계 접근**이다. imdb 에선 GTN 단독(0.525)이 HAN(0.438)을 이김 — 병목은
+  경로 사전합성+부분집합 구조의 HAN 쪽.
+- **남는 가치 = 해석성**: 메타패스 채널은 class-homophilous(acm 실측 same-class edge 0.67 vs 무작위
+  0.33, **2.0×**) — "어떤 의미 경로가 노드를 묶는가"의 설명 도구로는 유효.
+- caveat: 입력 비대칭(RGCN 관계 3–6 vs HAN 메타패스 2) 하의 "표준 사용법" 비교임. 단 그 비대칭
+  자체가 메타패스 방법론의 본질적 약점(선택 위험)이다.
 
-### 2.2 메커니즘 분해 (b2_manual 통제 — HAN 메타패스 2개 *위에서만* 계산한 위상)
+---
 
-| | (a) | b2_manual | (c) GTN 위상(전 관계) | 결론 |
+## 3. Q3 — 데이터 특성에 따라 결과가 달라졌나? 왜?
+
+### 3.1 특성 → 결과 대응
+
+| 데이터셋 | 결정적 특성 | 위상 효과(HAN, paired) | 원인 유형 |
+|---|---|---|---|
+| acm | feature 강(1902d), homophily 2.0× | ≈0 | **C 포화** |
+| imdb | feature 강(3489d), 멀티라벨 | **−0.036\*** (noise 보다도 ↓) | **C 포화 + (ii) 구조상관잡음** |
+| dblp | feature 중(334d), venue 가 클래스 결정 | +0.076\* | **A 커버리지 누출** |
+| aifb | **featureless**, 소형·깨끗한 RDF | +0.124\* (불안정 ±0.145) | **B 구조 인코딩** |
+| freebase | featureless, subsample·희소 라벨, 붕괴 seed | ≈0 | **E 분산 지배** |
+| mag | 349클래스 subsample | ≈0 | **D metric 붕괴** |
+| yelp | featureless·초밀집(3.9M)·희귀 멀티라벨 | ≈0/− | **D+E** |
+
+### 3.2 메커니즘 검증 (b2_manual = HAN 메타패스 위상만 사용, 아카이브 10-seed)
+
+| | (a) | +위상(HAN 메타패스만) | +위상(GTN 전 관계) | 해석 |
 |---|---|---|---|---|
-| dblp | 0.786 | **0.790 (+0.004)** | 0.862 (+0.076) | 이득 = 위상 아님, **누락 관계(venue) 주입** |
-| aifb | 0.451 | **0.560 (+0.109)** | 0.575 (+0.124) | 이득 = **구조 인코딩** (같은 관계 위상만으로 대부분 재현) |
+| dblp | 0.786 | 0.790 (+0.004) | 0.862 (+0.076) | 이득 = **누락 관계(venue) 주입**, EPD 아님 |
+| aifb | 0.451 | 0.560 (+0.109) | 0.575 (+0.124) | 이득 = **featureless 보완용 구조 기술자** |
 | acm | 0.895 | 0.896 | 0.894 | 아무것도 안 통함 |
 
-**A. 관계 커버리지 누출 (dblp).** 클래스(연구분야)를 결정하는 venue 관계(APVPA)가 HAN 메타패스
-(APA·APTPA)에 빠져 있고 GTN 채널(전 관계)에는 있음. 같은 위상을 HAN 의 2개 메타패스 위에서
-계산하면 이득이 +0.004 로 소멸 → "+0.076 위상 이득"의 실체는 **EPD 가 아니라 GTN 채널을 경유한
-누락 관계 정보**. mix>real(위상 내용이 아니라 class-상관 분포만 중요), RGCN(venue 직접 사용)
-0.934 와 모두 정합.
-
-**B. featureless 구조 인코딩 (aifb).** one-hot feature 뿐이라 *어떤* 노드 구조 기술자도 정보가 됨.
-같은 관계 위 위상만으로 +0.109. paired 로는 유의(p=0.020, win 90%)하나 **std 0.145 로 매우
-불안정**하고, (c)−(b1)은 비유의(p=0.275) — "noise 이상의 가치"는 통계적으로 확립 못 함.
-
-**C. feature 포화 (acm·imdb).** 1902~3489 차원 bag-of-words 가 클래스를 사실상 결정. 메타패스
-homophily 2.0×(실측)로 구조 신호는 있으나 feature 와 중복 → 위상·noise·mix 전부 ≈0.
-
-**D. metric 붕괴 (mag·yelp).** 349클래스 subsample 평균 / 희귀 멀티라벨 → macro-F1 이 신호를
-못 담음(accuracy 는 정상 학습 증명). 조건 간 Δ 만 유효.
-
-**E. 분산 지배 (freebase, yelp).** freebase 는 (a)(c)(d)에 **macro-F1=0.000 붕괴 seed** 가 있고
-std ±0.05~0.11 — 어떤 조건 효과도 분산에 묻힘. featureless 라도 aifb 처럼 작동하지 않는 이유:
-subsample 후 구조 훼손 + 라벨 희소. → **"featureless 면 위상이 돕는다"가 아니라
-"featureless + 깨끗한 구조 + 조밀한 라벨(aifb)"** 이 정확한 조건.
-
-### 2.3 위상 자체의 관점
-- 시각화 실측에서 **대부분 노드의 ego EPD 는 위상적으로 빈약**(near-clique ego → 유한 위상점 0,
-  degenerate 다수) — per-node 위상이 노드를 구분할 정보량 자체가 제한적.
-- 메타패스 채널은 class-homophilous(acm 2.0×)하므로 **채널 구조에 class 신호는 있다** — 그러나
-  그 신호는 GNN 메시지패싱이 이미 소비하는 것과 중복이고, EPD 요약이 *추가로* 주는 부분이
-  aggregate 지표에서 검출되지 않는 것.
+**일반화**: 위상(및 어떤 구조 기술자든)이 도우려면 ① node feature 가 약/부재하고, ② 구조가
+깨끗하며(subsample 훼손·고립 없음), ③ 라벨이 조밀하고, ④ 지표가 신호를 담을 수 있어야 한다 —
+7개 중 이를 다 만족한 것은 aifb 뿐. "featureless 면 위상이 돕는다"는 부정확하고, **"위상은
+'차선의 feature 대체재'이며 진짜 feature 나 전체 관계 접근이 있으면 즉시 잉여·유해로 전락한다"**
+가 정확한 요약. 메타패스 효과의 데이터 의존성도 동일 축: 클래스-결정 관계가 메타패스에 포함되면
+작동(acm), 누락되면 실패(dblp).
 
 ---
 
-## 3. Q3 — HAN vs RGCN, 그리고 메타패스는 NC 에 적합한가
+## 4. Q4 — 추후 과제: 위상 특징·메타패스는 어떤 task 에 효과가 있을까?
 
-### 3.1 백본 비교 (paired (d)−(a): 7/7 전부 유의)
-acm +0.029, dblp **+0.148**, imdb **+0.198**, freebase +0.063, mag +0.087, aifb **+0.301**
-(모두 win 90~100%, p≤0.008). yelp 만 macro-F1 −0.055\* 인데 accuracy 는 0.624→0.871 —
-희귀 라벨을 버리고 다수를 맞히는 trade-off (지표 착시). **accuracy 기준 RGCN ≥ HAN 7/7.**
+**(1) Link prediction (가장 유력).** 본 연구의 실패 지점은 per-node "정렬"인데, LP 는 **노드쌍의
+지역 구조**가 직접 신호이고 EPD 의 H1(루프)은 triadic closure 와 기계적으로 연결된다. 실제로 이
+파이프라인의 원류인 TLC-GNN (Yan et al., ICML 2021)은 PH 기반 **LP** 방법이고, PDGNN 논문(Yan et
+al., NeurIPS 2022)도 LP 벤치마크에서 true-EPD 동급 성능을 보고했다. **단** 본 프로젝트의 선행
+hetero-LP 통제 실험은 null 이었으므로, 재도전 시 필수 설계: pair-level permutation 대조군(공통이웃/
+거리 bucket 내 셔플 — 본 연구 class-mix 의 LP 판), 관계 커버리지 통제(§3.2-A 누출 방지),
+featureless 세팅 우선, hard-pair subset 지표.
 
-| 요인 | 내용 |
-|---|---|
-| 입력 커버리지 | RGCN=base relation 전부(3–6), HAN=메타패스 2개. dblp 격차 +0.148 의 대부분이 venue 누락(§2.2-A) — **공정성 caveat**: 순수 아키텍처 비교 아님 |
-| 표현력 | 관계별 전용 W_r vs 공유변환+스칼라 β (메타패스 2개면 attention 이 고를 것도 없음) |
-| 홈그라운드 | RDF entity 분류는 RGCN 원논문 벤치마크 (aifb +0.301) |
-| noise 내성 | 역설: **HAN 은 noise 둔감, RGCN 은 유의하게 민감**((e1)−(d): imdb −0.057\*, freebase −0.051\*, aifb −0.079\*) — 그럼에도 RGCN 이 전부 이김 |
-| 보조 증거 | dblp 에서 GTN-only(0.920) > HAN+위상(0.862) — 병목은 HAN+메타패스 부분집합 자체 |
+**(2) Graph-level 분류.** persistence 는 본질적으로 전역 요약이라 그래프 단위 비교(분자·단백질 등)
+에서 판별력이 산다 — PH 기반 그래프 분류는 확립된 영역(Hofer et al., NeurIPS 2017; PersLay,
+Carrière et al., AISTATS 2020; TOGL, Horn et al., ICLR 2022). 우리가 관찰한 "그래프 *내* 노드 간
+ego-EPD 는 대부분 퇴화·유사"라는 사실 자체가, 변별이 노드 간이 아니라 **그래프 간**에서 발생함을
+시사한다.
 
-### 3.2 메타패스는 NC 에 도움이 되었나
-**판정: 제한적으로만. 관계-완전 메시지패싱에 지배당함(dominated).**
-- 도움: 메타패스 그래프는 class-homophilous(2.0×) — HAN 이 작동하는 이유.
-- 한계: ① **선택(coverage)이 아킬레스건** — dblp 메타패스 2개가 venue 누락 → −0.148.
-  ② 관계-완전 1-hop(RGCN)이 전 데이터셋 우세 → 경로 사전합성이 불필요.
-  ③ GTN 으로 경로를 *학습*해도 수동 선택 대비 이득 없음(acm: 0.894 vs b2_manual 0.896) —
-  GTN 의 실질 기여는 경로 발견이 아니라 **전 관계 접근**.
-  ④ 사전합성+kNN 희소화 과정에서 엣지 중복도·가중치 소실.
-- **메타패스의 실제 가치 = 해석성** (어떤 의미 경로가 노드를 묶는지; 시각화로 확인 가능).
+**(3) 구조적 이상탐지.** 위상이 class 신호로는 약해도 **outlier 신호**일 수 있다 — 비정상적 ego
+위상(비정상 루프 구조)을 갖는 노드 탐지(사기/봇). class-mix 대조가 그대로 이식 가능.
 
----
+**(4) Featureless/cold-start 노드 표현.** aifb 가 보여준 유일한 진짜 효용. 단 이 경우에도 degree·
+PageRank·Laplacian PE 등 **훨씬 싼 구조 인코딩과의 정면 비교가 선행**되어야 한다 — EPD 가 그보다
+나은지는 미검증이며, §1.2(iv)의 표현 병목을 감안하면 회의적으로 출발하는 것이 정직하다.
 
-## 4. 추가 발견·진단
-
-1. **noise 민감성의 백본 비대칭** — HAN 은 무의미한 75차원에 둔감(projection+attention 이 걸러냄),
-   RGCN 은 유의하게 취약(3/7 데이터셋 유의 하락). 아키텍처의 입력 선택성 차이. 실무 함의:
-   RGCN 계열에 feature 를 얹을 땐 사전 선별 필요.
-2. **class-mix 의 mixed-ratio caveat** — 구현이 train/val/test split 구성원(=라벨 노드)만 셔플:
-   acm/dblp 100%, imdb 93%, mag 98%, yelp 94% 는 충분하나 **freebase 9.9%·aifb 7.7%만 혼합**
-   (라벨 노드가 소수). 이 두 데이터셋에서 mix≈real 은 대조군이 약해서일 수 있음 — 단 평가 노드
-   자신의 위상 정렬은 파괴되므로 "own-feature 정렬" 검정으로는 유효.
-3. **freebase 붕괴 seed** — (a)(c)(d)에 macro-F1=0.000 seed 존재(멀티클래스 전붕괴). freebase 의
-   모든 조건 비교는 신뢰도 낮음. (f)만 붕괴 없음(min 0.153)은 흥미로우나 평균이 낮아 해석 보류.
-4. **imdb·freebase 의 GTN attention NaN — 근본 원인 규명**: NaN 은 정확히 **모든 base relation
-   에서 완전 고립된 타겟 노드가 있는 두 데이터셋**(imdb 61개=1.2%, freebase 97개=1.6%; 나머지는
-   0개)에서만 발생. 로그상 ep1 loss 정상 → ep10 내 NaN. 메커니즘: 고립 노드는 identity 관계의
-   softmax 가중치로만 채널 degree 를 갖는데, 학습 중 그 가중치가 줄면 deg→0 → `_gtn_norm` 의
-   `1/deg` 폭발(+`torch.where` backward 0×inf=NaN) → GTConv 가중치 전체 NaN 고착.
-   (멀티라벨 미지원이 원인 아님 — freebase 는 단일라벨인데 NaN, yelp 는 멀티라벨인데 정상.)
-   **파급**: 이 두 데이터셋의 (c)/(f) GTN 채널은 사실상 초기(미학습) 혼합 — 채널 품질 caveat.
-   수정안: `deg.clamp(min=ε)` / GTN grad clipping / 고립 노드 제거.
-   **후속 검증(로그) — 실제로는 "0벡터 위상"**: NaN run 의 stage-2 로그에서 HKS 고유값이
-   전부 λ=1(=엣지 0개 그래프), PDGNN 학습 라인 없음, stage2 3~5초(정상 ~1,000초). 즉
-   H(NaN)→kNN 이웃 0→빈 채널→HKS 상수→ego 빈 그래프→**위상 특징 전량 0** (silent failure).
-   **→ 해결 완료**: `_gtn_norm` 에 `deg.clamp(min=1e-12)` 픽스(수치 동일, 회귀 테스트
-   `test_gtn_isolated.py` 추가 — 옛 코드는 epoch 1 에서 NaN 재현) 후 **imdb·freebase ×
-   {c, b2, e2, f} × 10 seed = 80 run 전량 재실행, GTN-attn NaN 0/80 확인**
-   (`rerun_imdb_freebase.md`). 본 문서의 imdb·freebase 수치는 모두 픽스 후 값으로 교체됨.
-   재실행 결과 진짜 위상은 imdb 에서 **유의하게 유해**(HAN −0.036\*, RGCN −0.070\*,
-   noise 보다도 −0.039\*)로 판명 — 0벡터 시절의 "≈0 효과"보다 더 부정적.
-5. **e2>d (dblp +0.005)**: 셔플된 위상조차 RGCN 을 살짝 올리는 유일한 사례 — class-level 위상
-   분포가 순수 feature 로서 미미하게 기여할 수 있음을 시사(유의성 미검정).
+**(5) 메타패스**: 성능 도구가 아니라 **해석·탐색 도구**로 — 발견된 메타패스(관계 합성 가중치)와
+homophily 진단을 모델 설명에 쓰는 방향. 성능 목적이면 관계-완전 모델이 기본값.
 
 ---
 
-## 5. 종합 결론
+## 5. 추가 발견 (F5–F9)
 
-1. **GTN-PDGNN per-node 위상 특징은 이종 NC 에서 instance-level 기여가 없다** — real≈mix
-   (HAN dblp 는 mix 가 유의하게 우세; imdb/freebase 픽스 후 Δ≈0), **mix≥real 이 전 데이터셋**
-   (real 이 mix 를 유의하게 이기는 곳 없음), 강한 백본에선 주입 자체가 유의한 손해(f<d).
-2. **진짜 위상은 해로울 수도 있다** — imdb 에서 유의하게 baseline·noise 이하
-   (HAN −0.036\*/−0.039\*, RGCN −0.070\*): 구조화된-무관 특징이 등방 noise 보다 더 오도.
-3. 위상이 aggregate 를 올리는 두 사례(dblp·aifb)는 각각 **관계 커버리지 누출**과 **featureless
-   구조 인코딩**으로 분해되며, 둘 다 "EPD 위상이라서"가 아니다.
-4. **백본 선택이 위상 주입보다 훨씬 크다** — RGCN ≥ HAN (accuracy 7/7, paired 전부 유의).
-   메타패스 기반 모델의 병목은 메타패스 *선택*이며, 관계를 전부 주는 모델이 우선.
-5. 본 프로젝트 선행 관찰("통제하면 위상 신호 없음")이 **2 백본 × 4 조건 × 10 seed × paired 검정
-   + NaN 버그 규명·재실행**으로 승격·재확인됨.
+**F5. Silent failure 와 대조군의 방법론적 가치.** imdb·freebase 의 위상이 **0벡터로 대체된 채**
+파이프라인이 조용히 완주했고(§F7), 결과 수치는 "그럴듯한 ≈0 효과"로 보였다. 이를 잡아낸 것은
+에러가 아니라 **대조군 간 불일치**(e2 vs f 유의차가 0벡터 가설과 모순)였다. 교훈: (1) "에러 없이
+돌았다 ≠ 실험이 수행됐다", (2) noise/mix/manual 대조군은 효과 분해뿐 아니라 **파이프라인 무결성
+검증** 역할을 한다. NaN watchdog·특징 분산 assert 같은 런타임 검증을 표준화할 것.
+
+**F6. 백본의 noise 내성 비대칭.** HAN 은 attention 구조 덕에 등방 noise 에 둔감((b1)≈(a)), RGCN 은
+유의하게 취약((e1)<(d) 3/7\*). 실무: RGCN 계열에 feature 를 얹을 땐 사전 선별/게이팅 필요.
+
+**F7. GTN 의 고립노드 NaN (원인 규명·수정).** 모든 base relation 에서 고립된 노드(imdb 61개,
+freebase 97개; 타 데이터셋 0)가 inter-layer 정규화의 대각 제거 후 zero-row 가 되고,
+`torch.where(deg>0, 1/deg, 0)` 의 backward 에서 0×inf=NaN 이 첫 backward 에 GTConv 전체를 오염
+(epoch1 재현, 회귀 테스트로 고정). `deg.clamp(min=1e-12)` 로 수정(수치 동일) 후 80 run 재실행,
+NaN 0/80. 고립은 subsample(freebase)·kNN 희소화(imdb)가 만든 것 — **전처리가 만든 병리가 모델
+수치 안정성을 관통**한 사례.
+
+**F8. 지표 선택이 결론을 뒤집는다.** yelp: macro-F1 은 HAN>RGCN, accuracy 는 RGCN(0.871)≫HAN
+(0.624) — 희귀 라벨 포기 vs 다수 정확도의 trade-off. mag: macro-F1 0.02 vs accuracy 0.28(우연의
+~100배). 결론 서술에 두 지표 병기가 필수.
+
+**F9. 통계 실무.** 주변 std 가 크게 겹쳐도(aifb ±0.145) paired 검정은 유의를 검출(win 90%,
+p=0.020) — seed 짝 없는 mean±std 비교는 검정력 낭비. 반대로 8대조×7데이터셋 다중비교이므로 경계
+p(~0.05)는 단독 근거로 쓰지 않았다.
+
+---
 
 ## 6. 한계
 
-- aggregate metric(macro-F1/acc)은 within-class 정보에 둔감 — real≈mix 단독으론 per-node 무의미
-  단정 불가(경계). 반면 **mix>real 은 방향성 있는 유의 결과**로 더 강함. per-node metric
-  (margin/NLL)·η² 진단 미수행.
-- (f) 5/7 (aifb·yelp 미완, mag 은 요약치만·per-seed 없음). 다중비교 보정 미적용(경계 p 주의).
-- 백본 비교는 입력 비대칭 하의 "표준 사용법" 비교(§2.2-A 가 dblp 에서 그 크기를 정량화).
-- class-mix 의 freebase/aifb 혼합률 저하(§4-2), freebase 붕괴 seed(§4-3), imdb GTN NaN(§4-4).
+- 집계 지표(macro-F1/acc)는 within-class 정보에 둔감 — real≈mix 단독으론 "per-node 무의미"의 강한
+  단정 불가. 단 **mix>real(유의)·f<d(유의)** 는 방향성 있는 결과로 이 한계의 영향을 받지 않는다.
+  per-node 지표(margin/NLL)·η²(위상 유사도 분산비) 진단은 미수행.
+- (f) aifb·yelp 미완 — 특히 aifb (f)는 "구조 인코딩 이득이 강한 백본에서도 생존하는가"의 미해결
+  질문. class-mix 의 혼합률이 라벨 희소 데이터셋에서 낮음(aifb 7.7%, freebase 9.9%) — 그곳의 mix
+  대조는 약함. 백본 비교는 입력 비대칭 포함(§2). 다중비교 보정 미적용.
+- b2/e2(acm·dblp·mag·aifb·yelp)와 f(acm·dblp·mag)는 협업 환경 실행값(요약/상세표 경유) — 로컬
+  재검산은 imdb·freebase 만 수행.
 
-## 7. 향후 과제 — 위상 × Link Prediction
+## 7. 참고문헌
 
-근거: 본 연구의 실패 지점은 per-node *정렬*인데 LP 는 **노드쌍 지역 구조**가 직접 신호이고,
-EPD 의 루프(H1)는 링크 형성(triadic closure)과 기계적으로 연결된다. TLC-GNN(원류)·PDGNN 논문
-모두 LP 에서 우호적 결과 보고. **단** 본 프로젝트의 선행 hetero-LP 통제 실험은 null 이었으므로,
-재도전 시 이번 교훈 필수 반영: pair-level permutation 대조군(같은 공통이웃/거리 bucket 내 셔플),
-관계 커버리지 통제(§2.2-A 누출 방지), featureless 세팅 우선, hard-pair subset metric.
+이 세션에서 원문 검증: [V] 표기. 나머지는 표준 문헌(재검증 안 함).
 
-## 8. 참고
-
-- Yun et al., NeurIPS 2019 (GTN) · Yan et al., NeurIPS 2022 (PDGNN) · Wang et al., WWW 2019 (HAN)
-- Schlichtkrull et al., ESWC 2018 (RGCN) · Yan et al., ICML 2021 (TLC-GNN)
-- Lee et al., ICML 2024, arXiv:2402.04621 (within-class shuffle) · Strobl et al., 2008 (conditional permutation)
-- 부속 파일: `paired_stats.md`(paired 검정 전체) · `CLASS_WISE_MIXING.md`(mix 상세) ·
-  `f_rgcn_per_seed.md`((f) per-seed) · `SUMMARY.md`(전 표)
+- [V] Yan, Ma, Gao, Tang, Wang, Chen. *Neural Approximation of Graph Topological Features* (PDGNN). NeurIPS 2022, arXiv:2201.12032 — vicinity(지역) EPD·필터(ORC/HKS×2/degree)·~100× 가속·transferability 를 본문에서 확인.
+- [V] Lee, Kim, Bu, Yoo, Tang, Shin. *Feature Distribution on Graph Topology Mediates the Effect of Graph Convolution: Homophily Perspective*. ICML 2024, arXiv:2402.04621 — within-class feature shuffle(우리 class-mix 의 1차 출처), A–X 의존성 축소가 성능을 올릴 수 있음.
+- Yun et al. *Graph Transformer Networks*. NeurIPS 2019 (GTN).
+- Wang et al. *Heterogeneous Graph Attention Network*. WWW 2019 (HAN; semantic attention = 우리 fusion 의 출처).
+- Schlichtkrull et al. *Modeling Relational Data with Graph Convolutional Networks*. ESWC 2018 (RGCN; PyG RGCNConv).
+- Yan et al. *Link Prediction with Persistent Homology: An Interactive View*. ICML 2021 (TLC-GNN; HKS 필터·PI 워크플로의 원류).
+- Adams et al. *Persistence Images*. JMLR 2017.
+- Hofer et al. *Deep Learning with Topological Signatures*. NeurIPS 2017 · Carrière et al. *PersLay*. AISTATS 2020 · Horn et al. *Topological Graph Neural Networks (TOGL)*. ICLR 2022 — graph-level PH.
+- Strobl et al. *Conditional Variable Importance for Random Forests*. BMC Bioinformatics 2008 (conditional permutation importance — class-mix 의 통계적 원조).
+- (오인용 정정) arXiv:2106.04764 는 speaker diarization 논문으로 class-mix 와 무관 — [V] 확인.
+- 부속: `paired_stats.md` · `SUMMARY.md` · `CLASS_WISE_MIXING.md` · `f_rgcn_per_seed.md` · `rerun_imdb_freebase.md` · `DATASETS.md`.
