@@ -4,6 +4,7 @@
 > ① NC 본캠페인 — 2백본(HAN/RGCN)×4조건(base/noise/class-mix/real)×7 데이터셋 (§1)
 > ② 주입 factorial — 2백본×{주입 none/concat/gate × 내용 real/noise/mix}×3 데이터셋, 고정 manual 위상 (§2)
 > ③ LP — L1(node-PI, 5 seed) + L2(pair-vicinity EPD, TLC-GNN식, 10 seed)×3 데이터셋 (§3)
+> NC (f)는 7/7 완료 — aifb f=0.643±0.287 (f−d=−0.109), yelp f=0.070±0.017 (협업 요약치)
 > 검정: `paired_stats.md`(①) · `paired_stats2.md`(②③). 표: `SUMMARY.md` · `GATED.md` · `LP.md`.
 
 ## 1. NC — 위상을 feature 로 concat 하면 (본캠페인 요약)
