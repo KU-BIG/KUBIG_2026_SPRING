@@ -42,6 +42,41 @@ def _manual_topology(bundle, config, device, verbose):
     return feats
 
 
+def _gtn_fixed_topology(bundle, config, device, verbose):
+    """고정 GTN+PDGNN 위상: GTN 을 topo_seed 로 1회 학습한 채널 위에서 PDGNN 위상 계산.
+
+    본 파이프라인(GTN→PDGNN)과 동일한 위상 제조 경로 — 단 run seed 와 분리해 고정
+    (per-seed 재학습이 아니라 데이터셋당 1회). GPU 비결정성으로 H 의 해시가 실행마다
+    달라질 수 있어 채널-해시 캐시 대신 데이터셋 단위 npz 파일로 캐시한다."""
+    import numpy as np
+    gt = config["gated"]
+    topo_seed = int(gt.get("topo_seed", 777))
+    cache_dir = gt.get("topo_cache", "cache/topo_gtnfix")
+    os.makedirs(cache_dir, exist_ok=True)
+    path = os.path.join(cache_dir, f"{config['dataset']}__gtnfix_s{topo_seed}.npz")
+    if os.path.exists(path):
+        z = np.load(path)
+        return [torch.tensor(z[k], dtype=torch.float32, device=device)
+                for k in sorted(z.files)]
+    from tda.train import _build_A_stack, train_gtn
+    set_seed(topo_seed)          # GTN 학습·위상을 run seed 와 무관하게 고정
+    x = bundle.x.to(device)
+    y = bundle.y.to(device)
+    masks = {k: v.to(device) for k, v in bundle.masks.items()}
+    A_stack = _build_A_stack(bundle, device)
+    H = train_gtn(bundle, A_stack, x, y, masks, config, device, verbose)
+    feats = []
+    for c in range(H.size(0)):
+        arr = compute_channel_topology_cached(
+            H[c], config, topo_seed, device=device, verbose=verbose,
+            cache_dir=None, tag=f"gatedgtn__{config['dataset']}__ch{c}")
+        feats.append(np.asarray(arr))
+    tmp = f"{path}.tmp{os.getpid()}.npz"
+    np.savez(tmp, **{f"ch{c}": a for c, a in enumerate(feats)})
+    os.replace(tmp, path)        # 원자적 교체 (부분 기록 방지)
+    return [torch.tensor(a, dtype=torch.float32, device=device) for a in feats]
+
+
 def run_gated(config: dict, dataset: str, data_root: str, device=None,
               output_dir=None, verbose: bool = True) -> Dict:
     gt = config["gated"]
@@ -69,8 +104,13 @@ def run_gated(config: dict, dataset: str, data_root: str, device=None,
         if content == "noise":
             channels = [torch.randn(n, topo_dim, device=device)]
         else:
+            ch_mode = gt.get("channels", "manual")   # manual | gtn_fixed
             with Timer("gated_topology"):
-                channels = _manual_topology(bundle, config, device, verbose)
+                if ch_mode == "gtn_fixed":
+                    channels = _gtn_fixed_topology(bundle, config, device, verbose)
+                else:
+                    channels = _manual_topology(bundle, config, device, verbose)
+            record["channels"] = ch_mode
             if content == "mix":  # NC class-mix 와 동일 셔플 (class·split 내, 채널 공통 순열)
                 channels, mix_stats = _shuffle_topology_within_class_and_split(
                     channels, y, masks, bundle.multilabel, seed, config)
