@@ -1,0 +1,55 @@
+# ── Python ──────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ── 가상환경 ─────────────────────────────────────────
+.venv/
+venv/
+env/
+
+# ── 환경 변수 ─────────────────────────────────────────
+.env
+.env.local
+
+# ── Stage 1 파이프라인 생성물 ─────────────────────────
+stage1/outputs/data/*.csv
+stage1/outputs/models/*.pkl
+!stage1/outputs/**/.gitkeep
+# Streamlit Cloud 서빙용 최종 산출물은 추적
+!stage1/outputs/models/best_xgboost_final.pkl
+!stage1/outputs/data/features_dataset.csv
+
+# ── Stage 2 파이프라인 생성물 ─────────────────────────
+stage2/outputs/data/*.csv
+stage2/outputs/models/*.pkl
+!stage2/outputs/**/.gitkeep
+# Streamlit Cloud 서빙용 최종 산출물은 추적
+!stage2/outputs/models/skh_xgb_final.pkl
+!stage2/outputs/data/stage2_features.csv
+!stage2/outputs/data/stage1_predictions.csv
+
+# ── ablation_study 산출물 ──────────────────────────────
+ablation_study/**/outputs/
+ablation_study/**/__pycache__/
+ablation_study/**/.DS_Store
+
+# ── Jupyter ──────────────────────────────────────────
+.ipynb_checkpoints/
+
+# ── macOS ────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── IDE ──────────────────────────────────────────────
+.vscode/
+.idea/
+
+# ── Claude Code ──────────────────────────────────────
+.claude/

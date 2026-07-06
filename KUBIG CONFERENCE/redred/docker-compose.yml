@@ -1,0 +1,28 @@
+# ─────────────────────────────────────────────────────────────
+# 대시보드 단일 서비스 구성
+# 모델 산출물은 런타임에 S3에서 받으므로 영속 볼륨 불필요
+# ─────────────────────────────────────────────────────────────
+services:
+  dashboard:
+    # 현재 디렉터리의 Dockerfile로 이미지 빌드
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # 호스트 8501 → 컨테이너 8501 (Streamlit)
+    ports:
+      - "8501:8501"
+    # .env 파일의 키들을 컨테이너 환경변수로 주입
+    # (FRED API 키 + S3 접근 자격증명/버킷명)
+    env_file:
+      - .env
+    # env_file로 들어온 값을 명시적으로 매핑
+    # 값을 비워 두면 .env / 호스트 환경의 동일 키 값을 그대로 전달
+    environment:
+      FRED_API_KEY: ${FRED_API_KEY}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME}
+    # 비정상 종료 시 자동 재시작
+    restart: unless-stopped
+    # 볼륨 마운트 없음: 산출물은 S3에서 받고 이미지 자체로 완결
+

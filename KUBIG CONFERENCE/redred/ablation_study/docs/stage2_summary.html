@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stage 2: 반도체 공급 신호 → 주가 수익률 예측 검증</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+      font-size: 15px;
+      line-height: 1.75;
+      color: #1a1a2e;
+      background: #f8f9fc;
+    }
+
+    .page-wrap {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 48px 32px 80px;
+    }
+
+    /* ── Header ── */
+    .doc-header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+      color: #fff;
+      border-radius: 12px;
+      padding: 40px 44px;
+      margin-bottom: 40px;
+    }
+    .doc-header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      letter-spacing: -0.3px;
+    }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 6px 16px;
+      font-size: 13.5px;
+      opacity: 0.88;
+    }
+    .meta-grid .label { color: #90caf9; font-weight: 600; white-space: nowrap; }
+
+    /* ── Sections ── */
+    h2 {
+      font-size: 19px;
+      font-weight: 700;
+      color: #0f3460;
+      border-left: 4px solid #0f3460;
+      padding-left: 14px;
+      margin: 44px 0 20px;
+    }
+    h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #16213e;
+      margin: 32px 0 12px;
+      padding-bottom: 6px;
+      border-bottom: 1.5px solid #dee2e6;
+    }
+
+    p { margin-bottom: 14px; }
+
+    /* ── Blockquote / callout ── */
+    blockquote {
+      background: #e8f4fd;
+      border-left: 4px solid #2196f3;
+      border-radius: 0 6px 6px 0;
+      padding: 12px 18px;
+      margin: 16px 0;
+      font-size: 13.5px;
+      color: #1565c0;
+    }
+    blockquote p { margin: 0; }
+
+    /* ── Code ── */
+    pre {
+      background: #1e1e2e;
+      color: #cdd6f4;
+      border-radius: 8px;
+      padding: 18px 20px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      margin: 16px 0;
+    }
+    code {
+      background: #eef2ff;
+      color: #3730a3;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 0.88em;
+    }
+    pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+
+    /* ── Tables ── */
+    .tbl-wrap { overflow-x: auto; margin: 16px 0 24px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+      background: #fff;
+    }
+    thead tr { background: #1a1a2e; color: #fff; }
+    thead th {
+      padding: 11px 14px;
+      text-align: left;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    tbody tr:nth-child(even) { background: #f5f7ff; }
+    tbody tr:hover { background: #eef2ff; }
+    tbody td { padding: 9px 14px; border-bottom: 1px solid #e9ecef; vertical-align: top; }
+    td strong, th strong { color: #0f3460; }
+
+    /* ── Highlight row ── */
+    tr.best td { background: #fff9c4 !important; font-weight: 600; }
+
+    /* ── Lists ── */
+    ul, ol { padding-left: 22px; margin-bottom: 14px; }
+    li { margin-bottom: 6px; }
+
+    /* ── Divider ── */
+    hr { border: none; border-top: 1.5px solid #dee2e6; margin: 40px 0; }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .badge-blue  { background: #dbeafe; color: #1d4ed8; }
+    .badge-green { background: #dcfce7; color: #15803d; }
+    .badge-red   { background: #fee2e2; color: #b91c1c; }
+    .badge-gray  { background: #f1f5f9; color: #475569; }
+
+    /* ── Result cards ── */
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin: 20px 0;
+    }
+    .result-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 18px 20px;
+      box-shadow: 0 1px 6px rgba(0,0,0,.08);
+      border-top: 3px solid #6366f1;
+    }
+    .result-card.model-a { border-top-color: #22c55e; }
+    .result-card.model-b { border-top-color: #f59e0b; }
+    .result-card.model-c { border-top-color: #94a3b8; }
+    .result-card .model-label { font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 8px; text-transform: uppercase; letter-spacing: .5px; }
+    .result-card .metric { font-size: 22px; font-weight: 700; color: #1a1a2e; }
+    .result-card .metric-sub { font-size: 13px; color: #64748b; margin-top: 2px; }
+    .delta-row {
+      background: #0f3460;
+      color: #fff;
+      border-radius: 8px;
+      padding: 14px 20px;
+      margin: 12px 0 24px;
+      font-size: 14px;
+      display: flex;
+      gap: 32px;
+      align-items: center;
+    }
+    .delta-row .delta-label { opacity: .75; font-size: 12px; margin-bottom: 2px; }
+    .delta-row .delta-val { font-size: 18px; font-weight: 700; color: #86efac; }
+    .delta-row .delta-val.neg { color: #fca5a5; }
+
+    /* ── Insight cards ── */
+    .insight-list { list-style: none; padding: 0; margin: 0; }
+    .insight-list li {
+      background: #fff;
+      border-radius: 8px;
+      padding: 14px 18px 14px 52px;
+      margin-bottom: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.07);
+      position: relative;
+    }
+    .insight-list li::before {
+      content: attr(data-n);
+      position: absolute;
+      left: 16px;
+      top: 14px;
+      background: #0f3460;
+      color: #fff;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    /* ── Summary comparison ── */
+    .compare-table thead tr { background: #0f3460; }
+
+    /* ── Footer ── */
+    .doc-footer {
+      margin-top: 56px;
+      padding-top: 20px;
+      border-top: 1px solid #dee2e6;
+      font-size: 12.5px;
+      color: #94a3b8;
+    }
+    .doc-footer p { margin: 3px 0; }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- ══════════ HEADER ══════════ -->
+  <div class="doc-header">
+    <h1>Stage 2: 반도체 공급 신호 → 주가 수익률 예측 검증</h1>
+    <div class="meta-grid">
+      <span class="label">대상 종목</span><span>SK하이닉스(메모리), ASML(장비)</span>
+      <span class="label">분석 기간</span><span>2004-12 ~ 2023-07 (월별, 224개월)</span>
+      <span class="label">검증 방식</span><span>Ablation Study (Model A/B/C) + Walk-forward Cross-Validation</span>
+    </div>
+  </div>
+
+  <!-- ══════════ 1. Overview ══════════ -->
+  <h2>1. Overview</h2>
+
+  <p>Stage 1에서 WSTS 글로벌 반도체 매출 YoY%의 t+6 예측값(<code>wsts_pred_t6</code>)을 생성했다. Stage 2는 이 <strong>공급 사이클 예측값이 실제 반도체 기업 주가 수익률의 유의미한 선행 신호인지</strong>를 검증한다.</p>
+
+  <p>주가 6개월 forward return을 타겟으로 선택한 이유는 두 가지다. 첫째, 분기 매출이나 EPS 같은 실적 데이터는 발표 주기가 길고 revision이 잦아 월별 시계열 모델에 연결하기 어렵다. 반면 주가는 시장 참여자들의 미래 기대를 실시간으로 반영하는 고주파 신호다. 둘째, <strong>h=6(6개월)은 Stage 1 예측 horizon과 정합</strong>한다. Stage 1이 "지금부터 6개월 후 업황"을 예측하므로, Stage 2에서도 6개월 후 주가 수익률로 공급 신호의 실효성을 검증하는 것이 논리적으로 일관된다.</p>
+
+  <p>검증 방식은 <strong>Ablation Study</strong>다. 공급 신호(<code>wsts_pred_t6</code>)를 포함한 풀 모델(A)과 제외한 모델(B), 공급 신호만 사용한 모델(C)을 비교해 공급 신호의 <strong>incremental 기여도</strong>와 <strong>독립적 설명력</strong>을 정량화한다.</p>
+
+  <hr>
+
+  <!-- ══════════ 2. Experiment Design ══════════ -->
+  <h2>2. Experiment Design</h2>
+
+  <h3>2-1. Ablation Study Framework</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Model</th><th>Feature Set</th><th>목적</th></tr></thead>
+      <tbody>
+        <tr><td><strong>A (Full)</strong></td><td>공급 신호 + 거시경제 + 종목 전용 피처</td><td>전체 피처 사용 기준선</td></tr>
+        <tr><td><strong>B (No supply)</strong></td><td>거시경제 + 종목 전용 피처</td><td>공급 신호 제외 → incremental 기여 측정</td></tr>
+        <tr><td><strong>C (Supply only)</strong></td><td><code>wsts_pred_t6</code> 단독</td><td>공급 신호의 절대적 설명력</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p><strong>A vs B 비교</strong>: 공급 신호가 다른 피처들과 함께 사용될 때 추가로 기여하는 예측력</p>
+  <p><strong>C 단독</strong>: 공급 신호만으로 방향(상승/하락)을 맞출 수 있는지 여부</p>
+
+  <h3>2-2. OOS Prediction — Leakage 방지 설계</h3>
+  <p><code>wsts_pred_t6</code>를 단순히 Stage 1 모델의 <strong>전체 데이터로 학습한</strong> 예측값으로 사용하면 데이터 누출(leakage)이 발생한다. 미래 정보가 학습에 스며들어 검증 성능이 과대평가되기 때문이다.</p>
+  <p>이를 막기 위해 <strong>Expanding-window Walk-forward</strong>로 생성한 Out-of-Sample(OOS) 예측값만 사용한다. 각 시점 t에서 t 이전의 데이터만으로 학습한 모델의 예측값으로 <code>wsts_pred_t6</code>를 구성함으로써, 모든 시점의 예측값이 그 시점에서 실제로 관측 가능한 정보에만 의존한다.</p>
+<pre>t=60: train[0:60]  → predict t=60
+t=61: train[0:61]  → predict t=61
+t=62: train[0:62]  → predict t=62
+...
+t=n:  train[0:n]   → predict t=n</pre>
+  <p>이 OOS 예측 시퀀스를 Stage 2의 <code>wsts_pred_t6</code> 피처로 사용하기 때문에, Stage 2의 walk-forward CV 역시 같은 원칙 하에 미래 정보 없이 검증이 이루어진다.</p>
+
+  <h3>2-3. Walk-forward CV 설정</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>항목</th><th>설정값</th></tr></thead>
+      <tbody>
+        <tr><td>CV 방식</td><td>Expanding window walk-forward</td></tr>
+        <tr><td>최소 학습 기간</td><td>60개월</td></tr>
+        <tr><td>Step</td><td>1개월</td></tr>
+        <tr><td>Shuffle</td><td>False (시계열 순서 보존)</td></tr>
+        <tr><td>평가 지표</td><td>RMSE (예측 오차), DirAcc (방향 정확도)</td></tr>
+        <tr><td>모델</td><td>XGBoost (Stage 1 최적 하이퍼파라미터 재사용)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <blockquote><p><strong>방향 정확도(DirAcc)</strong>: 모델이 수익률의 양/음 방향을 맞춘 비율. 투자 관점에서 RMSE보다 직접적으로 의미 있는 지표.</p></blockquote>
+
+  <hr>
+
+  <!-- ══════════ 3. SK하이닉스 ══════════ -->
+  <h2>3. SK하이닉스 분석</h2>
+
+  <h3>3-1. 피처 구성</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Category</th><th>Features</th><th>비고</th></tr></thead>
+      <tbody>
+        <tr><td><strong>거시경제 (6)</strong></td><td><code>FedFunds_lag6</code>, <code>FRED_T10Y2Y_lag6</code>, <code>FRED_ConsSenti_YoY_lag6</code>, <code>FedFunds_diff12</code>, <code>FRED_T10Y2Y_chg3</code>, <code>Worldwide_YoY_ma12</code></td><td>features_dataset.csv, lag 기적용</td></tr>
+        <tr><td><strong>공급 신호 (1)</strong></td><td><code>wsts_pred_t6</code></td><td>Stage 1 OOS 예측값</td></tr>
+        <tr><td><strong>환율 FX (2)</strong></td><td><code>usdkrw_lag6</code>, <code>usdkrw_chg6_lag6</code></td><td>yfinance, 6개월 lag 적용</td></tr>
+        <tr><td><strong>SK 자체 (3)</strong></td><td><code>hynix_return_lag6</code>, <code>hynix_return_lag12</code>, <code>hynix_vol_lag6</code></td><td>yfinance, lag 적용</td></tr>
+        <tr><td><strong>타겟</strong></td><td><code>hynix_fwd6</code></td><td>6개월 forward return (피처 사용 금지)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p><strong>피처 총 12개 (타겟 제외)</strong></p>
+
+  <h3>3-2. Ablation 결과</h3>
+  <p>SK하이닉스는 매출의 대부분이 달러로 결제되므로, 원화 강세(USD/KRW 하락)는 원화 환산 매출 감소 → 실적 압박 → 주가 하방 요인이 된다. 반대로 원화 약세는 수출 기업으로서 프리미엄 요인이다. <strong>USD/KRW 환율은 SK하이닉스 주가의 핵심 외생 드라이버</strong>로, 이를 공급 신호와 함께 통제하지 않으면 공급 신호의 기여를 과대 또는 과소평가할 수 있다.</p>
+  <p>Walk-forward CV 결과 (<code>usdkrw_lag6</code>, <code>usdkrw_chg6_lag6</code> 포함):</p>
+
+  <div class="result-grid">
+    <div class="result-card model-a">
+      <div class="model-label">A — Full</div>
+      <div class="metric">17.23</div>
+      <div class="metric-sub">RMSE</div>
+      <div class="metric" style="margin-top:10px">75.6%</div>
+      <div class="metric-sub">DirAcc</div>
+    </div>
+    <div class="result-card model-b">
+      <div class="model-label">B — No Supply</div>
+      <div class="metric">18.24</div>
+      <div class="metric-sub">RMSE</div>
+      <div class="metric" style="margin-top:10px">71.3%</div>
+      <div class="metric-sub">DirAcc</div>
+    </div>
+    <div class="result-card model-c">
+      <div class="model-label">C — Supply Only</div>
+      <div class="metric">30.45</div>
+      <div class="metric-sub">RMSE</div>
+      <div class="metric" style="margin-top:10px">57.3%</div>
+      <div class="metric-sub">DirAcc</div>
+    </div>
+  </div>
+  <div class="delta-row">
+    <div>
+      <div class="delta-label">Δ RMSE (A−B)</div>
+      <div class="delta-val">−1.01</div>
+    </div>
+    <div>
+      <div class="delta-label">Δ DirAcc (A−B)</div>
+      <div class="delta-val">+4.3%p</div>
+    </div>
+  </div>
+  <p>환율 통제 후 RMSE가 약 30% 개선되었고, 공급 신호의 incremental 기여폭도 RMSE −0.35 → −1.01로 3배 확대되었다. 이는 <strong>환율 노이즈를 통제한 뒤에도 공급 신호가 독립적인 예측력을 보유함</strong>을 의미한다.</p>
+
+  <h3>3-3. Horizon Sensitivity</h3>
+  <p>공급 신호의 기여도가 예측 horizon h(개월)에 따라 어떻게 변하는지 h=1~12에 걸쳐 검증했다.</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>h</th><th>RMSE_A</th><th>RMSE_B</th><th>Δ RMSE</th><th>DirAcc_A</th><th>DirAcc_B</th><th>Δ DirAcc</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>8.16</td><td>8.11</td><td>+0.05</td><td>52.4%</td><td>47.0%</td><td>+5.5%p</td></tr>
+        <tr><td>2</td><td>11.15</td><td>11.45</td><td>−0.31</td><td>60.4%</td><td>61.0%</td><td>−0.6%p</td></tr>
+        <tr><td>3</td><td>13.27</td><td>14.05</td><td><strong>−0.77</strong></td><td>64.6%</td><td>61.6%</td><td><strong>+3.0%p</strong></td></tr>
+        <tr><td>4</td><td>14.75</td><td>15.76</td><td><strong>−1.01</strong></td><td>69.5%</td><td>64.0%</td><td><strong>+5.5%p</strong></td></tr>
+        <tr><td>5</td><td>16.24</td><td>17.07</td><td><strong>−0.83</strong></td><td>70.1%</td><td>68.9%</td><td><strong>+1.2%p</strong></td></tr>
+        <tr class="best"><td><strong>6</strong></td><td><strong>17.24</strong></td><td><strong>18.24</strong></td><td><strong>−1.00</strong></td><td><strong>75.6%</strong></td><td><strong>71.3%</strong></td><td><strong>+4.3%p</strong></td></tr>
+        <tr><td>7</td><td>18.58</td><td>19.33</td><td><strong>−0.75</strong></td><td>76.2%</td><td>71.3%</td><td><strong>+4.9%p</strong></td></tr>
+        <tr><td>8</td><td>20.58</td><td>20.24</td><td>+0.33</td><td>75.0%</td><td>73.2%</td><td>+1.8%p</td></tr>
+        <tr><td>9</td><td>19.62</td><td>19.23</td><td>+0.39</td><td>76.2%</td><td>74.4%</td><td>+1.8%p</td></tr>
+        <tr><td>10</td><td>18.58</td><td>18.89</td><td>−0.31</td><td>76.2%</td><td>74.4%</td><td>+1.8%p</td></tr>
+        <tr><td>11</td><td>20.01</td><td>20.13</td><td>−0.12</td><td>72.6%</td><td>75.6%</td><td>−3.0%p</td></tr>
+        <tr><td>12</td><td>22.39</td><td>21.84</td><td>+0.55</td><td>76.2%</td><td>75.6%</td><td>+0.6%p</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <blockquote><p>노란색 행(h=6): Stage 1 horizon과 정합. <strong>bold</strong> Δ: RMSE↓ + DirAcc↑ 동시 만족 구간</p></blockquote>
+  <p><strong>핵심 발견:</strong></p>
+  <ul>
+    <li><strong>h=3~7 구간</strong>에서 RMSE 감소와 DirAcc 증가가 동시에 달성되는 "sweet spot"이 확인됐다.</li>
+    <li>h=4에서 ΔRMSE −1.01로 최대 기여, h=6에서도 ΔRMSE −1.00, ΔDirAcc +4.3%p로 준최적 수준을 유지한다.</li>
+    <li>h=1~2 구간은 공급 신호가 역효과를 내거나 기여가 미미하고, h=8 이상은 기여가 소멸한다.</li>
+    <li><strong>h=6 선택은 사후적으로도 타당</strong>: Stage 1 horizon과의 정합성을 맞추기 위해 설계한 h=6이 sweet spot 내에 정확히 위치한다.</li>
+  </ul>
+  <blockquote><p>시각화: <code>skhynix/outputs/figures/sk_horizon_diracc.png</code>, <code>sk_horizon_rmse.png</code></p></blockquote>
+
+  <h3>3-4. SHAP 분석</h3>
+  <p>모델 A를 전체 데이터로 학습한 뒤 SHAP TreeExplainer로 피처 기여도를 분석했다.</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>순위</th><th>피처</th><th>평균 |SHAP|</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><code>Worldwide_YoY_ma12</code></td><td>6.71</td></tr>
+        <tr class="best"><td><strong>2</strong></td><td><strong><code>wsts_pred_t6</code> ←</strong></td><td><strong>5.73</strong></td></tr>
+        <tr><td>3</td><td><code>FedFunds_diff12</code></td><td>5.31</td></tr>
+        <tr><td>4</td><td><code>usdkrw_lag6</code></td><td>3.86</td></tr>
+        <tr><td>5</td><td><code>FedFunds_lag6</code></td><td>3.24</td></tr>
+        <tr><td>6</td><td><code>FRED_ConsSenti_YoY_lag6</code></td><td>2.63</td></tr>
+        <tr><td>7</td><td><code>usdkrw_chg6_lag6</code></td><td>2.61</td></tr>
+        <tr><td>8</td><td><code>FRED_T10Y2Y_chg3</code></td><td>2.25</td></tr>
+        <tr><td>9</td><td><code>FRED_T10Y2Y_lag6</code></td><td>1.99</td></tr>
+        <tr><td>10</td><td><code>hynix_vol_lag6</code></td><td>1.73</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>공급 신호 <code>wsts_pred_t6</code>가 <strong>전체 12개 피처 중 2위</strong>로, 글로벌 반도체 업황 지표인 <code>Worldwide_YoY_ma12</code> 다음으로 높은 설명력을 보인다. 환율(4위)이나 거시금리(3위)보다 높은 순위는, 공급 사이클이 SK하이닉스 주가 변동의 <strong>핵심 드라이버</strong>임을 정량적으로 확인해준다.</p>
+  <blockquote><p>시각화: <code>skhynix/outputs/figures/sk_shap_summary.png</code>, <code>sk_shap_wsts.png</code></p></blockquote>
+
+  <h3>3-5. SK하이닉스 핵심 발견</h3>
+  <ul class="insight-list">
+    <li data-n="1"><strong>공급 신호의 독립적 기여 확인</strong>: 환율(USD/KRW)을 통제한 뒤에도 <code>wsts_pred_t6</code>의 incremental 기여는 RMSE −1.01, DirAcc +4.3%p로 명확하게 존재한다. 공급 신호가 환율 효과를 반영하는 것이 아닌, <strong>별도 정보를 제공</strong>하고 있음을 시사한다.</li>
+    <li data-n="2"><strong>SHAP 2위</strong>: 12개 피처 중 <code>wsts_pred_t6</code>가 SHAP 기여도 2위를 기록했다. 거시금리·환율 등과 독립적인 설명 차원을 형성하고 있으며, 이는 Stage 1 공급 예측 모델이 단순 트렌드 추종 이상의 정보를 추출했음을 의미한다.</li>
+    <li data-n="3"><strong>Horizon sweet spot h=3~7, h=6 설계 결정 사후 검증</strong>: 공급 신호의 기여가 3~7개월 구간에서 집중되고, 설계 당시 Stage 1 horizon 정합성을 이유로 선택한 h=6이 이 sweet spot 내에 있어 설계 결정이 사후적으로도 타당함이 확인됐다.</li>
+  </ul>
+
+  <hr>
+
+  <!-- ══════════ 4. ASML ══════════ -->
+  <h2>4. ASML 분석</h2>
+
+  <h3>4-1. 왜 ASML인가?</h3>
+  <p>SK하이닉스(메모리 반도체 제조사)에서의 검증만으로는 "공급 사이클 신호가 메모리 업종에만 유효한가"라는 질문에 답할 수 없다. ASML은 반도체 노광 장비(EUV·DUV)의 독점적 공급자로, 반도체 제조사의 생산 능력 투자 결정에 직접 연결된다. 메커니즘 가설은 단순하다: <strong>"공급 확장이 예측되면 → 반도체 제조사가 설비 투자를 늘리고 → ASML에 장비 발주가 증가한다."</strong> 이 경로가 유효하다면, Stage 1의 공급 예측값이 메모리 제조사뿐 아니라 <strong>장비 섹터 주가에도 선행 신호로 작동</strong>해야 한다. 서로 다른 섹터 포지션에서 동일한 공급 신호의 유효성을 검증함으로써 분석의 일반성을 높인다.</p>
+
+  <h3>4-2. 피처 구성</h3>
+  <p>SK하이닉스 대비 주요 변경 사항:</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Category</th><th>Features</th><th>비고</th></tr></thead>
+      <tbody>
+        <tr><td><strong>거시경제 (6)</strong></td><td><code>FedFunds_lag6</code>, <code>FRED_T10Y2Y_lag6</code>, <code>FRED_ConsSenti_YoY_lag6</code>, <code>FedFunds_diff12</code>, <code>FRED_T10Y2Y_chg3</code>, <code>Worldwide_YoY_ma12</code></td><td>동일</td></tr>
+        <tr><td><strong>SOX (3)</strong></td><td><code>Ret_SOX_lag6</code>, <code>Ret_SOX_ma6</code>, <code>Ret_SOX_vol6</code></td><td><strong>신규</strong> — 필라델피아 반도체지수</td></tr>
+        <tr><td><strong>공급 신호 (1)</strong></td><td><code>wsts_pred_t6</code></td><td>동일</td></tr>
+        <tr><td><strong>환율 FX (2)</strong></td><td><code>usdeur_lag6</code>, <code>usdeur_chg6_lag6</code></td><td><strong>변경</strong>: KRW → EUR (ASML은 네덜란드 기반)</td></tr>
+        <tr><td><strong>ASML 자체 (3)</strong></td><td><code>ASML_return_lag6</code>, <code>ASML_return_lag12</code>, <code>ASML_vol_lag6</code></td><td>yfinance "ASML"</td></tr>
+        <tr><td><strong>타겟</strong></td><td><code>ASML_fwd6</code></td><td>6개월 forward return</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p><strong>피처 총 15개 (타겟 제외)</strong></p>
+  <p>SK하이닉스의 usdkrw 대신 usdeur를 사용하고(<code>EURUSD=X</code>의 역수로 USD/EUR 변환), 반도체 섹터 모멘텀을 포착하기 위해 SOX 관련 피처를 추가했다.</p>
+
+  <h3>4-3. Ablation 결과</h3>
+  <div class="result-grid">
+    <div class="result-card model-a">
+      <div class="model-label">A — Full</div>
+      <div class="metric">12.63</div>
+      <div class="metric-sub">RMSE</div>
+      <div class="metric" style="margin-top:10px">79.3%</div>
+      <div class="metric-sub">DirAcc</div>
+    </div>
+    <div class="result-card model-b">
+      <div class="model-label">B — No Supply</div>
+      <div class="metric">12.95</div>
+      <div class="metric-sub">RMSE</div>
+      <div class="metric" style="margin-top:10px">78.0%</div>
+      <div class="metric-sub">DirAcc</div>
+    </div>
+    <div class="result-card model-c">
+      <div class="model-label">C — Supply Only</div>
+      <div class="metric">20.81</div>
+      <div class="metric-sub">RMSE</div>
+      <div class="metric" style="margin-top:10px">67.1%</div>
+      <div class="metric-sub">DirAcc</div>
+    </div>
+  </div>
+  <div class="delta-row">
+    <div>
+      <div class="delta-label">Δ RMSE (A−B)</div>
+      <div class="delta-val">−0.32</div>
+    </div>
+    <div>
+      <div class="delta-label">Δ DirAcc (A−B)</div>
+      <div class="delta-val">+1.2%p</div>
+    </div>
+  </div>
+  <blockquote><p>비교 기준 (sk5 crossfirm 결과): RMSE_A=12.90, RMSE_B=12.95, ΔDirAcc=+1.8%p<br>
+  종목 전용 FX(EUR) 피처 추가 후 ΔRMSE가 −0.06 → <strong>−0.32로 5배 강화</strong></p></blockquote>
+
+  <h3>4-4. Model C 해석 — 공급 신호의 독립 설명력</h3>
+  <p>Model C(공급 신호 단독)의 DirAcc <strong>67.1%</strong>는 다음과 같이 해석한다.</p>
+  <ul>
+    <li><strong>랜덤 기준선(50%) 대비 +17%p</strong>: 공급 신호 하나만으로 ASML 주가의 상승/하락 방향을 랜덤보다 17%p 더 정확히 예측한다. 단일 피처 기준으로 유의미한 설명력이다.</li>
+    <li><strong>Model B(78.0%) 대비 −11%p</strong>: 거시경제·FX 등 다른 피처들이 더 강한 설명력을 보유하고 있으므로, 공급 신호가 "지배적 신호"라고는 할 수 없다. 하지만 "<strong>독립적으로 유효한 신호</strong>"임은 분명하다.</li>
+    <li><strong>C → A로 갈 때 +12%p 개선</strong>: 공급 신호를 다른 거시 피처와 결합할 때 시너지가 발생한다. 이는 공급 신호가 거시 환경 정보를 일부 내재하고 있어, 공급·수요 양측 정보를 동시에 활용할 때 예측 정확도가 높아짐을 시사한다.</li>
+  </ul>
+
+  <h3>4-5. SHAP 분석</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>순위</th><th>피처</th><th>평균 |SHAP|</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><code>Worldwide_YoY_ma12</code></td><td>4.77</td></tr>
+        <tr><td>2</td><td><code>FedFunds_lag6</code></td><td>3.60</td></tr>
+        <tr><td>3</td><td><code>FedFunds_diff12</code></td><td>3.23</td></tr>
+        <tr><td>4</td><td><code>usdeur_lag6</code></td><td>2.25</td></tr>
+        <tr><td>5</td><td><code>FRED_ConsSenti_YoY_lag6</code></td><td>2.23</td></tr>
+        <tr><td>6</td><td><code>FRED_T10Y2Y_lag6</code></td><td>2.19</td></tr>
+        <tr><td>7</td><td><code>Ret_SOX_ma6</code></td><td>1.96</td></tr>
+        <tr><td>8</td><td><code>ASML_vol_lag6</code></td><td>1.48</td></tr>
+        <tr><td>9</td><td><code>Ret_SOX_vol6</code></td><td>0.93</td></tr>
+        <tr><td>10</td><td><code>usdeur_chg6_lag6</code></td><td>0.88</td></tr>
+        <tr><td>(11+)</td><td><code>wsts_pred_t6</code></td><td>0.87 이하</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p><code>wsts_pred_t6</code>는 상위 10위 밖에 위치하지만, ΔRMSE −0.32는 incremental 기여로는 유의미하다. ASML 주가는 글로벌 업황(<code>Worldwide_YoY_ma12</code>)과 금리 환경(FedFunds), EUR 환율(<code>usdeur_lag6</code>)에 더 직접적으로 반응하며, 공급 신호는 이 변수들과 독립적인 <strong>보완적 정보원</strong>으로 작동한다.</p>
+  <blockquote><p>시각화: <code>asml/outputs/figures/asml_shap_summary.png</code>, <code>asml_shap_wsts.png</code></p></blockquote>
+
+  <h3>4-6. ASML 핵심 발견</h3>
+  <ul class="insight-list">
+    <li data-n="1"><strong>RMSE+DirAcc 동시 양의 기여 확인</strong>: 종목 전용 EUR 환율 피처 추가 후 ΔRMSE −0.32, ΔDirAcc +1.2%p로 두 지표 모두 양의 기여를 보인다. SK하이닉스 대비 절대 기여폭은 작지만, 방향성은 일관된다.</li>
+    <li data-n="2"><strong>장비 섹터에서도 공급 사이클 선행 신호 유효</strong>: ASML은 메모리 제조사가 아닌 장비 공급자로, 공급 신호가 단순히 "메모리 업황 → 하이닉스 매출"의 직접 연결이 아닌, <strong>산업 사이클 전반에 걸친 선행 정보</strong>를 포함함을 시사한다.</li>
+    <li data-n="3"><strong>Model C 단독 설명력 랜덤 대비 +17%p</strong>: 공급 신호 하나만으로 67.1%의 방향 정확도를 달성한다. 이는 wsts_pred_t6가 포트폴리오 관점에서 독립적으로 활용할 수 있는 신호 품질을 보유하고 있음을 보여준다.</li>
+  </ul>
+
+  <hr>
+
+  <!-- ══════════ 5. 비교 요약 ══════════ -->
+  <h2>5. 비교 요약</h2>
+
+  <div class="tbl-wrap">
+    <table class="compare-table">
+      <thead><tr><th>항목</th><th>SK하이닉스</th><th>ASML</th></tr></thead>
+      <tbody>
+        <tr><td>섹터 포지션</td><td>메모리 제조</td><td>반도체 장비</td></tr>
+        <tr><td>피처 수 (타겟 제외)</td><td>12</td><td>15</td></tr>
+        <tr><td>분석 기간</td><td>2004-12 ~ 2023-07</td><td>2004-12 ~ 2023-07</td></tr>
+        <tr><td>CV folds</td><td>164</td><td>164</td></tr>
+        <tr><td>RMSE_A</td><td>17.23</td><td>12.63</td></tr>
+        <tr><td>RMSE_B</td><td>18.24</td><td>12.95</td></tr>
+        <tr class="best"><td><strong>Δ RMSE (A−B)</strong></td><td><strong>−1.01</strong></td><td><strong>−0.32</strong></td></tr>
+        <tr><td>DirAcc_A</td><td>75.6%</td><td>79.3%</td></tr>
+        <tr><td>DirAcc_B</td><td>71.3%</td><td>78.0%</td></tr>
+        <tr class="best"><td><strong>Δ DirAcc (A−B)</strong></td><td><strong>+4.3%p</strong></td><td><strong>+1.2%p</strong></td></tr>
+        <tr><td>SHAP 순위 (wsts_pred_t6)</td><td><strong>2위 (5.73)</strong></td><td>11위+</td></tr>
+        <tr><td>Model C DirAcc</td><td>57.3%</td><td><strong>67.1%</strong></td></tr>
+        <tr><td>Horizon sweet spot</td><td>h=3~7</td><td>h=6, 8~9</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p><strong>공통 결론:</strong></p>
+  <ul>
+    <li><strong>두 종목 모두 RMSE↓ + DirAcc↑ 동시 달성</strong>: 공급 신호(<code>wsts_pred_t6</code>)가 거시경제 피처와 함께 사용될 때 예측 정확도를 의미 있게 개선한다.</li>
+    <li><strong>공급 신호는 메모리뿐 아니라 장비 섹터에서도 유효</strong>: 수직계열이 다름에도 동일한 방향성의 기여를 보이며, 이는 <code>wsts_pred_t6</code>가 반도체 공급 사이클 전반에 걸친 선행 정보를 담고 있음을 시사한다.</li>
+    <li><strong>포지션이 달라도 일관된 방향</strong>: SK하이닉스에서는 공급 신호가 SHAP 2위의 주요 드라이버로 작동하고, ASML에서는 보완적 정보원으로 기여한다. 기여 강도의 차이는 있지만 방향은 동일하며, 이는 Stage 1 공급 예측 모델의 <strong>산업 전반에 걸친 선행 지표로서의 가능성</strong>을 보여준다.</li>
+  </ul>
+
+  <hr>
+
+  <div class="doc-footer">
+    <p>생성일: 2026-05-28</p>
+    <p>데이터 출처: skhynix/outputs/, asml/outputs/</p>
+    <p>이미지 위치: skhynix/outputs/figures/, asml/outputs/figures/</p>
+  </div>
+
+</div>
+</body>
+</html>

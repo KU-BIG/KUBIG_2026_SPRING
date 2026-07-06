@@ -1,0 +1,72 @@
+name: Monthly Retrain
+
+on:
+  schedule:
+    # 매월 1일 02:00 UTC (KST 11:00)
+    - cron: '0 2 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  retrain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: stage1/requirements.txt
+
+      - name: 의존성 설치
+        run: pip install -r stage1/requirements.txt
+
+      - name: WSTS 최신 데이터 다운로드
+        run: |
+          python - <<'EOF'
+          import re, sys
+          import urllib.request
+
+          page = urllib.request.urlopen("https://www.wsts.org/67/Historical-Billings-Report").read().decode()
+          match = re.search(r'https://www\.wsts\.org[^"]+\.xlsx', page)
+          if not match:
+              print("WSTS xlsx URL을 찾지 못했습니다.", file=sys.stderr)
+              sys.exit(1)
+          url = match.group(0)
+          print(f"다운로드: {url}")
+          urllib.request.urlretrieve(url, "wsts_historical.xlsx")
+          print("wsts_historical.xlsx 저장 완료")
+          EOF
+
+      - name: Stage 1 재학습
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: python stage1/pipeline.py
+
+      - name: Stage 2 재학습
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: python stage2/pipeline.py
+
+      - name: 산출물 커밋 & 푸시 (Streamlit Cloud 자동 반영)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add \
+            wsts_historical.xlsx \
+            stage1/outputs/models/best_xgboost_final.pkl \
+            stage1/outputs/data/features_dataset.csv \
+            stage2/outputs/models/skh_xgb_final.pkl \
+            stage2/outputs/data/stage2_features.csv \
+            stage2/outputs/data/stage1_predictions.csv \
+            stage1/outputs/metrics/ \
+            stage1/outputs/figures/ \
+            stage2/outputs/metrics/ \
+            stage2/outputs/figures/
+          git diff --staged --quiet && echo "변경 없음 — 커밋 스킵" || \
+            git commit -m "chore: monthly retrain ($(date +%F))" && git push
