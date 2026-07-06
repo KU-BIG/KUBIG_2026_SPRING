@@ -7,7 +7,7 @@ import numpy as np
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 os.chdir(os.path.abspath(ROOT))
-DS = ["acm", "dblp", "aifb"]
+DS = ["acm", "dblp", "aifb", "imdb", "freebase", "mag", "yelp"]
 L1 = [("lp_a", "base"), ("lp_b1", "+noise"), ("lp_m", "+mix(node)"), ("lp_c", "+node-PI")]
 L2 = [("lp2_base", "base"), ("lp2_noise", "+noise"), ("lp2_mix", "+mix(CN)"), ("lp2_real", "+pair-PI")]
 

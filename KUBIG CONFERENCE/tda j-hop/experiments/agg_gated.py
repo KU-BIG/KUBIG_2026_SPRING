@@ -8,7 +8,7 @@ import numpy as np
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 os.chdir(os.path.abspath(ROOT))
 SEEDS = set(int(x) for x in open("experiments/seeds.txt").read().split())
-DS = ["acm", "dblp", "aifb"]
+DS = ["acm", "dblp", "aifb", "imdb", "freebase", "mag", "yelp"]
 COND = ["gt_base", "gt_cat_real", "gt_cat_noise", "gt_cat_mix",
         "gt_gate_real", "gt_gate_noise", "gt_gate_mix"]
 LAB = {"gt_base": "base", "gt_cat_real": "concat+real", "gt_cat_noise": "concat+noise",

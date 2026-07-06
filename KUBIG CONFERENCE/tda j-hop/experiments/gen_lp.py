@@ -9,7 +9,9 @@ os.chdir(os.path.abspath(ROOT))
 OUT = "configs/campaign"
 os.makedirs(OUT, exist_ok=True)
 
-TARGET = {"acm": "PAP", "dblp": "APA", "aifb": "r0"}
+# 주 타겟-타겟 관계 = 각 config 의 han_metapaths[0]
+TARGET = {ds: json.load(open(f"configs/{ds}.json"))["han_metapaths"][0]
+          for ds in ["acm", "dblp", "aifb", "imdb", "freebase", "mag", "yelp"]}
 LP = {"hidden": 64, "num_layers": 2, "dropout": 0.5, "lr": 0.01, "weight_decay": 5e-4,
       "epochs": 200, "edge_cap": 5000, "split_seed": 20260705, "topo_seed": 777,
       "topo_cache": "cache/topo_lp"}

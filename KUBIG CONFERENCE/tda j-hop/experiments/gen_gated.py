@@ -17,7 +17,7 @@ COND = [("gt_base", "none", "real"),
         ("gt_gate_mix", "gate", "mix")]
 
 names = []
-for ds in ["acm", "dblp", "aifb"]:
+for ds in ["acm", "dblp", "aifb", "imdb", "freebase", "mag", "yelp"]:
     base = json.load(open(f"configs/{ds}.json"))
     for suf, inj, cont in COND:
         cfg = copy.deepcopy(base)
