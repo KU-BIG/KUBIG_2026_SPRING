@@ -8,7 +8,7 @@ from scipy import stats as st
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 os.chdir(os.path.abspath(ROOT))
-DS = ["acm", "dblp", "aifb"]
+DS = ["acm", "dblp", "aifb", "imdb", "freebase", "mag", "yelp"]
 
 
 def load(pattern, key):
