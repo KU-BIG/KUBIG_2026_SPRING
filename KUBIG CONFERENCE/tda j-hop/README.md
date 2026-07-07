@@ -111,10 +111,10 @@ test macro-F1 (mean±std, 10 seeds).
 
 ## 4. Conclusion & Future Work
 
-**연구 질문 단답**
-- **Q1. 위상 feature 추가로 NC 성능이 향상되는가?** → **아니오.** concat은 유해, gate는 그 유해함을 중화할 뿐 base 대비 이득 없음.
-- **Q2. 진짜 위상 신호 때문인가?** → **아니오.** 차원 효과는 아니지만(noise 대조), 남는 신호는 per-node 위상이 아닌 class 수준 신호 (gate+mix ≥ gate+real, 정렬 유의 0/5).
-- **Q3. backbone에 따라 달라지는가?** → **아니오.** 고유 기여는 HAN·RGCN 모두 ≈ 0 — 하락 폭 차이는 잡음 내성 차이일 뿐.
+
+- **Q1. 위상 feature 추가로 NC 성능이 향상되는가?** → **향상 되기는 함** 하지만 진짜 정확한 위상 때문은 아님. injection 방식으로 concat은 유해, gate는 그 유해함을 중화할 뿐 base 대비 이득 없음.
+- **Q2. 진짜 위상 신호 때문인가?** → **아니오.** 차원 효과는 아니지만(noise 대조), 남는 신호는 per-node(진짜) 위상이 아닌 class 수준 신호
+- **Q3. backbone에 따라 달라지는가?** → **아니오.** 고유 기여는 HAN·RGCN 모두 ≈ 0. 하락 폭 차이는 잡음 내성 차이일 뿐.
 
 -  위상 특징의 고유 기여는 백본과 무관하게 거의 0.
 -  하지만 class의 위상 구조를 담은 high level의 정보는 도움이 됐다 (gate injection 방식에서)
