@@ -7,13 +7,13 @@ GTN(메타패스 자동 발견) → PDGNN(EPD 근사) → HAN/RGCN 주입 파이
 ## 01. Introduction
 
 **배경**
-- 실세계 데이터(학술·지식그래프·리뷰)는 여러 타입의 노드·관계가 섞인 이종(heterogeneous) 그래프
-- 대표 모델(HAN·RGCN 등 MPNN 계열)은 이웃 feature를 aggregate하는 방식 → **수용 범위가 local(layer 수 × hop)에 갇힘**
+- 실세계 데이터(학술, 지식그래프, 리뷰 등)는 여러 타입의 노드와 관계가 섞인 heterogeneous graph이다.
+- 대표 모델(HAN,RGCN 등 MPNN 계열)은 이웃 feature를 aggregate하는 방식 → **수용 범위가 local(layer 수 × hop)에 갇힘**
 - 같은 이웃 구조를 가진 두 노드라도 전역 위상(연결 성분 H0, 루프 H1)은 다를 수 있음 — 이 정보가 feature에 담기지 않음 (**topology blindness**)
 
 **접근**
-- Persistent homology: filtration 과정에서 위상 특징의 생성(birth)·소멸(death)을 추적 → 전역 구조를 벡터(persistence image)로 요약
-- 단 EPD 추출기(PDGNN)는 동종 그래프 전용 → **GTN이 학습한 meta-path로 이종 → 동종 서브그래프 변환** 후 결합
+- Persistent homology: filtration 과정에서 위상 특징의 생성(birth)과 소멸(death)을 추적 → Persistent homology를 이미지 벡터(persistence image)로 요약
+- 단 EPD 추출기(PDGNN)는 homogeneous 전용 → **GTN이 학습한 meta-path로 heterogeneous → homogeneous 서브그래프 변환** 후 결합
 - 전체 파이프라인: **GTN → PDGNN → backbone(HAN/RGCN)**
 
 **연구 질문**
@@ -26,7 +26,7 @@ GTN(메타패스 자동 발견) → PDGNN(EPD 근사) → HAN/RGCN 주입 파이
 - 실험 매트릭스 = 백본{HAN, RGCN} × 내용{없음, random noise, class-wise mix, real 위상} × 주입{concat, gate}. 10 random seeds,
 - 5 데이터셋(acm·dblp·imdb·mag·aifb) 사용.
 
-**주입 방식 1 — concat (위상을 노드 feature의 '내용'으로):**
+**주입 방식 1 : concat (위상을 노드 feature의 내용으로):**
 
 ```math
 \tilde{g}_u=\sum_{c=1}^{C}\beta_c\, t_u^{(c)}\in\mathbb{R}^{75},\qquad \beta=\mathrm{softmax}(w_1,\ldots,w_C)
@@ -36,9 +36,9 @@ GTN(메타패스 자동 발견) → PDGNN(EPD 근사) → HAN/RGCN 주입 파이
 W_r\tilde{x}_v=\underbrace{W_r^{(x)}x_v}_{\text{feature}}+\underbrace{W_r^{(g)}\tilde{g}_v}_{\text{topology}}
 ```
 
-채널 융합(semantic attention β) 후 노드 feature에 이어붙임 → 이웃 집계에서 평균화되며 잡음이 그대로 유입.
+채널 융합(semantic attention β) 후 노드 feature에 이어붙임 → 이웃 집계에서 평균화되며 잡음이 그대로 유입할 수가 있다
 
-**주입 방식 2 — gate (위상을 엣지 메시지의 '밸브'로, PEGN식):**
+**주입 방식 2 : gate (위상을 엣지 메시지의 gate로, PEGN식):**
 
 ```math
 h'_u=W_0h_u+\sum_{r\in\mathcal{R}}\frac{1}{|N_r(u)|}\sum_{v\in N_r(u)}(W_r h_v)\odot g_{uv}
@@ -47,12 +47,12 @@ h'_u=W_0h_u+\sum_{r\in\mathcal{R}}\frac{1}{|N_r(u)|}\sum_{v\in N_r(u)}(W_r h_v)\
 g_{uv}=\sigma\!\left(\mathrm{MLP}\left([\,\tilde{g}_u \,\Vert\, \tilde{g}_v\,]\right)\right)\in(0,1)^d
 ```
 
-양끝 노드의 위상을 비교해 (0,1) 밸브를 만들고 **집계 전에** 메시지별로 곱함 — 재가중만 가능하므로 해악에 상한이 있음.
+양끝 노드의 위상을 비교해 (0,1) 밸브를 만들고 **집계 전에** 메시지별로 곱함 
 
 ## 03. Results
 
 test macro-F1 (mean±std, 10 seeds).
-> 📝 데이터셋별 상세 분석·전체 표·paired 검정·LP 결과는 [Notion: conclusion / discussion](https://www.notion.so/3942bc41882d804b8a59e44feba7d366) 참고.
+결과분석 (https://www.notion.so/3942bc41882d804b8a59e44feba7d366) 참고.
 ### 1. concat 주입은 homology 정보의 올바른 injection이 아니다
 
 | 데이터셋 | RGCN: base → concat | HAN: base → concat |
