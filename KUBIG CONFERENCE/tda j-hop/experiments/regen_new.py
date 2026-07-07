@@ -98,5 +98,6 @@ L += ["",
       "yelp 0.62→0.87 로 정상 학습. 이 두 데이터셋은 절대값 비교 대신 **같은 데이터셋 내 조건 간 Δ**로만 해석.",
       "",
       "원본 per-run: `runs/campaign/<ds>__<setting>_s<seed>/metrics.json`", ""]
+os.makedirs("results", exist_ok=True)
 open("results/SUMMARY.md", "w").write("\n".join(L) + "\n")
 print("\n".join(L))

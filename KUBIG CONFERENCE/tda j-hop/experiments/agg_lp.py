@@ -46,5 +46,6 @@ for ds in DS:
     L.append("| " + " | ".join(row) + " |")
 L += ["", "판정: real>mix>noise ⇒ pair-위상 고유 신호 / real≈mix ⇒ CN 수준 정보뿐 / "
       "전부≈base ⇒ LP 에서도 null (AP 는 metrics.json 의 test_ap).", ""]
+os.makedirs("results", exist_ok=True)
 open("results/LP.md", "w").write("\n".join(L) + "\n")
 print("\n".join(L))

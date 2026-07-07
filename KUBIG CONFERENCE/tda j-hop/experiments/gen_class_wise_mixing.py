@@ -16,8 +16,8 @@ DATASETS = ["acm", "dblp", "imdb", "freebase", "mag", "aifb", "yelp"]
 RGCN = {"hidden_dim": 64, "num_layers": 2, "num_bases": None,
         "lr": 0.01, "weight_decay": 0.0005, "dropout": 0.5, "epochs": 100}
 SETTINGS = [
-    ("han__class_wise_mixing", {"backbone": "han"}),
-    ("rgcn__class_wise_mixing", {"backbone": "rgcn", "rgcn": RGCN}),
+    ("b2_mix", {"backbone": "han"}),
+    ("e2_mix", {"backbone": "rgcn", "rgcn": RGCN}),
 ]
 
 names = []

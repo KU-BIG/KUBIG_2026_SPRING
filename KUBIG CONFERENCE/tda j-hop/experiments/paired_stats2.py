@@ -48,10 +48,14 @@ def row(title, a, b):
 L = ["# Paired 검정 v2 — 주입 factorial(gated) + LP\n"]
 HDR = "| 대조 | n | mean Δ [95% CI] | win | Wilcoxon p |\n|---|---|---|---|---|"
 
+DS_FACT = ["acm", "dblp", "imdb", "mag", "aifb"]  # 최종 factorial (freebase·yelp 제외)
 for bk, pre in [("RGCN", "gt"), ("HAN", "gh")]:
     L.append(f"\n## 주입 factorial — {bk} (test macro-F1)\n")
-    for ds in DS:
-        g = lambda c: load(f"runs/gated/{ds}__{pre}_{c}_s*/metrics.json", "test_macro_f1")
+    for ds in DS_FACT:
+        # real/mix 는 고정 GTN+PDGNN 위상(gt2_/gh2_), base/noise 는 위상 무관(gt_/gh_)
+        g = lambda c: load(
+            f"runs/gated/{ds}__{pre}{'2' if c in ('cat_real', 'cat_mix', 'gate_real', 'gate_mix') else ''}"
+            f"_{c}_s*/metrics.json", "test_macro_f1")
         base, cr, cn_, cm = g("base"), g("cat_real"), g("cat_noise"), g("cat_mix")
         gr, gn, gm = g("gate_real"), g("gate_noise"), g("gate_mix")
         L.append(f"### {ds}\n" + HDR)
@@ -87,5 +91,6 @@ v = np.array(sorted(gh.values()))
 L.append(f"\n## 진단: aifb gh_base(커스텀 attention HAN) per-seed 분포\n\n"
          f"n={len(v)}, min={v.min():.3f}, median={np.median(v):.3f}, max={v.max():.3f}, "
          f"values={[round(x,3) for x in v]}\n")
+os.makedirs("results", exist_ok=True)
 open("results/paired_stats2.md", "w").write("\n".join(L) + "\n")
 print("\n".join(L))

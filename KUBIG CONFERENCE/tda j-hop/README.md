@@ -126,11 +126,13 @@ test macro-F1 (mean±std, 10 seeds).
 ```
 tda/           코어 패키지 (models/ GTN·PDGNN·HAN·RGCN·Gated*, topology/ EPD·HKS·PI, train.py, gated.py, lp.py)
 configs/       데이터셋별 base config (campaign config 는 gen_* 스크립트로 생성)
-experiments/   config 생성기(gen_*), SLURM 러너(*.slurm), 캠페인 오케스트레이터(run_*), 집계·검정(agg_*, paired_stats*)
+experiments/   config 생성기(gen_*), seed 목록(seeds.txt), 집계·검정(regen_new, agg_*, paired_stats2)
 tests/         회귀 테스트 (GTN NaN, topology cache RNG, gated/LP)
 ```
 
 ## Reproduction
+
+CUDA GPU 1개 기준. `experiments/seeds.txt`의 10개 seed로 config 하나씩 순차 실행하고, 완료된 run(`metrics.json` 존재)은 건너뛴다.
 
 ```bash
 # 환경
@@ -138,27 +140,59 @@ conda create -n tlcgnn python=3.9 -y && conda activate tlcgnn
 pip install -r requirements.txt        # torch / torch_geometric / gudhi 버전 고정
 pytest tests/ -q                       # 회귀 테스트
 
+export DATA_ROOT=<DATA_ROOT>           # 데이터셋 루트
+
 # 단일 실행 예 (dblp, HAN + GTN-PDGNN 위상, seed 고정)
 python -m tda.train --config configs/dblp.json --dataset dblp \
-    --data-root <DATA_ROOT> --output-dir runs/demo --seed 312132
+    --data-root "$DATA_ROOT" --output-dir runs/demo --seed 312132
 
-# 1) 본표 (a)~(f) 캠페인 — SLURM (seeds: experiments/seeds.txt)
-python experiments/gen_full_campaign.py
-bash experiments/run_campaign.sh              # baseline·위상 조건
-bash experiments/run_d.sh                     # (d) RGCN
-bash experiments/run_noise.sh                 # (b1)(e1) random noise
-bash experiments/run_class_wise_mixing.sh     # (b2)(e2) class-wise mixing
+# 공통 러너: run <모듈> <config> <출력루트>  — config 하나 × 10 seed
+run() {
+  local NAME DS; NAME=$(basename "$2" .json)
+  DS=$(python -c "import json;print(json.load(open('$2'))['dataset'])")
+  while read -r SEED; do
+    OUT=$3/${NAME}_s${SEED}
+    [ -f "$OUT/metrics.json" ] || python -m "$1" --config "$2" --dataset "$DS" \
+        --data-root "$DATA_ROOT" --output-dir "$OUT" --seed "$SEED"
+  done < experiments/seeds.txt
+}
 
-# 2) 주입 factorial — concat vs gate (고정 GTN+PDGNN 위상)
+# 1) 본표 (a)~(f): 7 ds × 8조건 × 10 seed → runs/campaign
+python experiments/gen_full_campaign.py       # (a) a1_baseline · (c) c2_gtn
+python experiments/gen_noise.py               # (b1) b1_noise   · (e1) d1_noise
+python experiments/gen_class_wise_mixing.py   # (b2) b2_mix     · (e2) e2_mix
+python experiments/gen_rgcn.py                # (d) d_rgcn      · (f) f_rgcn
+for ds in acm dblp imdb freebase mag aifb yelp; do
+  for c in a1_baseline b1_noise b2_mix c2_gtn d_rgcn d1_noise e2_mix f_rgcn; do
+    run tda.train configs/campaign/${ds}__${c}.json runs/campaign
+  done
+done
+
+# 2) 주입 factorial (concat vs gate): 5 ds × 14조건 × 10 seed → runs/gated
+#    real/mix 는 고정 GTN+PDGNN 위상(gt2_/gh2_), base/noise 는 위상 무관(gt_/gh_)
 python experiments/gen_gated.py
-MAXGPU=8 bash experiments/run_gated2_campaign.sh
+for ds in acm dblp imdb mag aifb; do
+  for c in gt_base gt2_cat_real gt_cat_noise gt2_cat_mix gt2_gate_real gt_gate_noise gt2_gate_mix \
+           gh_base gh2_cat_real gh_cat_noise gh2_cat_mix gh2_gate_real gh_gate_noise gh2_gate_mix; do
+    run tda.gated configs/campaign/${ds}__${c}.json runs/gated
+  done
+done
 
-# 3) Link prediction (L1 node-PI / L2 pair-vicinity EPD)
+# 3) Link prediction: L1 node-PI(3 ds) + L2 pair-vicinity EPD(7 ds) → runs/lp
 python experiments/gen_lp.py
-bash experiments/run_lp_campaign.sh && bash experiments/run_lp2_campaign.sh
+for ds in acm dblp aifb; do
+  for c in lp_a lp_b1 lp_c lp_m; do run tda.lp configs/campaign/${ds}__${c}.json runs/lp; done
+done
+run tda.lp configs/campaign/dblp__lp_cx.json runs/lp
+for ds in acm dblp imdb freebase mag aifb yelp; do
+  for c in lp2_base lp2_real lp2_noise lp2_mix; do run tda.lp configs/campaign/${ds}__${c}.json runs/lp; done
+done
 
-# 4) 집계·검정
-python experiments/regen_new.py               # 본표 mean±std 집계
-python experiments/agg_gated.py && python experiments/agg_lp.py
-python experiments/paired_stats2.py           # paired Wilcoxon
+# 4) 집계·검정 → results/
+python experiments/regen_new.py               # 본표 (a)~(f) mean±std
+python experiments/agg_gated.py               # factorial 표
+python experiments/agg_lp.py                  # LP 표
+python experiments/paired_stats2.py           # paired Wilcoxon 검정
 ```
+
+> dblp의 HAN 결과는 metapath 목록에 venue를 포함한 것 (`configs/dblp.json`의 `han_metapaths`를 `["APA","APTPA","APVPA"]`로 교체 후 실행).
