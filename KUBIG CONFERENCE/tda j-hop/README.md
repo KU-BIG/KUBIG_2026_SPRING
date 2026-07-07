@@ -4,21 +4,47 @@
 
 GTN(메타패스 자동 발견) → PDGNN(EPD 근사) → HAN/RGCN 주입 파이프라인으로, "위상(persistent homology) 특징이 이종 그래프 node classification에 기여하는가"를 통제 실험(noise·class-mix 대조군, paired 검정)으로 검증한 프로젝트.
 
-## 발표 개요
 
-**01. Introduction** — MPNN은 local aggregation에 갇혀 그래프의 전역 위상(H0 성분·H1 루프)에 눈멀어 있다. Persistent homology로 보완하되, EPD 추출기(PDGNN)는 동종 그래프 전용이므로 GTN이 학습한 메타패스로 이종→동종 변환 후 결합한다.
+## 01. Introduction
+- MPNN은 local aggregation에 갇혀 그래프의 전역 위상(H0 성분, H1 루프)에 눈멀어 있다. 이를 Persistent homology로 보완
+- Persistent homology 정보를 담고 있는 EPD 추출기(PDGNN)는 동종 그래프 전용이므로 GTN이 학습한 meta-path로 이종 → 동종 변환 후 결합한다.
 
-**02. Methodology** — 3-stage 파이프라인: GTN(채널 그래프 4개) → PDGNN(노드별 75d persistence image) → backbone 주입. 실험 매트릭스 = 백본{HAN, RGCN} × 내용{없음, random noise, class-wise mix, real 위상} × 주입{concat, gate}. 10 random seeds, paired Wilcoxon. 5 데이터셋(acm·dblp·imdb·mag·aifb; dblp HAN은 venue 포함 메타패스 목록 사용).
+## 02. Methodology
+- 3-stage 파이프라인: GTN(채널 그래프 4개) → PDGNN(노드별 75d persistence image) → backbone 주입.
+- 실험 매트릭스 = 백본{HAN, RGCN} × 내용{없음, random noise, class-wise mix, real 위상} × 주입{concat, gate}. 10 random seeds,
+  
+- 5 데이터셋(acm·dblp·imdb·mag·aif)사용.
 
-**03. Results**
-1. concat 주입은 homology 정보의 올바른 injection이 아니다 — RGCN 전면 하락(최대 −0.165\*), HAN의 상승 사례는 baseline 고착의 구출 효과.
-2. gate(엣지 밸브 σ(MLP([g_u‖g_v])))는 concat의 유해함을 중화한다 — base 동급 복원, 단 이득 창출은 없음.
-3. gate도 내용물이 진짜 위상일 때만 작동한다 — gate+noise는 전 데이터셋에서 gate+real 미만.
-4. 남는 신호는 노드별 위상이 아니라 클래스 수준이다 — gate+mix ≥ gate+real (per-node 정렬 기여 0).
 
-**04. Conclusion & Future Work** — 위상 특징의 고유 기여는 백본과 무관하게 ≈0. 백본 간 하락 폭 차이는 잡음 내성(HAN의 attention 필터 vs RGCN의 무필터 평균 집계) 차이일 뿐. 향후: link prediction — featureless 그래프에서 pair-vicinity EPD가 +0.07~0.09 AUC(win 100%)로 유일하게 유효.
+## 03. Results
+### 1. concat 주입은 homology 정보의 올바른 injection이 아니다 
+- RGCN 전면 하락(최대 −0.165\*),
+- HAN의 상승 사례는 baseline 고착의 구출 효과.
+- concat 방식은 구조 상관 문제를 일으킬 수 있다. 구조 space와 Node feature space를 섞어버리기 때문에
 
-## 저장소 구조
+### 2. gate(엣지 밸브 σ(MLP([g_u‖g_v])))는 concat의 유해함을 중화한다 
+- base 동급 복원, 단 이득 창출은 없음.
+- gate는 구조 정보를 구조 제어에 사용했기 때문
+  
+### 3. gate도 내용물이 진짜 위상일 때만 작동한다 
+- gate+noise는 전 데이터셋에서 gate+real 미만.
+- gate는 구조 정보를 구조 제어에 사용하도록 학습되었기 때문이다.
+  
+4. 남는 신호는 노드별 위상이 아니라 클래스 수준이다
+- gate+mix ≥ gate+real (per-node 정렬의 기여는 0..).
+- mix는 class 안에서만 섞기 때문에, 섞은 후에도 남는 정보는 class 수준의 위상 신호뿐이다.
+- gate가 class수준의 위상만으로도 real과 동급 이상으로 작동한다
+
+   
+
+## 4. Conclusion & Future Work
+-  위상 특징의 고유 기여는 백본과 무관하게 거의 0.
+-  하지만 class의 위상 구조를 담은 high level의 정보는 도움이 됐다 (gate injection 방식에서)
+-  백본 간 하락 폭 차이는 잡음 내성(HAN의 attention 필터 vs RGCN의 무필터 평균 집계) 차이일 뿐.
+-  향후: link prediction — featureless 그래프에서 유용할 것이라고 예상
+
+
+# 저장소 구조
 
 ```
 tda/           코어 패키지 (models/ GTN·PDGNN·HAN·RGCN·Gated*, topology/ EPD·HKS·PI, train.py, gated.py, lp.py)
