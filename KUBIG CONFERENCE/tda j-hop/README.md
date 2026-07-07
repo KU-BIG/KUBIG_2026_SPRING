@@ -6,9 +6,15 @@ GTN(메타패스 자동 발견) → PDGNN(EPD 근사) → HAN/RGCN 주입 파이
 
 ## 01. Introduction
 
-**배경** — 실세계 데이터(학술·지식그래프·리뷰)는 여러 타입의 노드와 관계가 섞인 이종(heterogeneous) 그래프다. 대표 모델인 HAN·RGCN 등 MPNN 계열은 이웃 feature를 aggregate하는 방식이라 **수용 범위가 local(layer 수 × hop)에 갇힌다** — 같은 이웃 구조를 가진 두 노드라도 그래프 전체에서의 전역 위상(연결 성분 H0, 루프 H1)은 다를 수 있는데, 이 정보는 feature에 담기지 않는다 (topology blindness).
+**배경**
+- 실세계 데이터(학술·지식그래프·리뷰)는 여러 타입의 노드·관계가 섞인 이종(heterogeneous) 그래프
+- 대표 모델(HAN·RGCN 등 MPNN 계열)은 이웃 feature를 aggregate하는 방식 → **수용 범위가 local(layer 수 × hop)에 갇힘**
+- 같은 이웃 구조를 가진 두 노드라도 전역 위상(연결 성분 H0, 루프 H1)은 다를 수 있음 — 이 정보가 feature에 담기지 않음 (**topology blindness**)
 
-**접근** — Persistent homology는 filtration 과정에서 위상 특징의 생성(birth)·소멸(death)을 추적해 전역 구조를 벡터(persistence image)로 요약한다. 단 EPD 추출기(PDGNN)는 동종 그래프 전용이므로, **GTN이 학습한 meta-path로 이종 → 동종 서브그래프 변환** 후 결합한다 (GTN → PDGNN → backbone).
+**접근**
+- Persistent homology: filtration 과정에서 위상 특징의 생성(birth)·소멸(death)을 추적 → 전역 구조를 벡터(persistence image)로 요약
+- 단 EPD 추출기(PDGNN)는 동종 그래프 전용 → **GTN이 학습한 meta-path로 이종 → 동종 서브그래프 변환** 후 결합
+- 전체 파이프라인: **GTN → PDGNN → backbone(HAN/RGCN)**
 
 **연구 질문**
 - **Q1.** GTN-PDGNN으로 추출한 homology feature를 이종 GNN에 추가하면 node classification 성능이 향상되는가?
@@ -60,7 +66,7 @@ test macro-F1 (mean±std, 10 seeds).
 - HAN의 상승 사례는 baseline 고착의 구출 효과.
 - concat 방식은 구조 상관 문제를 일으킬 수 있다. 구조 space와 Node feature space를 섞어버리기 때문에
 
-### 2. gate(엣지 밸브 σ(MLP([g_u‖g_v])))는 concat의 유해함을 중화한다
+### 2. gate(엣지 밸브 $g_{uv}=\sigma(\mathrm{MLP}([\tilde{g}_u \Vert \tilde{g}_v]))$)는 concat의 유해함을 중화한다
 
 | 데이터셋 | RGCN: concat → gate (base) | HAN: concat → gate (base) |
 |---|---|---|
