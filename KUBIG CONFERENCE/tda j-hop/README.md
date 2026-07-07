@@ -52,6 +52,7 @@ g_{uv}=\sigma\!\left(\mathrm{MLP}\left([\,\tilde{g}_u \,\Vert\, \tilde{g}_v\,]\r
 ## 03. Results
 
 test macro-F1 (mean±std, 10 seeds).
+> 📝 데이터셋별 상세 분석·전체 표·paired 검정·LP 결과는 [Notion: conclusion / discussion](https://www.notion.so/3942bc41882d804b8a59e44feba7d366) 참고.
 ### 1. concat 주입은 homology 정보의 올바른 injection이 아니다
 
 | 데이터셋 | RGCN: base → concat | HAN: base → concat |
