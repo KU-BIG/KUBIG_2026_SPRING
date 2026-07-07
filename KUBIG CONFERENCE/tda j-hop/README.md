@@ -5,8 +5,15 @@
 GTN(메타패스 자동 발견) → PDGNN(EPD 근사) → HAN/RGCN 주입 파이프라인으로, "위상(persistent homology) 특징이 이종 그래프 node classification에 기여하는가"를 통제 실험(noise·class-mix 대조군, paired 검정)으로 검증한 프로젝트.
 
 ## 01. Introduction
-- MPNN은 local aggregation에 갇혀 그래프의 전역 위상(H0 성분, H1 루프)에 눈멀어 있다. 이를 Persistent homology로 보완
-- Persistent homology 정보를 담고 있는 EPD 추출기(PDGNN)는 동종 그래프 전용이므로 GTN이 학습한 meta-path로 이종 → 동종 변환 후 결합한다.
+
+**배경** — 실세계 데이터(학술·지식그래프·리뷰)는 여러 타입의 노드와 관계가 섞인 이종(heterogeneous) 그래프다. 대표 모델인 HAN·RGCN 등 MPNN 계열은 이웃 feature를 aggregate하는 방식이라 **수용 범위가 local(layer 수 × hop)에 갇힌다** — 같은 이웃 구조를 가진 두 노드라도 그래프 전체에서의 전역 위상(연결 성분 H0, 루프 H1)은 다를 수 있는데, 이 정보는 feature에 담기지 않는다 (topology blindness).
+
+**접근** — Persistent homology는 filtration 과정에서 위상 특징의 생성(birth)·소멸(death)을 추적해 전역 구조를 벡터(persistence image)로 요약한다. 단 EPD 추출기(PDGNN)는 동종 그래프 전용이므로, **GTN이 학습한 meta-path로 이종 → 동종 서브그래프 변환** 후 결합한다 (GTN → PDGNN → backbone).
+
+**연구 질문**
+- **Q1.** GTN-PDGNN으로 추출한 homology feature를 이종 GNN에 추가하면 node classification 성능이 향상되는가?
+- **Q2.** 향상이 있다면 진짜 위상 신호 때문인가, feature 차원 증가 효과인가? → noise·class-mix 대조군으로 검증
+- **Q3.** 위상 feature의 기여는 backbone 구조(HAN vs RGCN)에 따라 달라지는가?
 
 ## 02. Methodology
 - 3-stage 파이프라인: GTN(채널 그래프 4개) → PDGNN(노드별 75d persistence image) → backbone 주입.
