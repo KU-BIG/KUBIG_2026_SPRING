@@ -2,7 +2,9 @@
 
 **Combining Meta-Path Discovery and Persistent Homology for Heterogeneous Graph Learning**
 
-GTN(메타패스 자동 발견) → PDGNN(EPD 근사) → HAN/RGCN 주입 파이프라인으로, "위상(persistent homology) 특징이 이종 그래프 node classification에 기여하는가"를 통제 실험(noise·class-mix 대조군, paired 검정)으로 검증한 프로젝트.
+GTN(메타패스 자동 발견) → PDGNN(EPD 근사) → HAN/RGCN 주입 파이프라인
+
+**위상(persistent homology) 특징이 이종 그래프 node classification에 기여하는가**를 noise/class-mix 대조 실험으로 검증한 프로젝트이다.
 
 ## 01. Introduction
 
