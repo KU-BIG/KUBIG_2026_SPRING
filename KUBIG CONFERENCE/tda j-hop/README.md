@@ -69,7 +69,7 @@ test macro-F1 (mean±std, 10 seeds).
 - HAN의 상승 사례는 baseline 고착의 구출 효과.
 - concat 방식은 구조 상관 문제를 일으킬 수 있다. 구조 space와 Node feature space를 섞어버리기 때문에
 
-### 2. gate(엣지 밸브 $g_{uv}=\sigma(\mathrm{MLP}([\tilde{g}_u \Vert \tilde{g}_v]))$)는 concat의 유해함을 중화한다
+### 2. gate(엣지 밸브 $`g_{uv}=\sigma(\mathrm{MLP}([\tilde{g}_u \Vert \tilde{g}_v]))`$)는 concat의 유해함을 중화한다
 
 | 데이터셋 | RGCN: concat → gate (base) | HAN: concat → gate (base) |
 |---|---|---|
