@@ -1,0 +1,18 @@
+# Hyperparameter search space for HAN+PDGNN fusion (main model).
+# Each key maps to a list of candidate values (random search samples one per trial).
+
+search_space:
+  lr: [0.0003, 0.0005, 0.001, 0.002, 0.003]
+  weight_decay: [0.0, 0.00001, 0.0001]
+  dropout: [0.1, 0.2, 0.3]
+  model_dim: [128, 192, 256]
+  num_han_layers: [1, 2, 3]
+  num_pdg_layers: [2, 3, 4]
+  num_attention_heads: [2, 4, 8]
+  batch_size: [16, 32, 64]
+  pooling: [mean, add]
+
+# Constraints applied after sampling (invalid trials are resampled).
+constraints:
+  model_dim_divisible_by_num_attention_heads: true
+  hidden_dim_equals_model_dim: true

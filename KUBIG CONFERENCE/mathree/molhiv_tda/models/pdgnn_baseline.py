@@ -1,0 +1,82 @@
+"""PDGNN baseline model for OGBG-MolHIV graph classification."""
+from __future__ import annotations
+
+import torch
+import torch.nn.functional as F
+from ogb.graphproppred.mol_encoder import AtomEncoder, BondEncoder
+from torch_geometric.nn import global_add_pool
+from torch_geometric.nn.inits import reset
+
+from models.pdgnn_conv import PDConv
+
+
+class PDGNNBaseline(torch.nn.Module):
+    """
+    PDGNN backbone for molecular graphs.
+
+    Architecture follows TLC-GNN Teacher_model.Base_Model (type='PDGNN'):
+    5 PDConv layers with sum+min aggregation, adapted for OGB atom/bond encoders.
+    """
+
+    def __init__(
+        self,
+        num_tasks: int = 1,
+        num_layers: int = 5,
+        emb_dim: int = 300,
+        dropout: float = 0.5,
+        edge_phys_dim: int = 0,
+    ):
+        super().__init__()
+        self.num_layers = num_layers
+        self.dropout = dropout
+        self.emb_dim = emb_dim
+        self.edge_phys_dim = edge_phys_dim
+        self.prelu = torch.nn.PReLU(num_parameters=1, init=0.1)
+
+        self.atom_encoder = AtomEncoder(emb_dim)
+        self.bond_encoder = BondEncoder(emb_dim)
+        self.edge_phys_proj = (
+            torch.nn.Linear(edge_phys_dim, emb_dim) if edge_phys_dim > 0 else None
+        )
+
+        # PDGNN stack: each layer output is 2 * emb_dim due to sum+min aggregation
+        self.convs = torch.nn.ModuleList()
+        self.convs.append(
+            PDConv(emb_dim, emb_dim, double_input=False, bond_dim=emb_dim, normalize=False)
+        )
+        for _ in range(1, num_layers):
+            self.convs.append(
+                PDConv(emb_dim, emb_dim, double_input=True, bond_dim=emb_dim, normalize=False)
+            )
+
+        self.graph_pred = torch.nn.Sequential(
+            torch.nn.Linear(2 * emb_dim, 2 * emb_dim),
+            torch.nn.ReLU(),
+            torch.nn.Dropout(dropout),
+            torch.nn.Linear(2 * emb_dim, num_tasks),
+        )
+
+    def encode_nodes(self, batch) -> torch.Tensor:
+        """Return per-node features (pre-pooling), shape [num_nodes, 2 * emb_dim]."""
+        x = self.atom_encoder(batch.x)
+        edge_emb = self.bond_encoder(batch.edge_attr)
+        if self.edge_phys_proj is not None and hasattr(batch, "edge_phys"):
+            edge_emb = edge_emb + self.edge_phys_proj(batch.edge_phys)
+
+        for i, conv in enumerate(self.convs):
+            x = F.dropout(x, p=self.dropout, training=self.training)
+            x = conv(x, batch.edge_index, edge_emb=edge_emb)
+            x = self.prelu(x)
+            if i < len(self.convs) - 1:
+                x = F.dropout(x, p=self.dropout, training=self.training)
+
+        return x
+
+    def encode(self, batch) -> torch.Tensor:
+        return global_add_pool(self.encode_nodes(batch), batch.batch)
+
+    def forward(self, batch):
+        return self.graph_pred(self.encode(batch))
+
+    def reset_parameters(self):
+        reset(self)

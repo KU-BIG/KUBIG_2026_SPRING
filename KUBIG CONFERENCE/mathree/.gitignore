@@ -1,0 +1,20 @@
+.venv/
+__pycache__/
+*.pyc
+*.so
+*.egg-info/
+
+# Run logs
+*.log
+nohup.out
+**/nohup.out
+
+# Data, caches, checkpoints (download or regenerate on vast.ai)
+molhiv_tda/dataset/
+molhiv_tda/cache/
+molhiv_tda/results/
+molhiv_tda/han_pdgnn_fusion/results/
+data/
+
+# Large upstream clone (optional on cloud)
+pdgnn/TLC-GNN/
