@@ -1,174 +1,158 @@
-# Moore-AnimateAnyone 구현 가이드
+> 📦 **전체 코드·커밋 히스토리**: [goldkangsan/anime-action-scene](https://github.com/goldkangsan/anime-action-scene) · **KUBIG 아카이브**: [KU-BIG/2026_SPRING-Anime_Action_Scene](https://github.com/KU-BIG/2026_SPRING-Anime_Action_Scene)
+>
+> 컨퍼런스 제출용 스냅샷입니다. 엔진(submodule) 코드는 위 원본 repo를 참고하세요.
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/goldkangsan/moore-animate-anyone/blob/main/colab_animate_anyone.ipynb)
+# Anime Action Scene Generator
+**KUBIG Conference · Multimodal Team**
 
-## 전체 실행 흐름
+> 캐릭터 이미지 1장 + 동작 영상 → 그 캐릭터가 그 동작을 하는 애니메이션 영상 생성
+
+세대별 SOTA character animation 모델을 **직접 재현·비교**하고 애니 도메인에 적용한 프로젝트.
+**학습/파인튜닝 없이** 공개 가중치를 그대로 불러와 inference만 수행한다.
+
+---
+
+## 프로젝트 개요 — "동작을 어떻게 주는가"로 세대 비교
+
+| 세대 | 모델 | 동작 가이드 | 이 레포 |
+|---|---|---|---|
+| **2D** (2023) | AnimateAnyone (Moore) | DWPose 2D 스켈레톤 | ✅ [`2d/`](2d/README.md) |
+| **3D** (2024) | Champ | SMPL 3D (depth·normal·semantic·dwpose) | ✅ [`3d/`](3d/README.md) |
+| **최신** (2026) | UniAnimate | DWPose + video diffusion 백본 | ✅ [`unianimate/`](unianimate/README.md) |
+
+**공통 구조** (세 모델 공통): 확산(Diffusion) 기반 ·
+**ReferenceNet**(외형 identity) + **Pose Guider**(동작 주입) + **Denoising UNet** + **Motion Module**(프레임 간 일관성).
+→ 세대 차이는 결국 **동작을 표현하는 방식(가이드)**의 차이다.
+
+---
+
+## 핵심 발견
+
+- **3D SMPL 가이드는 정보(깊이·표면)가 풍부하지만, 프레임 간 떨림(jitter)이 있다.**
+- training-free 노이즈 재배치(FreeNoise)로도 이 떨림은 크게 줄지 않았다 → **문제는 노이즈가 아니라 입력 가이드 자체.**
+- 최신 UniAnimate가 SMPL(3D)을 버리고 DWPose(2D)로 회귀한 흐름과 일치. → **정보량 ≠ 안정성.**
+
+> ⚠️ **방법론 주의**: FreeNoise는 프레임 수 `L`이 `window_size`(기본 24)보다 **클 때만** `iid`와 달라진다.
+> `-L 24` 이하로 실험하면 재배치 루프가 비어 결과가 `iid`와 동일하다. 효과를 보려면 `-L 48` 이상으로 확인할 것.
+
+---
+
+## 결과 영상
+
+같은 캐릭터(이누야샤)로 세대별 결과를 비교했다 — 분할 화면 = **참조 · 생성 · 가이드맵**.
+
+| 영상 | 모델 | 구성 | 포인트 |
+|---|---|---|---|
+| [`champ_inuyasha.mp4`](results/champ_inuyasha.mp4) | 3D Champ | ref · 생성 · dwpose · depth · normal | SMPL 가이드맵 4종이 함께 보임 |
+| [`unianimate_inuyasha.mp4`](results/unianimate_inuyasha.mp4) | 최신 UniAnimate | ref · dwpose · 생성 | DWPose 기반, 셋 중 가장 깔끔 |
+| [`champ_freenoise_inuyasha.mp4`](results/champ_freenoise_inuyasha.mp4) | 3D Champ + FreeNoise | 5분할 | FreeNoise 적용해도 기본 대비 변화 미미 |
+
+> GitHub에서 파일명을 클릭하면 브라우저에서 바로 재생된다.
+
+---
+
+## 폴더 구조
 
 ```
-[사람 이미지 1장]  +  [동작 비디오]
-       ↓                    ↓
-  prepare_inputs.py    vid2pose.py (포즈 추출)
-       ↓                    ↓
-            pose2vid.py (inference)
-                   ↓
-           output/*.mp4 (결과 영상)
+anime-action-scene/
+├── 2d/                      # Moore-AnimateAnyone 2D wrapper   → 2d/README.md
+│   ├── run.py               #   진입점
+│   ├── noise.py             #   training-free 노이즈 전략 (iid/repeat/freenoise)
+│   ├── config.yaml
+│   └── Moore-AnimateAnyone/  #  엔진 submodule
+├── 3d/                      # Champ 3D wrapper                 → 3d/README.md
+│   ├── run.py
+│   ├── noise.py             #   2d와 동일 파일 (prepare_latents 몽키패치)
+│   ├── preprocess.py        #   raw 영상 → SMPL guidance (무거운 별도 경로)
+│   └── champ/                #  엔진 submodule
+├── unianimate/              # UniAnimate 최신 모델 wrapper      → unianimate/README.md
+│   ├── UniAnimate_infer_my.yaml
+│   └── UniAnimate/           #  엔진 submodule
+├── results/                 # 세대별 결과 영상 (이누야샤)
+├── run_gradio.py            # Gradio 데모 UI
+├── colab_2d_baseline.ipynb  # Colab 실험 노트북
+├── colab_champ_inference.ipynb
+├── colab_animate_anyone.ipynb
+├── configs/                 # 2D/3D inference 설정
+└── README_KR.md             # 한글 README (본 문서와 동일)
+```
+
+> 실행법·CLI 옵션·가중치·라이선스는 각 폴더 README에 상세히 있다:
+> **[2d/README.md](2d/README.md)** · **[3d/README.md](3d/README.md)**
+
+---
+
+## 빠른 시작
+
+**2D (Moore-AnimateAnyone)**
+```bash
+cd 2d
+python download_weights.py                                   # 가중치 ~15GB → ./weights
+python run.py --ref character.png --video driving.mp4 --out result.mp4
+python run.py --ref character.png --video driving.mp4 --out result_fn.mp4 --noise freenoise -L 48
+```
+
+**3D (Champ)** — `--video`에 raw 영상이 아니라 **SMPL guidance 폴더**를 준다
+```bash
+cd 3d
+python download_weights.py
+python run.py --ref character.png --video example_data/motions/motion-01 --out result.mp4
+```
+
+**최신 (UniAnimate)** — modelscope 가중치 + pose 정렬 후 inference (자세히는 [`unianimate/README.md`](unianimate/README.md))
+```bash
+cd unianimate/UniAnimate
+python run_align_pose.py --ref_name data/images/ref.jpg --source_video_paths data/videos/clip.mp4 --saved_pose_dir data/saved_pose/ref_clip
+python inference.py --cfg configs/UniAnimate_infer_my.yaml
+```
+
+**Gradio 데모**: `python run_gradio.py`
+
+---
+
+## Colab (설치 없이 실행)
+
+### 2D Baseline (Moore-AnimateAnyone)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/goldkangsan/anime-action-scene/blob/main/colab_2d_baseline.ipynb)
+
+### 3D Champ
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/goldkangsan/anime-action-scene/blob/main/colab_champ_inference.ipynb)
+
+**실행 순서 (공통)**
+```
+셀 0 → 셀 1 → 셀 2 (pip 설치, 자동 재시작)
+→ 셀 0 → 셀 1 → 셀 3 (import 테스트) → 이후 순서대로
+```
+> ⚠️ 셀 2 이후 런타임이 자동 재시작됨 — 정상 동작. 셀 2만 건너뛰고 다시 실행.
+
+---
+
+## training-free 노이즈 전략 (`--noise`)
+
+초기 latent noise `(B, C, F, H/8, W/8)`의 프레임 축 `F`를 채우는 방식만 교체한다.
+**재학습 없음** — `noise.py`가 pipeline의 `prepare_latents`를 몽키패치해서 주입한다.
+
+| 전략 | 방식 | 특징 |
+|---|---|---|
+| `iid` (기본) | 프레임마다 독립 노이즈 | 움직임 자유, flicker 가능 |
+| `repeat` | 한 프레임 노이즈를 전체 프레임에 복사 | 일관성 최대, 움직임 억제 |
+| `freenoise` | 윈도우 재사용 + 지역 셔플 | 긴 영상 일관성, tuning 불필요 (`-L 48`↑에서 효과) |
+
+---
+
+## 검증된 패키지 버전
+
+```
+diffusers==0.24.0
+transformers>=4.36.0,<4.40.0
+huggingface_hub>=0.19.0,<0.23.0   # 0.23+ 에서 cached_download 삭제됨
+accelerate
 ```
 
 ---
 
-## 사전 준비
+## 크레딧 · 라이선스
 
-### 1. 레포 클론 (원본 Moore-AnimateAnyone)
-```bash
-git clone https://github.com/MooreThreads/Moore-AnimateAnyone
-cd Moore-AnimateAnyone
-```
-
-> **주의**: 이 폴더의 스크립트는 Moore-AnimateAnyone 레포 루트에서 실행해야 한다.
-> `src/`, `configs/` 등이 원본 레포에 있다.
-
-### 2. 환경 설치
-```bash
-# Python 3.10+, CUDA 11.7+ 권장
-conda create -n animate python=3.10 -y
-conda activate animate
-pip install -r requirements.txt
-```
-
-### 3. Weights 다운로드
-```bash
-python tools/download_weights.py
-```
-
-다운받는 파일들:
-```
-pretrained_weights/
-├── stable-diffusion-v1-5/unet/
-├── image_encoder/
-├── sd-vae-ft-mse/
-├── DWPose/
-│   ├── dw-ll_ucoco_384.onnx
-│   └── yolox_l.onnx
-├── denoising_unet.pth
-├── reference_unet.pth
-├── pose_guider.pth
-└── motion_module.pth
-```
-
----
-
-## 실행 순서
-
-### Step 0: 환경 체크 (먼저 해라)
-```bash
-python tools/check_env.py
-```
-
-### Step 1: 입력 파일 전처리
-```bash
-# ref.png를 512x784로 리사이즈해서 inputs/ref.png로 저장
-python tools/prepare_inputs.py \
-  --ref path/to/your_photo.jpg \
-  --video path/to/driving.mp4 \
-  -W 512 -H 784
-```
-
-### Step 2: 포즈 추출
-```bash
-python tools/vid2pose.py --video_path inputs/driving.mp4
-# → outputs/pose/driving_kps.mp4 생성
-```
-
-### Step 3: animation.yaml 수정
-`configs/prompts/animation.yaml`:
-```yaml
-test_cases:
-  "./inputs/ref.png":
-    - "./outputs/pose/driving_kps.mp4"
-```
-
-### Step 4: Inference 실행
-```bash
-# 기본 (512x784, 32프레임)
-python scripts/pose2vid.py \
-  --config ./configs/prompts/animation.yaml \
-  -W 512 -H 784 -L 32
-
-# VRAM 부족할 때 (해상도/프레임 낮추기)
-python scripts/pose2vid.py \
-  --config ./configs/prompts/animation.yaml \
-  -W 384 -H 512 -L 16
-```
-
-### (선택) Gradio UI로 실행
-```bash
-python run_gradio.py
-# → http://localhost:7860
-```
-
-### 한 번에 전부 실행
-```bash
-bash run.sh                  # 기본 설정
-bash run.sh --low_vram       # VRAM 부족 시
-bash run.sh --frames 64      # 더 긴 영상
-```
-
----
-
-## VRAM 가이드
-
-| 설정 | 최소 VRAM |
-|------|-----------|
-| 384x512, 16프레임 | ~8GB |
-| 512x784, 32프레임 | ~12GB |
-| 512x784, 64프레임 | ~16GB+ |
-
----
-
-## 자주 막히는 포인트
-
-### onnxruntime 오류
-```bash
-pip install onnxruntime-gpu==1.16.3
-# GPU 없으면:
-pip install onnxruntime==1.16.3
-```
-
-### CUDA out of memory
-- `-L` (프레임 수) 줄이기
-- `-W`, `-H` 해상도 줄이기
-- `weight_dtype: fp16` 확인
-
-### weights 경로 오류
-- `pretrained_weights/` 폴더 구조가 README 기준과 정확히 맞아야 함
-- `python tools/check_env.py` 로 확인
-
-### pose 추출이 안 될 때
-- DWPose onnx 파일 확인: `pretrained_weights/DWPose/*.onnx`
-- 비디오 codec 문제: mp4 (H.264) 형식 사용 권장
-
----
-
-## 파일 구조
-
-```
-animate_anyone/
-├── scripts/
-│   └── pose2vid.py          # 메인 inference 스크립트
-├── tools/
-│   ├── download_weights.py  # weights 다운로드
-│   ├── vid2pose.py          # 포즈 추출
-│   ├── prepare_inputs.py    # 입력 전처리
-│   └── check_env.py         # 환경 체크
-├── configs/
-│   ├── prompts/
-│   │   └── animation.yaml   # 입력/출력 경로 설정
-│   └── inference/
-│       └── inference_v2.yaml # UNet/scheduler 설정
-├── inputs/                  # ref image 저장 위치
-├── outputs/
-│   └── pose/                # vid2pose 출력 위치
-├── pretrained_weights/      # 모델 weights
-├── run.sh                   # 원클릭 실행 스크립트
-└── run_gradio.py            # Gradio UI
-```
+재현 기반: **Moore-AnimateAnyone · (원조) AnimateAnyone · Champ · AnimateDiff · DWPose · SMPL · Stable Diffusion**.
+코드는 Apache-2.0(wrapper는 우리 것). 가중치 라이선스는 코드와 별개다 —
+특히 SD1.5는 CreativeML OpenRAIL-M, SMPL body model은 별도 라이선스. 배포 전 각 모델 카드에서 최종 조건을 확인할 것.

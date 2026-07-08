@@ -74,7 +74,7 @@ anime-action-scene/
 ├── colab_champ_inference.ipynb
 ├── colab_animate_anyone.ipynb
 ├── configs/                 # 2D/3D inference 설정
-└── README_KR.md             # 2D 상세 실행 가이드
+└── README_KR.md             # 한글 README (본 문서와 동일)
 ```
 
 > 실행법·CLI 옵션·가중치·라이선스는 각 폴더 README에 상세히 있다:
