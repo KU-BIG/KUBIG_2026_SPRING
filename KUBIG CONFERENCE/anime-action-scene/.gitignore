@@ -1,0 +1,38 @@
+# pretrained weights (용량 너무 큼)
+pretrained_weights/
+
+# 생성 결과
+output/
+
+# 입출력 파일 (개인 데이터)
+inputs/
+outputs/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# 환경
+.env
+.venv
+venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp

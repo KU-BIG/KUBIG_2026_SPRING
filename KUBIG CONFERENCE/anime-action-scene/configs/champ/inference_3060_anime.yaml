@@ -1,0 +1,39 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Champ inference config — RTX 3060 + Anything V5 (애니 특화)
+# inference_3060.yaml과 동일하되 베이스 모델만 Anything V5로 교체
+# ──────────────────────────────────────────────────────────────────────────────
+
+pretrained_model_name_or_path: "pretrained_weights/anything-v5"  # ← 핵심 변경
+image_encoder_path:             "pretrained_weights/image_encoder"
+
+champ_pretrained_weight_path:
+  denoising_unet:  "pretrained_weights/champ/denoising_unet.pth"
+  reference_unet:  "pretrained_weights/champ/reference_unet.pth"
+  motion_module:   "pretrained_weights/champ/motion_module.pth"
+  guidance_encoder_depth:    "pretrained_weights/champ/guidance_encoder_depth.pth"
+  guidance_encoder_normal:   "pretrained_weights/champ/guidance_encoder_normal.pth"
+  guidance_encoder_semantic: "pretrained_weights/champ/guidance_encoder_semantic.pth"
+  guidance_encoder_dwpose:   "pretrained_weights/champ/guidance_encoder_dwpose.pth"
+
+ref_image_path:    "inputs/ref.png"
+guidance_folder:   "outputs/guidance"
+output_dir:        "outputs/champ_anime"
+
+width:  384
+height: 512
+num_frames: 16
+
+num_inference_steps: 20
+guidance_scale: 3.5
+seed: 42
+
+guidance_types:
+  - depth
+  - normal
+  - semantic
+  - dwpose
+guidance_embedding_channels: 320
+
+weight_dtype: "fp16"
+xformers_memory_efficient_attention: true
+enable_attention_slicing: true

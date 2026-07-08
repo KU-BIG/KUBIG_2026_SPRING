@@ -1,0 +1,87 @@
+# 3d/config.yaml
+# Champ inference wrapper 설정
+#
+# CLI 플래그가 항상 이 값들보다 우선한다:
+#   --ref/--video/--out  --noise  -W  -H  -L  --steps  --cfg  --seed  --fps
+# Champ 엔진은 OmegaConf 설정을 그대로 먹기 때문에, 이 파일은 Champ inference.yaml
+# 구조를 따르되 (1) 경로를 우리 weights/ 레이아웃으로 바꾸고 (2) noise 키를 추가했다.
+
+exp_name: Animation
+
+# --- 생성 옵션 ---
+weight_dtype: fp16        # fp16 | fp32
+width:  512               # Champ 학습 해상도는 정사각(512x512) 기준
+height: 512
+num_inference_steps: 20
+guidance_scale: 3.5       # classifier-free guidance scale
+seed: 42
+fps:                      # 비우면 24 fps 로 저장 (guidance 는 원본 fps 정보가 없음)
+
+# --- 입력 (상대경로는 실행 시 CLI 값으로 덮어씀) ---
+data:
+  ref_image_path: ''             # --ref 로 지정
+  guidance_data_folder: ''       # --video 가 폴더면 그대로, 영상이면 전처리 결과로 채워짐
+  frame_range: [0, 100]          # [min, max] 프레임 구간. -L 주면 [0, L] 로 덮어씀
+  # guidance_process_size: 100   # [선택] VRAM 절약용: guidance tensor 를 나눠 인코딩
+
+# --- 가중치 (상대경로는 weights_dir 아래로 resolve; download_weights.py 참고) ---
+weights_dir: weights
+base_model_path:    stable-diffusion-v1-5   # base SD1.5 (unet/ 포함)
+vae_model_path:     sd-vae-ft-mse
+image_encoder_path: image_encoder
+ckpt_dir:           champ                    # denoising/reference/guidance_encoder_*/motion_module
+motion_module_path: champ/motion_module.pth
+
+# --- 노이즈 전략 (필수 옵션: --noise; 2d 와 동일) ----------------------------------------
+# iid       : 프레임마다 독립적인 noise (기본값; 자유로운 움직임, flicker 가능)
+# repeat    : 한 프레임의 noise를 모든 프레임에 복사 (일관성 최대, 움직임 감소)
+# freenoise : window 재사용 + local shuffle (긴 영상에서도 일관성 유지, tuning 불필요)
+noise: iid
+
+# noise: freenoise 일 때만 사용되며, 프레임 수가 window_size 보다 커야 iid 와 달라진다.
+# 기본값은 pipeline의 context window와 맞춤 (context_frames=24, context_overlap=4).
+freenoise:
+  window_size:   24
+  window_stride:  4
+
+# --- Champ 엔진 설정 (아래는 Champ inference.yaml 원본 그대로) ------------------------
+enable_zero_snr: true
+
+guidance_types:
+  - depth
+  - normal
+  - semantic_map
+  - dwpose
+
+noise_scheduler_kwargs:
+  num_train_timesteps: 1000
+  beta_start:          0.00085
+  beta_end:            0.012
+  beta_schedule:       linear
+  steps_offset:        1
+  clip_sample:         false
+
+unet_additional_kwargs:
+  use_inflated_groupnorm: true
+  unet_use_cross_frame_attention: false
+  unet_use_temporal_attention: false
+  use_motion_module: true
+  motion_module_resolutions: [1, 2, 4, 8]
+  motion_module_mid_block: true
+  motion_module_decoder_only: false
+  motion_module_type: Vanilla
+  motion_module_kwargs:
+    num_attention_heads: 8
+    num_transformer_block: 1
+    attention_block_types: [Temporal_Self, Temporal_Self]
+    temporal_position_encoding: true
+    temporal_position_encoding_max_len: 32
+    temporal_attention_dim_div: 1
+
+guidance_encoder_kwargs:
+  guidance_embedding_channels: 320
+  guidance_input_channels: 3
+  block_out_channels: [16, 32, 96, 256]
+
+# xformers 는 설치돼 있으면 켤 수 있다 (VRAM 절약). 버전이 torch 와 안 맞으면 false 로.
+enable_xformers_memory_efficient_attention: false

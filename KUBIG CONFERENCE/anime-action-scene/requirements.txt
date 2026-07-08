@@ -1,0 +1,39 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Anime Action Scene Generator
+# 맥북(MPS) + RTX 3060(CUDA) + Colab 공통 의존성
+# ──────────────────────────────────────────────────────────────────────────────
+
+# Core
+torch>=2.1.0
+torchvision>=0.16.0
+numpy
+Pillow
+opencv-python
+tqdm
+einops
+omegaconf
+safetensors
+
+# Diffusion
+diffusers==0.24.0
+transformers==4.30.2
+accelerate
+huggingface_hub
+
+# Pose & Segmentation (맥북 CPU/MPS 동작)
+onnxruntime          # DWPose (CUDA 있으면 onnxruntime-gpu로 교체)
+controlnet-aux==0.0.7
+mediapipe            # Semantic 맵 (CPU)
+
+# Video
+imageio
+imageio[ffmpeg]
+
+# UI
+gradio>=4.0.0
+
+# Champ 추가 의존성 (Colab/3060에서 Champ inference 시 필요)
+# xformers            # CUDA 환경에서만 설치 (pip install xformers)
+# open-clip-torch==2.20.0
+# pyrender==0.1.45
+# ultralytics==8.1.34

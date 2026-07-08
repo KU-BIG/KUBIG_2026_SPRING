@@ -1,0 +1,29 @@
+# 가중치는 크므로 커밋 X (2d/ 와 별개 — 절대 섞지 말 것)
+weights/
+*.pth
+*.safetensors
+*.ckpt
+*.onnx
+*.bin
+
+# 결과물
+results/
+outputs/
+output/
+*.mp4
+*.gif
+
+# 전처리 중간 파일 (SMPL/렌더)
+driving_videos/
+reference_imgs/
+transferd_result/
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# 기타
+.DS_Store

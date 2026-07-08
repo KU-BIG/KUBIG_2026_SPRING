@@ -1,0 +1,30 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Moore-AnimateAnyone: inference config
+# ──────────────────────────────────────────────────────────────────────────────
+# 모든 경로는 프로젝트 루트(animate_anyone/) 기준 상대경로 또는 절대경로.
+# test_cases: { ref_image_path: [pose_video_path, ...] }
+# ──────────────────────────────────────────────────────────────────────────────
+
+pretrained_base_model_path: "./pretrained_weights/stable-diffusion-v1-5"
+pretrained_vae_path:        "./pretrained_weights/sd-vae-ft-mse"
+image_encoder_path:         "./pretrained_weights/image_encoder"
+denoising_unet_path:        "./pretrained_weights/denoising_unet.pth"
+reference_unet_path:        "./pretrained_weights/reference_unet.pth"
+pose_guider_path:           "./pretrained_weights/pose_guider.pth"
+motion_module_path:         "./pretrained_weights/motion_module.pth"
+
+inference_config: "./configs/inference/inference_v2.yaml"
+
+# fp16: GPU 메모리 절약 (VRAM 16GB 이하 권장)
+# fp32: 더 정확하지만 메모리 2배 소요
+weight_dtype: "fp16"
+
+# ─── 입력 설정 ───────────────────────────────────────────────────────────────
+# ref_image_path → pose_video_path 여러 개 지정 가능
+test_cases:
+  "./inputs/ref.png":
+    - "./outputs/pose/driving_kps.mp4"
+
+  # 여러 입력이 있으면 아래처럼 추가
+  # "./inputs/ref2.png":
+  #   - "./outputs/pose/driving2_kps.mp4"

@@ -1,0 +1,21 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Anime Action Scene — Anything V5 기반 config
+# 기본 SD 1.5 UNet을 Anything V5로 교체. 나머지 컴포넌트(VAE, motion module 등)는 동일.
+# ──────────────────────────────────────────────────────────────────────────────
+
+pretrained_base_model_path: "./pretrained_weights/anything-v5"
+pretrained_vae_path:        "./pretrained_weights/sd-vae-ft-mse"
+image_encoder_path:         "./pretrained_weights/image_encoder"
+denoising_unet_path:        "./pretrained_weights/denoising_unet.pth"
+reference_unet_path:        "./pretrained_weights/reference_unet.pth"
+pose_guider_path:           "./pretrained_weights/pose_guider.pth"
+motion_module_path:         "./pretrained_weights/motion_module.pth"
+
+inference_config: "./configs/inference/inference_v2.yaml"
+
+# MPS(M1/M2/M3/M5) 환경에서는 fp16이 불안정할 수 있음 → 자동 감지 후 fp32로 전환됨
+weight_dtype: "fp16"
+
+test_cases:
+  "./inputs/ref.png":
+    - "./outputs/pose/driving_kps.mp4"

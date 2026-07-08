@@ -1,0 +1,45 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Champ inference config — RTX 3060 (12GB VRAM) 최적화
+# 베이스 모델: Stable Diffusion v1.5
+# ──────────────────────────────────────────────────────────────────────────────
+
+# 모델 경로 (download_weights.py --champ 로 다운로드)
+pretrained_model_name_or_path: "pretrained_weights/stable-diffusion-v1-5"
+image_encoder_path:             "pretrained_weights/image_encoder"
+
+champ_pretrained_weight_path:
+  denoising_unet:  "pretrained_weights/champ/denoising_unet.pth"
+  reference_unet:  "pretrained_weights/champ/reference_unet.pth"
+  motion_module:   "pretrained_weights/champ/motion_module.pth"
+  guidance_encoder_depth:    "pretrained_weights/champ/guidance_encoder_depth.pth"
+  guidance_encoder_normal:   "pretrained_weights/champ/guidance_encoder_normal.pth"
+  guidance_encoder_semantic: "pretrained_weights/champ/guidance_encoder_semantic.pth"
+  guidance_encoder_dwpose:   "pretrained_weights/champ/guidance_encoder_dwpose.pth"
+
+# ─── 입출력 ──────────────────────────────────────────────────────────────────
+ref_image_path:    "inputs/ref.png"
+guidance_folder:   "outputs/guidance"   # preprocess_smpl.py 출력 폴더
+output_dir:        "outputs/champ"
+
+# ─── 해상도 & 프레임 (3060 12GB 맞춤) ────────────────────────────────────────
+width:  384   # 권장 512 → 줄여서 VRAM 확보
+height: 512
+num_frames: 16  # 권장 32 → 절반으로
+
+# ─── 추론 파라미터 ────────────────────────────────────────────────────────────
+num_inference_steps: 20
+guidance_scale: 3.5
+seed: 42
+
+# ─── 가이드 채널 ──────────────────────────────────────────────────────────────
+guidance_types:
+  - depth
+  - normal
+  - semantic
+  - dwpose
+guidance_embedding_channels: 320
+
+# ─── 메모리 최적화 (3060 필수) ────────────────────────────────────────────────
+weight_dtype: "fp16"
+xformers_memory_efficient_attention: true
+enable_attention_slicing: true   # 추가 VRAM 절약

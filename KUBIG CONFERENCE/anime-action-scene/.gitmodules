@@ -1,0 +1,12 @@
+[submodule "champ"]
+	path = champ
+	url = https://github.com/fudan-generative-vision/champ.git
+[submodule "2d/Moore-AnimateAnyone"]
+	path = 2d/Moore-AnimateAnyone
+	url = https://github.com/MooreThreads/Moore-AnimateAnyone.git
+[submodule "3d/champ"]
+	path = 3d/champ
+	url = https://github.com/fudan-generative-vision/champ.git
+[submodule "unianimate/UniAnimate"]
+	path = unianimate/UniAnimate
+	url = https://github.com/ali-vilab/UniAnimate.git
