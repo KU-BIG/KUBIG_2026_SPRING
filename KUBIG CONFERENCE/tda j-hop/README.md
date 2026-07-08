@@ -11,7 +11,7 @@ GTN(메타패스 자동 발견) → PDGNN(EPD 근사) → HAN/RGCN 주입 파이
 **배경**
 - 실세계 데이터(학술, 지식그래프, 리뷰 등)는 여러 타입의 노드와 관계가 섞인 heterogeneous graph이다.
 - 대표 모델(HAN,RGCN 등 MPNN 계열)은 이웃 feature를 aggregate하는 방식 → **수용 범위가 local(layer 수 × hop)에 갇힘**
-- 같은 이웃 구조를 가진 두 노드라도 전역 위상(연결 성분 H0, 루프 H1)은 다를 수 있음 — 이 정보가 feature에 담기지 않음 (**topology blindness**)
+- 같은 이웃 구조를 가진 두 노드라도 전역 위상(연결 성분 H0, 루프 H1)은 다를 수 있다. 이 정보가 feature에 담기지 않음 (**topology blindness**)
 
 **접근**
 - Persistent homology: filtration 과정에서 위상 특징의 생성(birth)과 소멸(death)을 추적 → Persistent homology를 이미지 벡터(persistence image)로 요약
