@@ -1,0 +1,14 @@
+# Modern Python 3.11+ requirements (gudhi replaces dionysus)
+# Install via setup.sh for correct PyG wheel URLs.
+torch>=2.0
+torch-geometric>=2.8
+pyg-lib
+torch-scatter
+torch-sparse
+gudhi
+networkx
+scikit-learn
+scipy
+numpy
+GraphRicciCurvature
+cython

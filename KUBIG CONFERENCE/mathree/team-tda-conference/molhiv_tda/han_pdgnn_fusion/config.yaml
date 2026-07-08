@@ -1,0 +1,31 @@
+dataset: ogbg-molhiv
+dataset_root: ../dataset
+
+hidden_dim: 128
+model_dim: 128
+num_han_layers: 2
+num_pdg_layers: 3
+num_attention_heads: 4
+dropout: 0.2
+lr: 0.001
+weight_decay: 0.00001
+batch_size: 32
+epochs: 100
+patience: 10
+num_workers: 0
+
+filtration_taus: [1.0, 1.5, 2.0, 3.0]
+bond_filtration_scores:
+  single: 1.0
+  aromatic: 1.5
+  double: 2.0
+  triple: 3.0
+  unknown: 2.0
+
+fusion_mode: concat
+attention_mode: cross
+node_type_mode: atomic_number  # atomic_number | atomic_mass
+pooling: mean  # mean | add | max
+
+results_dir: results
+device: auto

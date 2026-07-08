@@ -6,6 +6,7 @@ node-level fusion for OGBG-MolHIV HIV inhibition prediction.
 ## Repository layout
 
 - `molhiv_tda/` — main experiment code (PDGNN+TDA backbone, HAN fine-tune, sweeps, eval)
+- `team-tda-conference/` — shared elice copy from `HyunjuYun1009/tda-conference` (multifiltration screening, charge TDA, 3D train variants, experiment logs)
 - `pdgnn/` — PDGNN reference notebooks and hetero-GNN notes
 - `requirements.txt`, `setup.sh` — environment setup
 
@@ -37,4 +38,6 @@ cd molhiv_tda
 
 Large artifacts (dataset, cache, `.pt` checkpoints) are excluded; regenerate via preprocess scripts on GPU.
 
-Origin: elice server `~/jonghyun/Topological-Data-Analysis` (branch `feature/han-pdgnn-fusion`).
+Origin:
+- `molhiv_tda/`, `pdgnn/`, `setup.sh` — elice `~/jonghyun/Topological-Data-Analysis` (branch `feature/han-pdgnn-fusion`)
+- `team-tda-conference/` — elice `~/tda-conference` (remote `HyunjuYun1009/tda-conference`)
