@@ -1,0 +1,12 @@
+{
+  "model": "PDGNN + BondTDA + 3DTDA + ElectroEdge",
+  "backbone": "PDGNN",
+  "bond_type_tda": true,
+  "molecular_weight": false,
+  "tda_3d": true,
+  "edge_dist_filtration": false,
+  "electro_edge": true,
+  "balanced_test_eval": true,
+  "valid_rocauc": 0.6974420683911425,
+  "test_rocauc": 0.6485207100591716
+}
