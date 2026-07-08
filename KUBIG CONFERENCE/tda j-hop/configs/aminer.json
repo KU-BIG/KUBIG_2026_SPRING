@@ -1,0 +1,15 @@
+{
+  "dataset": "aminer",
+  "use_topology": true,
+  "fusion": "attention",
+  "seed": 0,
+  "max_target_nodes": 6000,
+  "base_relations": {
+    "APA": [["author", "writes", "paper"], ["paper", "written_by", "author"]],
+    "APVPA": [["author", "writes", "paper"], ["paper", "published_in", "venue"], ["venue", "publishes", "paper"], ["paper", "written_by", "author"]]
+  },
+  "han_metapaths": ["APA", "APVPA"],
+  "gtn": {"num_channels": 4, "num_layers": 2, "hidden_dim": 64, "epochs": 50, "lr": 0.005, "weight_decay": 0.001, "dropout": 0.5},
+  "pdgnn": {"hks_K": 3, "knn_k": 20, "hop": 1, "max_nodes": 80, "pi_resolution": 5, "n_train_samples": 200, "hidden_dim": 32, "layers": 3, "epochs": 30, "lr": 0.001},
+  "han": {"hidden_dim": 64, "heads": 4, "dropout": 0.5, "epochs": 100, "lr": 0.005, "weight_decay": 0.001}
+}

@@ -1,0 +1,13 @@
+{
+  "dataset": "dblp_pyg",
+  "use_topology": true, "fusion": "attention", "seed": 0,
+  "base_relations": {
+    "APA": [["author","to","paper"],["paper","to","author"]],
+    "APTPA": [["author","to","paper"],["paper","to","term"],["term","to","paper"],["paper","to","author"]],
+    "APCPA": [["author","to","paper"],["paper","to","conference"],["conference","to","paper"],["paper","to","author"]]
+  },
+  "han_metapaths": ["APA","APCPA"],
+  "gtn": {"num_channels":4,"num_layers":2,"hidden_dim":64,"epochs":50,"lr":0.005,"weight_decay":0.001,"dropout":0.5},
+  "pdgnn": {"hks_K":3,"knn_k":20,"hop":1,"max_nodes":80,"pi_resolution":5,"n_train_samples":200,"hidden_dim":32,"layers":3,"epochs":30,"lr":0.001},
+  "han": {"hidden_dim":64,"heads":4,"dropout":0.5,"epochs":100,"lr":0.005,"weight_decay":0.001}
+}
