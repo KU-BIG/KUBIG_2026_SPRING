@@ -1,8 +1,8 @@
-# RRL (Robust RL) : Adaptive Method — 적대적 팀원 탐지 후 정책 전환하기
+# RRL (Robust RL) : Adaptive Method — adversarial agent 탐지 후 policy 전환하기
 
 3인 협동 Overcooked 환경(`dec_3_chefs_secret_heaven`)에서, 팀에 이기적으로 협동을 방해하는 에이전트가 섞여 있어도 잘 협동하게 만드는 게 목표. 베이스인 N-XPlay / SPN_1ADV 위에, 발표에서 제안했던 detector 기반 adaptive 방식을 구현하고 돌려본 코드와 결과를 모음.
 
-## 배경이 되는 정책들
+## baseline Policies
 
 - **SP** — 정상 팀원끼리만 self-play로 학습. 정상 상황엔 강하지만 적대자가 끼면 무너짐.
 - **ADV** — 개인 보상만 챙기며 팀을 방해하는 적대적 에이전트(selfisher).
