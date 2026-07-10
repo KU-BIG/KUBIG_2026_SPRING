@@ -1,0 +1,9 @@
+python: /workspace/venvs/cuda-test/bin/python
+python_version: 3.11.10 (main, Sep  7 2024, 18:35:41) [GCC 11.4.0]
+platform: Linux-6.8.0-94-generic-x86_64-with-glibc2.35
+torch: 2.11.0+cu128
+torch_cuda: 12.8
+cuda_available: True
+gpu: NVIDIA RTX PRO 4500 Blackwell
+capability: (12, 0)
+numpy: 1.26.4

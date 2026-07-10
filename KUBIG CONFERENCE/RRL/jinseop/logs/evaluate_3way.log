@@ -1,0 +1,256 @@
+/workspace/venv/lib/python3.11/site-packages/stable_baselines3/common/save_util.py:166: UserWarning: Could not deserialize object lr_schedule. Consider using `custom_objects` argument to replace this object.
+Exception: code() argument 13 must be str, not int
+  warnings.warn(
+/workspace/venv/lib/python3.11/site-packages/stable_baselines3/common/save_util.py:166: UserWarning: Could not deserialize object clip_range. Consider using `custom_objects` argument to replace this object.
+Exception: code() argument 13 must be str, not int
+  warnings.warn(
+/workspace/venv/lib/python3.11/site-packages/stable_baselines3/common/save_util.py:437: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  th_object = th.load(file_content, map_location=device)
+/workspace/venv/lib/python3.11/site-packages/stable_baselines3/common/save_util.py:437: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  th_object = th.load(file_content, map_location=device)
+/workspace/scripts/evaluate_sp_vs_spn1adv_vs_adaptive.py:299: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  classifier.load_state_dict(torch.load(CLASSIFIER_PATH, map_location=device))
+/workspace/venv/lib/python3.11/site-packages/stable_baselines3/common/save_util.py:166: UserWarning: Could not deserialize object lr_schedule. Consider using `custom_objects` argument to replace this object.
+Exception: code() argument 13 must be str, not int
+  warnings.warn(
+/workspace/venv/lib/python3.11/site-packages/stable_baselines3/common/save_util.py:166: UserWarning: Could not deserialize object clip_range. Consider using `custom_objects` argument to replace this object.
+Exception: code() argument 13 must be str, not int
+  warnings.warn(
+pygame 2.6.1 (SDL 2.28.4, Python 3.11.10)
+Hello from the pygame community. https://www.pygame.org/contribute.html
+Loading agents...
+Loaded team-type classifier from /workspace/team_type_classifier_runs/attempt_1/model.pt
+All agents loaded.
+
+
+=========================================================
+  Agent : SP
+  Team  : SP_clone x 2  (1 may become ADV p=0.5)
+=========================================================
+  ep   1 [NRM]  reward= 240.0 🎬
+  ep   2 [NRM]  reward= 240.0 🎬
+  ep   3 [ADV]  reward=  60.0 🎬
+  ep   4 [ADV]  reward=  20.0 🎬
+  ep   5 [NRM]  reward= 240.0 🎬
+  ep   6 [NRM]  reward= 240.0 🎬
+  ep   7 [NRM]  reward= 240.0 🎬
+  ep   8 [NRM]  reward= 240.0 🎬
+  ep   9 [NRM]  reward= 240.0 🎬
+  ep  10 [ADV]  reward=  20.0 🎬
+  ep  11 [ADV]  reward=  40.0
+  ep  12 [ADV]  reward=  60.0
+  ep  13 [NRM]  reward= 240.0
+  ep  14 [NRM]  reward= 240.0
+  ep  15 [ADV]  reward=  60.0
+  ep  16 [NRM]  reward= 240.0
+  ep  17 [ADV]  reward=  20.0
+  ep  18 [ADV]  reward=  40.0
+  ep  19 [NRM]  reward= 240.0
+  ep  20 [NRM]  reward= 200.0
+  ep  21 [ADV]  reward=  20.0
+  ep  22 [NRM]  reward= 200.0
+  ep  23 [NRM]  reward= 160.0
+  ep  24 [NRM]  reward= 240.0
+  ep  25 [NRM]  reward= 220.0
+  ep  26 [NRM]  reward= 240.0
+  ep  27 [ADV]  reward=  60.0
+  ep  28 [NRM]  reward= 240.0
+  ep  29 [ADV]  reward=  40.0
+  ep  30 [ADV]  reward=  40.0
+  ep  31 [ADV]  reward=  60.0
+  ep  32 [ADV]  reward=  20.0
+  ep  33 [ADV]  reward=  40.0
+  ep  34 [NRM]  reward= 240.0
+  ep  35 [NRM]  reward= 240.0
+  ep  36 [ADV]  reward=  40.0
+  ep  37 [NRM]  reward= 240.0
+  ep  38 [NRM]  reward= 240.0
+  ep  39 [NRM]  reward= 220.0
+  ep  40 [NRM]  reward= 240.0
+  ep  41 [ADV]  reward=  60.0
+  ep  42 [NRM]  reward= 240.0
+  ep  43 [ADV]  reward=  20.0
+  ep  44 [NRM]  reward= 240.0
+  ep  45 [ADV]  reward=  40.0
+  ep  46 [NRM]  reward= 240.0
+  ep  47 [NRM]  reward= 240.0
+  ep  48 [NRM]  reward= 240.0
+  ep  49 [NRM]  reward= 240.0
+  ep  50 [ADV]  reward=  60.0
+  ep  51 [NRM]  reward= 240.0
+  ep  52 [NRM]  reward= 240.0
+  ep  53 [NRM]  reward= 240.0
+  ep  54 [ADV]  reward=  20.0
+  ep  55 [ADV]  reward=  60.0
+  ep  56 [ADV]  reward=  40.0
+  ep  57 [ADV]  reward=  20.0
+  ep  58 [ADV]  reward=  40.0
+  ep  59 [ADV]  reward=   0.0
+  ep  60 [ADV]  reward=   0.0
+
+  -- SP --
+  Overall        : 145.33 +- 99.52  (n=60)
+  Normal team    : 233.94  (n=33)
+  Adversary team : 37.04  (n=27)
+  Robustness     : 15.8%  |  zero-reward: 2 / 27
+  GIFs saved     : 10  ->  /workspace/eval_results/gifs_3way/SP/
+
+=========================================================
+  Agent : SPN_1ADV
+  Team  : SPN_1ADV_clone x 2  (1 may become ADV p=0.5)
+=========================================================
+  ep   1 [NRM]  reward= 240.0 🎬
+  ep   2 [NRM]  reward= 240.0 🎬
+  ep   3 [ADV]  reward= 120.0 🎬
+  ep   4 [ADV]  reward= 120.0 🎬
+  ep   5 [NRM]  reward= 240.0 🎬
+  ep   6 [NRM]  reward= 240.0 🎬
+  ep   7 [NRM]  reward= 240.0 🎬
+  ep   8 [NRM]  reward= 240.0 🎬
+  ep   9 [NRM]  reward= 240.0 🎬
+  ep  10 [ADV]  reward= 120.0 🎬
+  ep  11 [ADV]  reward= 100.0
+  ep  12 [ADV]  reward= 100.0
+  ep  13 [NRM]  reward= 240.0
+  ep  14 [NRM]  reward= 240.0
+  ep  15 [ADV]  reward= 120.0
+  ep  16 [NRM]  reward= 240.0
+  ep  17 [ADV]  reward=  60.0
+  ep  18 [ADV]  reward= 100.0
+  ep  19 [NRM]  reward= 240.0
+  ep  20 [NRM]  reward= 240.0
+  ep  21 [ADV]  reward= 100.0
+  ep  22 [NRM]  reward= 200.0
+  ep  23 [NRM]  reward= 240.0
+  ep  24 [NRM]  reward= 240.0
+  ep  25 [NRM]  reward= 240.0
+  ep  26 [NRM]  reward= 240.0
+  ep  27 [ADV]  reward= 120.0
+  ep  28 [NRM]  reward= 240.0
+  ep  29 [ADV]  reward= 100.0
+  ep  30 [ADV]  reward= 100.0
+  ep  31 [ADV]  reward= 100.0
+  ep  32 [ADV]  reward= 120.0
+  ep  33 [ADV]  reward= 100.0
+  ep  34 [NRM]  reward= 240.0
+  ep  35 [NRM]  reward= 200.0
+  ep  36 [ADV]  reward= 100.0
+  ep  37 [NRM]  reward= 240.0
+  ep  38 [NRM]  reward= 240.0
+  ep  39 [NRM]  reward= 240.0
+  ep  40 [NRM]  reward= 220.0
+  ep  41 [ADV]  reward=  80.0
+  ep  42 [NRM]  reward= 240.0
+  ep  43 [ADV]  reward= 120.0
+  ep  44 [NRM]  reward= 240.0
+  ep  45 [ADV]  reward= 120.0
+  ep  46 [NRM]  reward= 240.0
+  ep  47 [NRM]  reward= 240.0
+  ep  48 [NRM]  reward= 240.0
+  ep  49 [NRM]  reward= 240.0
+  ep  50 [ADV]  reward= 100.0
+  ep  51 [NRM]  reward= 240.0
+  ep  52 [NRM]  reward= 240.0
+  ep  53 [NRM]  reward= 240.0
+  ep  54 [ADV]  reward= 100.0
+  ep  55 [ADV]  reward= 100.0
+  ep  56 [ADV]  reward= 120.0
+  ep  57 [ADV]  reward= 100.0
+  ep  58 [ADV]  reward= 140.0
+  ep  59 [ADV]  reward= 120.0
+  ep  60 [ADV]  reward= 120.0
+
+  -- SPN_1ADV --
+  Overall        : 178.67 +- 65.71  (n=60)
+  Normal team    : 236.97  (n=33)
+  Adversary team : 107.41  (n=27)
+  Robustness     : 45.3%  |  zero-reward: 0 / 27
+  GIFs saved     : 10  ->  /workspace/eval_results/gifs_3way/SPN_1ADV/
+
+=========================================================
+  Agent : Adaptive
+  Team  : Adaptive_clone x 2  (1 may become ADV p=0.5)
+=========================================================
+  ep   1 [NRM]  reward= 240.0  pred=SP 🎬
+  ep   2 [NRM]  reward= 240.0  pred=SP 🎬
+  ep   3 [ADV]  reward=  80.0  pred=SPADV 🎬
+  ep   4 [ADV]  reward=  60.0  pred=SPADV 🎬
+  ep   5 [NRM]  reward= 240.0  pred=SP 🎬
+  ep   6 [NRM]  reward= 160.0  pred=SPADV 🎬
+  ep   7 [NRM]  reward= 240.0  pred=SP 🎬
+  ep   8 [NRM]  reward= 240.0  pred=SP 🎬
+  ep   9 [NRM]  reward= 240.0  pred=SP 🎬
+  ep  10 [ADV]  reward=  60.0  pred=SPADV 🎬
+  ep  11 [ADV]  reward=  60.0  pred=SPADV
+  ep  12 [ADV]  reward=  80.0  pred=SPADV
+  ep  13 [NRM]  reward= 240.0  pred=SP
+  ep  14 [NRM]  reward= 240.0  pred=SP
+  ep  15 [ADV]  reward=  20.0  pred=SPADV
+  ep  16 [NRM]  reward= 240.0  pred=SP
+  ep  17 [ADV]  reward=  60.0  pred=SPADV
+  ep  18 [ADV]  reward=  80.0  pred=SPADV
+  ep  19 [NRM]  reward= 240.0  pred=SP
+  ep  20 [NRM]  reward= 200.0  pred=SP
+  ep  21 [ADV]  reward=  80.0  pred=SPADV
+  ep  22 [NRM]  reward= 200.0  pred=SP
+  ep  23 [NRM]  reward= 140.0  pred=SPADV
+  ep  24 [NRM]  reward= 240.0  pred=SP
+  ep  25 [NRM]  reward= 220.0  pred=SP
+  ep  26 [NRM]  reward= 240.0  pred=SP
+  ep  27 [ADV]  reward=  80.0  pred=SPADV
+  ep  28 [NRM]  reward= 240.0  pred=SP
+  ep  29 [ADV]  reward=  60.0  pred=SPADV
+  ep  30 [ADV]  reward=  60.0  pred=SPADV
+  ep  31 [ADV]  reward= 100.0  pred=SPADV
+  ep  32 [ADV]  reward=  60.0  pred=SPADV
+  ep  33 [ADV]  reward=  80.0  pred=SPADV
+  ep  34 [NRM]  reward= 240.0  pred=SP
+  ep  35 [NRM]  reward= 240.0  pred=SP
+  ep  36 [ADV]  reward=  60.0  pred=SPADV
+  ep  37 [NRM]  reward= 240.0  pred=SP
+  ep  38 [NRM]  reward= 240.0  pred=SP
+  ep  39 [NRM]  reward= 220.0  pred=SP
+  ep  40 [NRM]  reward= 240.0  pred=SP
+  ep  41 [ADV]  reward= 120.0  pred=SPADV
+  ep  42 [NRM]  reward= 240.0  pred=SP
+  ep  43 [ADV]  reward=  40.0  pred=SPADV
+  ep  44 [NRM]  reward= 240.0  pred=SP
+  ep  45 [ADV]  reward=  40.0  pred=SPADV
+  ep  46 [NRM]  reward= 240.0  pred=SP
+  ep  47 [NRM]  reward= 240.0  pred=SP
+  ep  48 [NRM]  reward= 240.0  pred=SP
+  ep  49 [NRM]  reward= 240.0  pred=SP
+  ep  50 [ADV]  reward=  20.0  pred=SPADV
+  ep  51 [NRM]  reward= 240.0  pred=SP
+  ep  52 [NRM]  reward= 240.0  pred=SP
+  ep  53 [NRM]  reward= 240.0  pred=SP
+  ep  54 [ADV]  reward=  80.0  pred=SPADV
+  ep  55 [ADV]  reward=  80.0  pred=SPADV
+  ep  56 [ADV]  reward=  40.0  pred=SPADV
+  ep  57 [ADV]  reward=  60.0  pred=SPADV
+  ep  58 [ADV]  reward=  80.0  pred=SPADV
+  ep  59 [ADV]  reward=  80.0  pred=SPADV
+  ep  60 [ADV]  reward=  60.0  pred=SPADV
+
+  -- Adaptive --
+  Overall        : 156.67 +- 85.10  (n=60)
+  Normal team    : 230.91  (n=33)
+  Adversary team : 65.93  (n=27)
+  Robustness     : 28.6%  |  zero-reward: 0 / 27
+  GIFs saved     : 10  ->  /workspace/eval_results/gifs_3way/Adaptive/
+  Classifier acc  : 58/60 (96.7%) during these episodes
+
+==============================================================================
+  FINAL COMPARISON  (each agent plays with clones of itself)
+==============================================================================
+Metric                                 SP       SPN_1ADV       Adaptive
+------------------------------------------------------------------------------
+Overall (n=60)                     145.33         178.67         156.67
+  Normal teammate                  233.94         236.97         230.91
+  Adversarial teammate              37.04         107.41          65.93
+Robustness (ADV/NRM)                15.8%          45.3%          28.6%
+Zero-reward under ADV                2/27           0/27           0/27
+
+  GIFs -> /workspace/eval_results/gifs_3way
+==============================================================================
+Summary saved to /workspace/eval_results/three_way_comparison.json

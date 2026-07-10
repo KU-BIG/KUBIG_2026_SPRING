@@ -1,0 +1,1803 @@
+Training agent: SP_hd256_seed2020, for experiment: Classic/3/SP_hd256_seed2020
+-------------------
+Train TC
+	SP:
+	SP_hd256_seed2020, score for layout 3_chefs_counter_circuit is: -1, start_pos: None, len: 2
+	SP_hd256_seed2020, score for layout 3_chefs_counter_circuit is: -1, start_pos: None, len: 2
+-------------------
+-------------------
+Eval TC
+	SP:
+	SP_hd256_seed2020, score for layout 3_chefs_counter_circuit is: -1, start_pos: None, len: 2
+	SP_hd256_seed2020, score for layout 3_chefs_counter_circuit is: -1, start_pos: None, len: 2
+-------------------
+Curriculum:
+Random curriculum:  ['SP']
+How Long:  20
+Epoch timesteps: 50000
+Total training timesteps: 30000000
+Number of environments: 384
+Hidden dimension: 256
+Seed: 2020
+args.num_of_ckpoints: 40
+args.checkpoint_rate: 750000
+Learner type: originaler
+layout_names ['3_chefs_counter_circuit']
+horizon 400
+num_stack 3
+encoding_fn OAI_egocentric
+lr 0.001
+batch_size 128
+SP_seed 1010
+FCP_seed 1010
+N_X_SP_seed 1010
+N_X_FCP_seed 1010
+SP_h_dim 256
+FCP_h_dim 256
+N_X_SP_h_dim 256
+N_X_FCP_h_dim 256
+ADV_seed 68
+ADV_h_dim 512
+algo_name SPN_1ADV
+num_players 3
+n_x_sp_total_training_timesteps 15000000
+adversary_total_training_timesteps 15000000
+n_x_fcp_total_training_timesteps None
+pop_force_training False
+primary_force_training False
+adversary_force_training False
+how_long 20
+exp_name last
+base_dir /workspace/multiHRI
+data_path data
+dataset 2019_hh_trials_all.pickle
+wandb_mode online
+wandb_ent None
+sb_verbose 1
+c
+args
+epoch_timesteps 50000
+n_envs 384
+teammates_len 2
+overcooked_verbose False
+pop_total_training_timesteps 30000000
+fcp_total_training_timesteps None
+fcp_w_sp_total_training_timesteps None
+eval_steps_interval 20
+reward_magnifier 3.0
+parallel True
+dynamic_reward True
+final_sparse_r_ratio 0.5
+prioritized_sampling False
+exp_dir Classic/3
+primary_learner_type originaler
+adversary_learner_type selfisher
+pop_learner_type originaler
+max_concurrent_jobs 3
+exp_name_prefix
+num_of_ckpoints 40
+resume False
+use_val_func_for_heatmap_gen False
+num_eval_for_heatmap_gen 2
+num_static_advs_per_heatmap 1
+num_dynamic_advs_per_heatmap 1
+num_steps_in_traj_for_dyn_adv 2
+custom_agent_ck_rate_generation 4
+gen_pop_for_eval False
+total_ego_agents 2
+ck_list_offset 0
+device cuda
+Saved on timestep_count: 0 and step_count:0 for tag: ck_0
+Computing MotionPlanner to be saved in /usr/local/lib/python3.11/dist-packages/overcooked_ai_py/data/planners/3_chefs_counter_circuit_mp.pkl
+It took 0.19919514656066895 seconds to create mp
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 400      |
+|    ep_rew_mean     | 0.594    |
+| time/              |          |
+|    fps             | 1668     |
+|    iterations      | 1        |
+|    time_elapsed    | 115      |
+|    total_timesteps | 192000   |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 0.582    |
+| time/              |          |
+|    fps             | 1693     |
+|    iterations      | 1        |
+|    time_elapsed    | 113      |
+|    total_timesteps | 384000   |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 1.17     |
+| time/              |          |
+|    fps             | 1718     |
+|    iterations      | 1        |
+|    time_elapsed    | 111      |
+|    total_timesteps | 576000   |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 1.65     |
+| time/              |          |
+|    fps             | 1689     |
+|    iterations      | 1        |
+|    time_elapsed    | 113      |
+|    total_timesteps | 768000   |
+---------------------------------
+Saved on timestep_count: 768000 and step_count:4 for tag: ck_1_rew_0.0
+Saved on timestep_count: 768000 and step_count:4 for tag: best
+New best evaluation score of 0.0 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 2.28     |
+| time/              |          |
+|    fps             | 1666     |
+|    iterations      | 1        |
+|    time_elapsed    | 115      |
+|    total_timesteps | 960000   |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 3.5      |
+| time/              |          |
+|    fps             | 1637     |
+|    iterations      | 1        |
+|    time_elapsed    | 117      |
+|    total_timesteps | 1152000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 5.22     |
+| time/              |          |
+|    fps             | 1590     |
+|    iterations      | 1        |
+|    time_elapsed    | 120      |
+|    total_timesteps | 1344000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 6.62     |
+| time/              |          |
+|    fps             | 1559     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 1536000  |
+---------------------------------
+Saved on timestep_count: 1536000 and step_count:8 for tag: ck_2_rew_0.0
+Saved on timestep_count: 1536000 and step_count:8 for tag: best
+New best evaluation score of 0.0 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 7.42     |
+| time/              |          |
+|    fps             | 1517     |
+|    iterations      | 1        |
+|    time_elapsed    | 126      |
+|    total_timesteps | 1728000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 7.68     |
+| time/              |          |
+|    fps             | 1490     |
+|    iterations      | 1        |
+|    time_elapsed    | 128      |
+|    total_timesteps | 1920000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 7.7      |
+| time/              |          |
+|    fps             | 1489     |
+|    iterations      | 1        |
+|    time_elapsed    | 128      |
+|    total_timesteps | 2112000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 8.21     |
+| time/              |          |
+|    fps             | 1474     |
+|    iterations      | 1        |
+|    time_elapsed    | 130      |
+|    total_timesteps | 2304000  |
+---------------------------------
+Saved on timestep_count: 2304000 and step_count:12 for tag: ck_3_rew_0.0
+Saved on timestep_count: 2304000 and step_count:12 for tag: best
+New best evaluation score of 0.0 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 7.76     |
+| time/              |          |
+|    fps             | 1496     |
+|    iterations      | 1        |
+|    time_elapsed    | 128      |
+|    total_timesteps | 2496000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 8.06     |
+| time/              |          |
+|    fps             | 1479     |
+|    iterations      | 1        |
+|    time_elapsed    | 129      |
+|    total_timesteps | 2688000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 8.27     |
+| time/              |          |
+|    fps             | 1455     |
+|    iterations      | 1        |
+|    time_elapsed    | 131      |
+|    total_timesteps | 2880000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 8.27     |
+| time/              |          |
+|    fps             | 1461     |
+|    iterations      | 1        |
+|    time_elapsed    | 131      |
+|    total_timesteps | 3072000  |
+---------------------------------
+Saved on timestep_count: 3072000 and step_count:16 for tag: ck_4_rew_0.0
+Saved on timestep_count: 3072000 and step_count:16 for tag: best
+New best evaluation score of 0.0 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 7.92     |
+| time/              |          |
+|    fps             | 1458     |
+|    iterations      | 1        |
+|    time_elapsed    | 131      |
+|    total_timesteps | 3264000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 7.95     |
+| time/              |          |
+|    fps             | 1448     |
+|    iterations      | 1        |
+|    time_elapsed    | 132      |
+|    total_timesteps | 3456000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 7.7      |
+| time/              |          |
+|    fps             | 1459     |
+|    iterations      | 1        |
+|    time_elapsed    | 131      |
+|    total_timesteps | 3648000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 7.55     |
+| time/              |          |
+|    fps             | 1464     |
+|    iterations      | 1        |
+|    time_elapsed    | 131      |
+|    total_timesteps | 3840000  |
+---------------------------------
+Saved on timestep_count: 3840000 and step_count:20 for tag: ck_5_rew_0.0
+Saved on timestep_count: 3840000 and step_count:20 for tag: best
+New best evaluation score of 0.0 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 7.16     |
+| time/              |          |
+|    fps             | 1471     |
+|    iterations      | 1        |
+|    time_elapsed    | 130      |
+|    total_timesteps | 4032000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 6.9      |
+| time/              |          |
+|    fps             | 1464     |
+|    iterations      | 1        |
+|    time_elapsed    | 131      |
+|    total_timesteps | 4224000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 6.61     |
+| time/              |          |
+|    fps             | 1473     |
+|    iterations      | 1        |
+|    time_elapsed    | 130      |
+|    total_timesteps | 4416000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 6.49     |
+| time/              |          |
+|    fps             | 1471     |
+|    iterations      | 1        |
+|    time_elapsed    | 130      |
+|    total_timesteps | 4608000  |
+---------------------------------
+Saved on timestep_count: 4608000 and step_count:24 for tag: ck_6_rew_0.0
+Saved on timestep_count: 4608000 and step_count:24 for tag: best
+New best evaluation score of 0.0 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 6.4      |
+| time/              |          |
+|    fps             | 1479     |
+|    iterations      | 1        |
+|    time_elapsed    | 129      |
+|    total_timesteps | 4800000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 6.14     |
+| time/              |          |
+|    fps             | 1471     |
+|    iterations      | 1        |
+|    time_elapsed    | 130      |
+|    total_timesteps | 4992000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 6.04     |
+| time/              |          |
+|    fps             | 1484     |
+|    iterations      | 1        |
+|    time_elapsed    | 129      |
+|    total_timesteps | 5184000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 6.04     |
+| time/              |          |
+|    fps             | 1462     |
+|    iterations      | 1        |
+|    time_elapsed    | 131      |
+|    total_timesteps | 5376000  |
+---------------------------------
+Saved on timestep_count: 5376000 and step_count:28 for tag: ck_7_rew_0.0
+Saved on timestep_count: 5376000 and step_count:28 for tag: best
+New best evaluation score of 0.0 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 5.89     |
+| time/              |          |
+|    fps             | 1480     |
+|    iterations      | 1        |
+|    time_elapsed    | 129      |
+|    total_timesteps | 5568000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 5.92     |
+| time/              |          |
+|    fps             | 1459     |
+|    iterations      | 1        |
+|    time_elapsed    | 131      |
+|    total_timesteps | 5760000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 5.96     |
+| time/              |          |
+|    fps             | 1468     |
+|    iterations      | 1        |
+|    time_elapsed    | 130      |
+|    total_timesteps | 5952000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 6.06     |
+| time/              |          |
+|    fps             | 1464     |
+|    iterations      | 1        |
+|    time_elapsed    | 131      |
+|    total_timesteps | 6144000  |
+---------------------------------
+Saved on timestep_count: 6144000 and step_count:32 for tag: ck_8_rew_0.0
+Saved on timestep_count: 6144000 and step_count:32 for tag: best
+New best evaluation score of 0.0 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 6.03     |
+| time/              |          |
+|    fps             | 1477     |
+|    iterations      | 1        |
+|    time_elapsed    | 129      |
+|    total_timesteps | 6336000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 6.09     |
+| time/              |          |
+|    fps             | 1460     |
+|    iterations      | 1        |
+|    time_elapsed    | 131      |
+|    total_timesteps | 6528000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 6.12     |
+| time/              |          |
+|    fps             | 1485     |
+|    iterations      | 1        |
+|    time_elapsed    | 129      |
+|    total_timesteps | 6720000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 6.14     |
+| time/              |          |
+|    fps             | 1471     |
+|    iterations      | 1        |
+|    time_elapsed    | 130      |
+|    total_timesteps | 6912000  |
+---------------------------------
+Saved on timestep_count: 6912000 and step_count:36 for tag: ck_9_rew_0.0
+Saved on timestep_count: 6912000 and step_count:36 for tag: best
+New best evaluation score of 0.0 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 6        |
+| time/              |          |
+|    fps             | 1471     |
+|    iterations      | 1        |
+|    time_elapsed    | 130      |
+|    total_timesteps | 7104000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 6.09     |
+| time/              |          |
+|    fps             | 1460     |
+|    iterations      | 1        |
+|    time_elapsed    | 131      |
+|    total_timesteps | 7296000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 6.06     |
+| time/              |          |
+|    fps             | 1461     |
+|    iterations      | 1        |
+|    time_elapsed    | 131      |
+|    total_timesteps | 7488000  |
+---------------------------------
+Saved on timestep_count: 7488000 and step_count:39 for tag: best
+New best evaluation score of 0.0 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 5.92     |
+| time/              |          |
+|    fps             | 1469     |
+|    iterations      | 1        |
+|    time_elapsed    | 130      |
+|    total_timesteps | 7680000  |
+---------------------------------
+Saved on timestep_count: 7680000 and step_count:40 for tag: ck_10_rew_0.0
+Saved on timestep_count: 7680000 and step_count:40 for tag: best
+New best evaluation score of 0.0 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 6.09     |
+| time/              |          |
+|    fps             | 1460     |
+|    iterations      | 1        |
+|    time_elapsed    | 131      |
+|    total_timesteps | 7872000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 5.94     |
+| time/              |          |
+|    fps             | 1458     |
+|    iterations      | 1        |
+|    time_elapsed    | 131      |
+|    total_timesteps | 8064000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 6.03     |
+| time/              |          |
+|    fps             | 1457     |
+|    iterations      | 1        |
+|    time_elapsed    | 131      |
+|    total_timesteps | 8256000  |
+---------------------------------
+Saved on timestep_count: 8256000 and step_count:43 for tag: ck_11_rew_0.0
+Saved on timestep_count: 8256000 and step_count:43 for tag: best
+New best evaluation score of 0.0 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 5.83     |
+| time/              |          |
+|    fps             | 1482     |
+|    iterations      | 1        |
+|    time_elapsed    | 129      |
+|    total_timesteps | 8448000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 5.91     |
+| time/              |          |
+|    fps             | 1443     |
+|    iterations      | 1        |
+|    time_elapsed    | 133      |
+|    total_timesteps | 8640000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 6.03     |
+| time/              |          |
+|    fps             | 1471     |
+|    iterations      | 1        |
+|    time_elapsed    | 130      |
+|    total_timesteps | 8832000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 6.06     |
+| time/              |          |
+|    fps             | 1472     |
+|    iterations      | 1        |
+|    time_elapsed    | 130      |
+|    total_timesteps | 9024000  |
+---------------------------------
+Saved on timestep_count: 9024000 and step_count:47 for tag: ck_12_rew_0.0
+Saved on timestep_count: 9024000 and step_count:47 for tag: best
+New best evaluation score of 0.0 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 5.97     |
+| time/              |          |
+|    fps             | 1488     |
+|    iterations      | 1        |
+|    time_elapsed    | 128      |
+|    total_timesteps | 9216000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 6.08     |
+| time/              |          |
+|    fps             | 1485     |
+|    iterations      | 1        |
+|    time_elapsed    | 129      |
+|    total_timesteps | 9408000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 6.03     |
+| time/              |          |
+|    fps             | 1473     |
+|    iterations      | 1        |
+|    time_elapsed    | 130      |
+|    total_timesteps | 9600000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 5.97     |
+| time/              |          |
+|    fps             | 1483     |
+|    iterations      | 1        |
+|    time_elapsed    | 129      |
+|    total_timesteps | 9792000  |
+---------------------------------
+Saved on timestep_count: 9792000 and step_count:51 for tag: ck_13_rew_0.0
+Saved on timestep_count: 9792000 and step_count:51 for tag: best
+New best evaluation score of 0.0 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 6.04     |
+| time/              |          |
+|    fps             | 1472     |
+|    iterations      | 1        |
+|    time_elapsed    | 130      |
+|    total_timesteps | 9984000  |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 6.11     |
+| time/              |          |
+|    fps             | 1484     |
+|    iterations      | 1        |
+|    time_elapsed    | 129      |
+|    total_timesteps | 10176000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 6.21     |
+| time/              |          |
+|    fps             | 1493     |
+|    iterations      | 1        |
+|    time_elapsed    | 128      |
+|    total_timesteps | 10368000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 6.45     |
+| time/              |          |
+|    fps             | 1482     |
+|    iterations      | 1        |
+|    time_elapsed    | 129      |
+|    total_timesteps | 10560000 |
+---------------------------------
+Saved on timestep_count: 10560000 and step_count:55 for tag: ck_14_rew_0.0
+Saved on timestep_count: 10560000 and step_count:55 for tag: best
+New best evaluation score of 0.0 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 6.99     |
+| time/              |          |
+|    fps             | 1487     |
+|    iterations      | 1        |
+|    time_elapsed    | 129      |
+|    total_timesteps | 10752000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 8.14     |
+| time/              |          |
+|    fps             | 1500     |
+|    iterations      | 1        |
+|    time_elapsed    | 127      |
+|    total_timesteps | 10944000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 9.3      |
+| time/              |          |
+|    fps             | 1473     |
+|    iterations      | 1        |
+|    time_elapsed    | 130      |
+|    total_timesteps | 11136000 |
+---------------------------------
+Saved on timestep_count: 11136000 and step_count:58 for tag: best
+New best evaluation score of 9.333333333333334 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 12.3     |
+| time/              |          |
+|    fps             | 1481     |
+|    iterations      | 1        |
+|    time_elapsed    | 129      |
+|    total_timesteps | 11328000 |
+---------------------------------
+Saved on timestep_count: 11328000 and step_count:59 for tag: ck_15_rew_13.333333333333334
+Saved on timestep_count: 11328000 and step_count:59 for tag: best
+New best evaluation score of 13.333333333333334 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 15.9     |
+| time/              |          |
+|    fps             | 1478     |
+|    iterations      | 1        |
+|    time_elapsed    | 129      |
+|    total_timesteps | 11520000 |
+---------------------------------
+Saved on timestep_count: 11520000 and step_count:60 for tag: best
+New best evaluation score of 18.666666666666668 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 23.3     |
+| time/              |          |
+|    fps             | 1485     |
+|    iterations      | 1        |
+|    time_elapsed    | 129      |
+|    total_timesteps | 11712000 |
+---------------------------------
+Saved on timestep_count: 11712000 and step_count:61 for tag: best
+New best evaluation score of 24.0 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 27.1     |
+| time/              |          |
+|    fps             | 1462     |
+|    iterations      | 1        |
+|    time_elapsed    | 131      |
+|    total_timesteps | 11904000 |
+---------------------------------
+Saved on timestep_count: 11904000 and step_count:62 for tag: best
+New best evaluation score of 46.666666666666664 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 33.5     |
+| time/              |          |
+|    fps             | 1444     |
+|    iterations      | 1        |
+|    time_elapsed    | 132      |
+|    total_timesteps | 12096000 |
+---------------------------------
+Saved on timestep_count: 12096000 and step_count:63 for tag: ck_16_rew_48.0
+Saved on timestep_count: 12096000 and step_count:63 for tag: best
+New best evaluation score of 48.0 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 41       |
+| time/              |          |
+|    fps             | 1502     |
+|    iterations      | 1        |
+|    time_elapsed    | 127      |
+|    total_timesteps | 12288000 |
+---------------------------------
+Saved on timestep_count: 12288000 and step_count:64 for tag: best
+New best evaluation score of 57.333333333333336 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 47       |
+| time/              |          |
+|    fps             | 1468     |
+|    iterations      | 1        |
+|    time_elapsed    | 130      |
+|    total_timesteps | 12480000 |
+---------------------------------
+Saved on timestep_count: 12480000 and step_count:65 for tag: best
+New best evaluation score of 74.66666666666667 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 55       |
+| time/              |          |
+|    fps             | 1505     |
+|    iterations      | 1        |
+|    time_elapsed    | 127      |
+|    total_timesteps | 12672000 |
+---------------------------------
+Saved on timestep_count: 12672000 and step_count:66 for tag: best
+New best evaluation score of 76.0 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 63       |
+| time/              |          |
+|    fps             | 1511     |
+|    iterations      | 1        |
+|    time_elapsed    | 127      |
+|    total_timesteps | 12864000 |
+---------------------------------
+Saved on timestep_count: 12864000 and step_count:67 for tag: ck_17_rew_97.33333333333333
+Saved on timestep_count: 12864000 and step_count:67 for tag: best
+New best evaluation score of 97.33333333333333 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 71.5     |
+| time/              |          |
+|    fps             | 1481     |
+|    iterations      | 1        |
+|    time_elapsed    | 129      |
+|    total_timesteps | 13056000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 79.4     |
+| time/              |          |
+|    fps             | 1507     |
+|    iterations      | 1        |
+|    time_elapsed    | 127      |
+|    total_timesteps | 13248000 |
+---------------------------------
+Saved on timestep_count: 13248000 and step_count:69 for tag: best
+New best evaluation score of 106.66666666666667 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 85       |
+| time/              |          |
+|    fps             | 1503     |
+|    iterations      | 1        |
+|    time_elapsed    | 127      |
+|    total_timesteps | 13440000 |
+---------------------------------
+Saved on timestep_count: 13440000 and step_count:70 for tag: best
+New best evaluation score of 128.0 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 92.9     |
+| time/              |          |
+|    fps             | 1499     |
+|    iterations      | 1        |
+|    time_elapsed    | 128      |
+|    total_timesteps | 13632000 |
+---------------------------------
+Saved on timestep_count: 13632000 and step_count:71 for tag: ck_18_rew_130.66666666666666
+Saved on timestep_count: 13632000 and step_count:71 for tag: best
+New best evaluation score of 130.66666666666666 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 102      |
+| time/              |          |
+|    fps             | 1485     |
+|    iterations      | 1        |
+|    time_elapsed    | 129      |
+|    total_timesteps | 13824000 |
+---------------------------------
+Saved on timestep_count: 13824000 and step_count:72 for tag: best
+New best evaluation score of 138.66666666666666 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 108      |
+| time/              |          |
+|    fps             | 1499     |
+|    iterations      | 1        |
+|    time_elapsed    | 128      |
+|    total_timesteps | 14016000 |
+---------------------------------
+Saved on timestep_count: 14016000 and step_count:73 for tag: best
+New best evaluation score of 149.33333333333334 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 111      |
+| time/              |          |
+|    fps             | 1510     |
+|    iterations      | 1        |
+|    time_elapsed    | 127      |
+|    total_timesteps | 14208000 |
+---------------------------------
+Saved on timestep_count: 14208000 and step_count:74 for tag: best
+New best evaluation score of 150.66666666666666 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 117      |
+| time/              |          |
+|    fps             | 1494     |
+|    iterations      | 1        |
+|    time_elapsed    | 128      |
+|    total_timesteps | 14400000 |
+---------------------------------
+Saved on timestep_count: 14400000 and step_count:75 for tag: ck_19_rew_156.0
+Saved on timestep_count: 14400000 and step_count:75 for tag: best
+New best evaluation score of 156.0 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 122      |
+| time/              |          |
+|    fps             | 1516     |
+|    iterations      | 1        |
+|    time_elapsed    | 126      |
+|    total_timesteps | 14592000 |
+---------------------------------
+Saved on timestep_count: 14592000 and step_count:76 for tag: best
+New best evaluation score of 158.66666666666666 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 123      |
+| time/              |          |
+|    fps             | 1526     |
+|    iterations      | 1        |
+|    time_elapsed    | 125      |
+|    total_timesteps | 14784000 |
+---------------------------------
+Saved on timestep_count: 14784000 and step_count:77 for tag: best
+New best evaluation score of 165.33333333333334 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 129      |
+| time/              |          |
+|    fps             | 1508     |
+|    iterations      | 1        |
+|    time_elapsed    | 127      |
+|    total_timesteps | 14976000 |
+---------------------------------
+Saved on timestep_count: 14976000 and step_count:78 for tag: best
+New best evaluation score of 172.0 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 128      |
+| time/              |          |
+|    fps             | 1526     |
+|    iterations      | 1        |
+|    time_elapsed    | 125      |
+|    total_timesteps | 15168000 |
+---------------------------------
+Saved on timestep_count: 15168000 and step_count:79 for tag: ck_20_rew_172.0
+Saved on timestep_count: 15168000 and step_count:79 for tag: best
+New best evaluation score of 172.0 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 131      |
+| time/              |          |
+|    fps             | 1488     |
+|    iterations      | 1        |
+|    time_elapsed    | 128      |
+|    total_timesteps | 15360000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 135      |
+| time/              |          |
+|    fps             | 1522     |
+|    iterations      | 1        |
+|    time_elapsed    | 126      |
+|    total_timesteps | 15552000 |
+---------------------------------
+Saved on timestep_count: 15552000 and step_count:81 for tag: best
+New best evaluation score of 181.33333333333334 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 139      |
+| time/              |          |
+|    fps             | 1500     |
+|    iterations      | 1        |
+|    time_elapsed    | 127      |
+|    total_timesteps | 15744000 |
+---------------------------------
+Saved on timestep_count: 15744000 and step_count:82 for tag: best
+New best evaluation score of 193.33333333333334 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 140      |
+| time/              |          |
+|    fps             | 1517     |
+|    iterations      | 1        |
+|    time_elapsed    | 126      |
+|    total_timesteps | 15936000 |
+---------------------------------
+Saved on timestep_count: 15936000 and step_count:83 for tag: ck_21_rew_186.66666666666666
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 144      |
+| time/              |          |
+|    fps             | 1548     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 16128000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 145      |
+| time/              |          |
+|    fps             | 1516     |
+|    iterations      | 1        |
+|    time_elapsed    | 126      |
+|    total_timesteps | 16320000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 147      |
+| time/              |          |
+|    fps             | 1538     |
+|    iterations      | 1        |
+|    time_elapsed    | 124      |
+|    total_timesteps | 16512000 |
+---------------------------------
+Saved on timestep_count: 16512000 and step_count:86 for tag: ck_22_rew_200.0
+Saved on timestep_count: 16512000 and step_count:86 for tag: best
+New best evaluation score of 200.0 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 152      |
+| time/              |          |
+|    fps             | 1521     |
+|    iterations      | 1        |
+|    time_elapsed    | 126      |
+|    total_timesteps | 16704000 |
+---------------------------------
+Saved on timestep_count: 16704000 and step_count:87 for tag: best
+New best evaluation score of 202.66666666666666 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 154      |
+| time/              |          |
+|    fps             | 1548     |
+|    iterations      | 1        |
+|    time_elapsed    | 124      |
+|    total_timesteps | 16896000 |
+---------------------------------
+Saved on timestep_count: 16896000 and step_count:88 for tag: best
+New best evaluation score of 208.0 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 154      |
+| time/              |          |
+|    fps             | 1538     |
+|    iterations      | 1        |
+|    time_elapsed    | 124      |
+|    total_timesteps | 17088000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 157      |
+| time/              |          |
+|    fps             | 1544     |
+|    iterations      | 1        |
+|    time_elapsed    | 124      |
+|    total_timesteps | 17280000 |
+---------------------------------
+Saved on timestep_count: 17280000 and step_count:90 for tag: ck_23_rew_210.66666666666666
+Saved on timestep_count: 17280000 and step_count:90 for tag: best
+New best evaluation score of 210.66666666666666 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 161      |
+| time/              |          |
+|    fps             | 1541     |
+|    iterations      | 1        |
+|    time_elapsed    | 124      |
+|    total_timesteps | 17472000 |
+---------------------------------
+Saved on timestep_count: 17472000 and step_count:91 for tag: best
+New best evaluation score of 217.33333333333334 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 161      |
+| time/              |          |
+|    fps             | 1536     |
+|    iterations      | 1        |
+|    time_elapsed    | 124      |
+|    total_timesteps | 17664000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 165      |
+| time/              |          |
+|    fps             | 1553     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 17856000 |
+---------------------------------
+Saved on timestep_count: 17856000 and step_count:93 for tag: best
+New best evaluation score of 220.0 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 164      |
+| time/              |          |
+|    fps             | 1561     |
+|    iterations      | 1        |
+|    time_elapsed    | 122      |
+|    total_timesteps | 18048000 |
+---------------------------------
+Saved on timestep_count: 18048000 and step_count:94 for tag: ck_24_rew_220.0
+Saved on timestep_count: 18048000 and step_count:94 for tag: best
+New best evaluation score of 220.0 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 166      |
+| time/              |          |
+|    fps             | 1549     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 18240000 |
+---------------------------------
+Saved on timestep_count: 18240000 and step_count:95 for tag: best
+New best evaluation score of 228.0 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 167      |
+| time/              |          |
+|    fps             | 1539     |
+|    iterations      | 1        |
+|    time_elapsed    | 124      |
+|    total_timesteps | 18432000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 165      |
+| time/              |          |
+|    fps             | 1556     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 18624000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 167      |
+| time/              |          |
+|    fps             | 1554     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 18816000 |
+---------------------------------
+Saved on timestep_count: 18816000 and step_count:98 for tag: ck_25_rew_216.0
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 167      |
+| time/              |          |
+|    fps             | 1546     |
+|    iterations      | 1        |
+|    time_elapsed    | 124      |
+|    total_timesteps | 19008000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 170      |
+| time/              |          |
+|    fps             | 1556     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 19200000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 167      |
+| time/              |          |
+|    fps             | 1544     |
+|    iterations      | 1        |
+|    time_elapsed    | 124      |
+|    total_timesteps | 19392000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 172      |
+| time/              |          |
+|    fps             | 1549     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 19584000 |
+---------------------------------
+Saved on timestep_count: 19584000 and step_count:102 for tag: ck_26_rew_236.0
+Saved on timestep_count: 19584000 and step_count:102 for tag: best
+New best evaluation score of 236.0 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 170      |
+| time/              |          |
+|    fps             | 1556     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 19776000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 170      |
+| time/              |          |
+|    fps             | 1546     |
+|    iterations      | 1        |
+|    time_elapsed    | 124      |
+|    total_timesteps | 19968000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 170      |
+| time/              |          |
+|    fps             | 1546     |
+|    iterations      | 1        |
+|    time_elapsed    | 124      |
+|    total_timesteps | 20160000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 172      |
+| time/              |          |
+|    fps             | 1560     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 20352000 |
+---------------------------------
+Saved on timestep_count: 20352000 and step_count:106 for tag: ck_27_rew_238.66666666666666
+Saved on timestep_count: 20352000 and step_count:106 for tag: best
+New best evaluation score of 238.66666666666666 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 171      |
+| time/              |          |
+|    fps             | 1555     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 20544000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 172      |
+| time/              |          |
+|    fps             | 1541     |
+|    iterations      | 1        |
+|    time_elapsed    | 124      |
+|    total_timesteps | 20736000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 173      |
+| time/              |          |
+|    fps             | 1567     |
+|    iterations      | 1        |
+|    time_elapsed    | 122      |
+|    total_timesteps | 20928000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 172      |
+| time/              |          |
+|    fps             | 1549     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 21120000 |
+---------------------------------
+Saved on timestep_count: 21120000 and step_count:110 for tag: ck_28_rew_218.66666666666666
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 172      |
+| time/              |          |
+|    fps             | 1555     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 21312000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 171      |
+| time/              |          |
+|    fps             | 1555     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 21504000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 171      |
+| time/              |          |
+|    fps             | 1548     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 21696000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 172      |
+| time/              |          |
+|    fps             | 1555     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 21888000 |
+---------------------------------
+Saved on timestep_count: 21888000 and step_count:114 for tag: ck_29_rew_230.66666666666666
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 166      |
+| time/              |          |
+|    fps             | 1535     |
+|    iterations      | 1        |
+|    time_elapsed    | 125      |
+|    total_timesteps | 22080000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 168      |
+| time/              |          |
+|    fps             | 1553     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 22272000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 167      |
+| time/              |          |
+|    fps             | 1531     |
+|    iterations      | 1        |
+|    time_elapsed    | 125      |
+|    total_timesteps | 22464000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 169      |
+| time/              |          |
+|    fps             | 1550     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 22656000 |
+---------------------------------
+Saved on timestep_count: 22656000 and step_count:118 for tag: ck_30_rew_232.0
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 169      |
+| time/              |          |
+|    fps             | 1558     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 22848000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 169      |
+| time/              |          |
+|    fps             | 1552     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 23040000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 170      |
+| time/              |          |
+|    fps             | 1553     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 23232000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 172      |
+| time/              |          |
+|    fps             | 1551     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 23424000 |
+---------------------------------
+Saved on timestep_count: 23424000 and step_count:122 for tag: ck_31_rew_233.33333333333334
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 170      |
+| time/              |          |
+|    fps             | 1541     |
+|    iterations      | 1        |
+|    time_elapsed    | 124      |
+|    total_timesteps | 23616000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 170      |
+| time/              |          |
+|    fps             | 1551     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 23808000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 172      |
+| time/              |          |
+|    fps             | 1544     |
+|    iterations      | 1        |
+|    time_elapsed    | 124      |
+|    total_timesteps | 24000000 |
+---------------------------------
+Saved on timestep_count: 24000000 and step_count:125 for tag: ck_32_rew_229.33333333333334
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 172      |
+| time/              |          |
+|    fps             | 1552     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 24192000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 173      |
+| time/              |          |
+|    fps             | 1561     |
+|    iterations      | 1        |
+|    time_elapsed    | 122      |
+|    total_timesteps | 24384000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 171      |
+| time/              |          |
+|    fps             | 1537     |
+|    iterations      | 1        |
+|    time_elapsed    | 124      |
+|    total_timesteps | 24576000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 173      |
+| time/              |          |
+|    fps             | 1549     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 24768000 |
+---------------------------------
+Saved on timestep_count: 24768000 and step_count:129 for tag: ck_33_rew_228.0
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 172      |
+| time/              |          |
+|    fps             | 1563     |
+|    iterations      | 1        |
+|    time_elapsed    | 122      |
+|    total_timesteps | 24960000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 173      |
+| time/              |          |
+|    fps             | 1558     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 25152000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 170      |
+| time/              |          |
+|    fps             | 1549     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 25344000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 175      |
+| time/              |          |
+|    fps             | 1554     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 25536000 |
+---------------------------------
+Saved on timestep_count: 25536000 and step_count:133 for tag: ck_34_rew_229.33333333333334
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 172      |
+| time/              |          |
+|    fps             | 1557     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 25728000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 172      |
+| time/              |          |
+|    fps             | 1554     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 25920000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 171      |
+| time/              |          |
+|    fps             | 1535     |
+|    iterations      | 1        |
+|    time_elapsed    | 125      |
+|    total_timesteps | 26112000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 172      |
+| time/              |          |
+|    fps             | 1532     |
+|    iterations      | 1        |
+|    time_elapsed    | 125      |
+|    total_timesteps | 26304000 |
+---------------------------------
+Saved on timestep_count: 26304000 and step_count:137 for tag: ck_35_rew_236.0
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 174      |
+| time/              |          |
+|    fps             | 1545     |
+|    iterations      | 1        |
+|    time_elapsed    | 124      |
+|    total_timesteps | 26496000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 172      |
+| time/              |          |
+|    fps             | 1556     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 26688000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 173      |
+| time/              |          |
+|    fps             | 1551     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 26880000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 172      |
+| time/              |          |
+|    fps             | 1549     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 27072000 |
+---------------------------------
+Saved on timestep_count: 27072000 and step_count:141 for tag: ck_36_rew_238.66666666666666
+Saved on timestep_count: 27072000 and step_count:141 for tag: best
+New best evaluation score of 238.66666666666666 reached, model saved to /workspace/multiHRI/agent_models/Classic/3/SP_hd256_seed2020/best
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 173      |
+| time/              |          |
+|    fps             | 1552     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 27264000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 170      |
+| time/              |          |
+|    fps             | 1554     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 27456000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 172      |
+| time/              |          |
+|    fps             | 1553     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 27648000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 172      |
+| time/              |          |
+|    fps             | 1541     |
+|    iterations      | 1        |
+|    time_elapsed    | 124      |
+|    total_timesteps | 27840000 |
+---------------------------------
+Saved on timestep_count: 27840000 and step_count:145 for tag: ck_37_rew_232.0
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 172      |
+| time/              |          |
+|    fps             | 1550     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 28032000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 171      |
+| time/              |          |
+|    fps             | 1557     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 28224000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 173      |
+| time/              |          |
+|    fps             | 1545     |
+|    iterations      | 1        |
+|    time_elapsed    | 124      |
+|    total_timesteps | 28416000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 174      |
+| time/              |          |
+|    fps             | 1548     |
+|    iterations      | 1        |
+|    time_elapsed    | 124      |
+|    total_timesteps | 28608000 |
+---------------------------------
+Saved on timestep_count: 28608000 and step_count:149 for tag: ck_38_rew_237.33333333333334
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 173      |
+| time/              |          |
+|    fps             | 1551     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 28800000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 173      |
+| time/              |          |
+|    fps             | 1554     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 28992000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 173      |
+| time/              |          |
+|    fps             | 1557     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 29184000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 173      |
+| time/              |          |
+|    fps             | 1547     |
+|    iterations      | 1        |
+|    time_elapsed    | 124      |
+|    total_timesteps | 29376000 |
+---------------------------------
+Saved on timestep_count: 29376000 and step_count:153 for tag: ck_39_rew_233.33333333333334
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 172      |
+| time/              |          |
+|    fps             | 1552     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 29568000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 172      |
+| time/              |          |
+|    fps             | 1545     |
+|    iterations      | 1        |
+|    time_elapsed    | 124      |
+|    total_timesteps | 29760000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 172      |
+| time/              |          |
+|    fps             | 1552     |
+|    iterations      | 1        |
+|    time_elapsed    | 123      |
+|    total_timesteps | 29952000 |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 500      |
+|    ep_rew_mean     | 173      |
+| time/              |          |
+|    fps             | 1541     |
+|    iterations      | 1        |
+|    time_elapsed    | 124      |
+|    total_timesteps | 30144000 |
+---------------------------------
+Saved on timestep_count: 30144000 and step_count:157 for tag: ck_40_rew_234.66666666666666
+Saved on timestep_count: 30144000 and step_count:157 for tag: last
+/usr/local/lib/python3.11/dist-packages/stable_baselines3/common/save_util.py:437: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  th_object = th.load(file_content, map_location=device)

@@ -1,0 +1,24 @@
+2026-05-31 20:11:14,973 INFO    MainThread:4518 [wandb_setup.py:_flush():81] Current SDK version is 0.27.0
+2026-05-31 20:11:14,974 INFO    MainThread:4518 [wandb_setup.py:_flush():81] Configure stats pid to 4518
+2026-05-31 20:11:14,975 INFO    MainThread:4518 [wandb_setup.py:_flush():81] Loading settings from environment variables
+2026-05-31 20:11:14,977 INFO    MainThread:4518 [wandb_init.py:setup_run_log_directory():723] Logging user logs to /workspace/multiHRI/wandb/wandb/run-20260531_201114-f42xd0db/logs/debug.log
+2026-05-31 20:11:14,980 INFO    MainThread:4518 [wandb_init.py:setup_run_log_directory():724] Logging internal logs to /workspace/multiHRI/wandb/wandb/run-20260531_201114-f42xd0db/logs/debug-internal.log
+2026-05-31 20:11:14,981 INFO    MainThread:4518 [wandb_init.py:init():851] calling init triggers
+2026-05-31 20:11:14,982 INFO    MainThread:4518 [wandb_init.py:init():856] wandb.init called with sweep_config: {}
+config: {'_wandb': {}}
+2026-05-31 20:11:14,983 INFO    MainThread:4518 [wandb_init.py:init():899] starting backend
+2026-05-31 20:11:15,328 INFO    MainThread:4518 [wandb_init.py:init():914] sending inform_init request
+2026-05-31 20:11:15,757 INFO    MainThread:4518 [wandb_init.py:init():919] backend started and connected
+2026-05-31 20:11:15,789 INFO    MainThread:4518 [wandb_init.py:init():989] updated telemetry
+2026-05-31 20:11:15,949 INFO    MainThread:4518 [wandb_init.py:init():1012] communicating run to backend with 90.0 second timeout
+2026-05-31 20:11:16,510 INFO    MainThread:4518 [wandb_init.py:init():1057] starting run threads in backend
+2026-05-31 20:11:16,675 INFO    MainThread:4518 [wandb_run.py:_console_start():2509] atexit reg
+2026-05-31 20:11:16,676 INFO    MainThread:4518 [wandb_run.py:_redirect():2359] redirect: wrap_raw
+2026-05-31 20:11:16,677 INFO    MainThread:4518 [wandb_run.py:_redirect():2428] Wrapping output streams.
+2026-05-31 20:11:16,678 INFO    MainThread:4518 [wandb_run.py:_redirect():2451] Redirects installed.
+2026-05-31 20:11:16,681 INFO    MainThread:4518 [wandb_init.py:init():1095] run started, returning control to user process
+2026-06-01 02:36:40,986 INFO    MainThread:4518 [wandb_run.py:_finish():2271] finishing run sjs020523-korea-university/overcooked_ai/f42xd0db
+2026-06-01 02:36:40,989 INFO    MainThread:4518 [wandb_run.py:_atexit_cleanup():2476] got exitcode: 0
+2026-06-01 02:36:41,003 INFO    MainThread:4518 [wandb_run.py:_restore():2458] restore
+2026-06-01 02:36:41,004 INFO    MainThread:4518 [wandb_run.py:_restore():2464] restore done
+2026-06-01 02:36:42,738 INFO    MainThread:4518 [wandb_run.py:_footer_sync_info():3877] logging synced files

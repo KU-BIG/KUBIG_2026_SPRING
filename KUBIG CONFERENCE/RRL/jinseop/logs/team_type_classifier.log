@@ -1,0 +1,48 @@
+[05:05:25] Using device: cuda
+[05:05:25] === Attempt 1/4 | dataset_n=2000 | config={'batch_size': 64, 'embed_dim': 256, 'hidden_dim': 256, 'num_layers': 1, 'dropout': 0.1, 'bidirectional': False, 'lr': 0.001, 'weight_decay': 1e-05, 'epochs': 30, 'early_stop_patience': 6} ===
+[05:05:25] Generating 2000 additional episodes (existing=0, target=2000)...
+/workspace/venv/lib/python3.11/site-packages/stable_baselines3/common/save_util.py:166: UserWarning: Could not deserialize object lr_schedule. Consider using `custom_objects` argument to replace this object.
+Exception: code() argument 13 must be str, not int
+  warnings.warn(
+/workspace/venv/lib/python3.11/site-packages/stable_baselines3/common/save_util.py:166: UserWarning: Could not deserialize object clip_range. Consider using `custom_objects` argument to replace this object.
+Exception: code() argument 13 must be str, not int
+  warnings.warn(
+/workspace/venv/lib/python3.11/site-packages/stable_baselines3/common/save_util.py:437: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  th_object = th.load(file_content, map_location=device)
+/workspace/venv/lib/python3.11/site-packages/stable_baselines3/common/save_util.py:437: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  th_object = th.load(file_content, map_location=device)
+[05:05:47]   round 1/16 scenario=SPADV@2 (128 eps, 14.6s elapsed)
+[05:06:01]   round 2/16 scenario=SPADV@1 (256 eps, 29.4s elapsed)
+[05:06:16]   round 3/16 scenario=SP (384 eps, 43.7s elapsed)
+[05:06:30]   round 4/16 scenario=SP (512 eps, 58.2s elapsed)
+[05:06:45]   round 5/16 scenario=SPADV@0 (640 eps, 72.6s elapsed)
+[05:06:59]   round 6/16 scenario=SP (768 eps, 87.3s elapsed)
+[05:07:14]   round 7/16 scenario=SPADV@1 (896 eps, 101.7s elapsed)
+[05:07:28]   round 8/16 scenario=SP (1024 eps, 116.1s elapsed)
+[05:07:43]   round 9/16 scenario=SP (1152 eps, 130.8s elapsed)
+[05:07:57]   round 10/16 scenario=SPADV@0 (1280 eps, 145.4s elapsed)
+[05:08:11]   round 11/16 scenario=SPADV@2 (1408 eps, 159.4s elapsed)
+[05:08:26]   round 12/16 scenario=SPADV@0 (1536 eps, 174.1s elapsed)
+[05:08:41]   round 13/16 scenario=SP (1664 eps, 188.7s elapsed)
+[05:08:55]   round 14/16 scenario=SPADV@1 (1792 eps, 203.3s elapsed)
+[05:09:10]   round 15/16 scenario=SPADV@0 (1920 eps, 217.7s elapsed)
+[05:09:24]   round 16/16 scenario=SP (2048 eps, 232.3s elapsed)
+[05:09:27] Dataset saved: 2048 episodes, X shape=(2048, 100, 3, 27, 7, 7), y balance=0.562
+[05:09:30]   [attempt 1] epoch 1/30 train_loss=0.2765 train_acc=0.8838 val_acc=0.9487
+[05:09:33]   [attempt 1] epoch 2/30 train_loss=0.0907 train_acc=0.9744 val_acc=0.9853
+[05:09:36]   [attempt 1] epoch 3/30 train_loss=0.0663 train_acc=0.9825 val_acc=0.9902
+[05:09:39]   [attempt 1] epoch 4/30 train_loss=0.0501 train_acc=0.9844 val_acc=0.9902
+[05:09:42]   [attempt 1] epoch 5/30 train_loss=0.0264 train_acc=0.9900 val_acc=0.9878
+[05:09:45]   [attempt 1] epoch 6/30 train_loss=0.0122 train_acc=0.9956 val_acc=0.9902
+[05:09:48]   [attempt 1] epoch 7/30 train_loss=0.0076 train_acc=0.9969 val_acc=0.9902
+[05:09:51]   [attempt 1] epoch 8/30 train_loss=0.0024 train_acc=1.0000 val_acc=0.9927
+[05:09:54]   [attempt 1] epoch 9/30 train_loss=0.0009 train_acc=1.0000 val_acc=0.9927
+[05:09:57]   [attempt 1] epoch 10/30 train_loss=0.0004 train_acc=1.0000 val_acc=0.9927
+[05:10:01]   [attempt 1] epoch 11/30 train_loss=0.0003 train_acc=1.0000 val_acc=0.9927
+[05:10:04]   [attempt 1] epoch 12/30 train_loss=0.0002 train_acc=1.0000 val_acc=0.9927
+[05:10:07]   [attempt 1] epoch 13/30 train_loss=0.0002 train_acc=1.0000 val_acc=0.9927
+[05:10:10]   [attempt 1] epoch 14/30 train_loss=0.0002 train_acc=1.0000 val_acc=0.9927
+[05:10:10]   [attempt 1] early stopping at epoch 14 (best val_acc=0.9927)
+[05:10:14] Saved attempt 1 artifacts to /workspace/team_type_classifier_runs/attempt_1
+[05:10:14] TARGET REACHED at attempt 1: val_acc=0.9927 >= 0.97
+[05:10:14] Done. Summary: {'attempts': [{'attempt': 1, 'val_acc': 0.9926650524139404, 'train_acc': 1.0}], 'success': True, 'final_attempt': 1}

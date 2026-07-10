@@ -1,0 +1,232 @@
+/workspace/venv/lib/python3.11/site-packages/stable_baselines3/common/save_util.py:437: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  th_object = th.load(file_content, map_location=device)
+/workspace/venv/lib/python3.11/site-packages/stable_baselines3/common/save_util.py:437: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  th_object = th.load(file_content, map_location=device)
+pygame 2.6.1 (SDL 2.28.4, Python 3.11.10)
+Hello from the pygame community. https://www.pygame.org/contribute.html
+Loading agents...
+All agents loaded.
+
+
+=========================================================
+  Agent : PWADV_advonly
+  Team  : PWADV_advonly_clone x 2  (1 may become ADV p=0.5)
+=========================================================
+  ep   1 [NRM]  reward= 240.0 🎬
+  ep   2 [NRM]  reward= 180.0 🎬
+  ep   3 [ADV]  reward= 160.0 🎬
+  ep   4 [ADV]  reward= 100.0 🎬
+  ep   5 [NRM]  reward= 220.0 🎬
+  ep   6 [NRM]  reward= 240.0 🎬
+  ep   7 [NRM]  reward= 220.0 🎬
+  ep   8 [NRM]  reward= 220.0 🎬
+  ep   9 [NRM]  reward= 220.0 🎬
+  ep  10 [ADV]  reward= 160.0 🎬
+  ep  11 [ADV]  reward= 120.0
+  ep  12 [ADV]  reward= 120.0
+  ep  13 [NRM]  reward= 220.0
+  ep  14 [NRM]  reward= 240.0
+  ep  15 [ADV]  reward= 120.0
+  ep  16 [NRM]  reward= 240.0
+  ep  17 [ADV]  reward=  80.0
+  ep  18 [ADV]  reward= 100.0
+  ep  19 [NRM]  reward= 240.0
+  ep  20 [NRM]  reward= 220.0
+  ep  21 [ADV]  reward= 120.0
+  ep  22 [NRM]  reward= 220.0
+  ep  23 [NRM]  reward= 240.0
+  ep  24 [NRM]  reward= 160.0
+  ep  25 [NRM]  reward= 240.0
+  ep  26 [NRM]  reward= 220.0
+  ep  27 [ADV]  reward= 100.0
+  ep  28 [NRM]  reward= 220.0
+  ep  29 [ADV]  reward= 100.0
+  ep  30 [ADV]  reward= 140.0
+  ep  31 [ADV]  reward= 100.0
+  ep  32 [ADV]  reward= 100.0
+  ep  33 [ADV]  reward= 140.0
+  ep  34 [NRM]  reward= 220.0
+  ep  35 [NRM]  reward= 200.0
+  ep  36 [ADV]  reward= 120.0
+  ep  37 [NRM]  reward= 220.0
+  ep  38 [NRM]  reward= 220.0
+  ep  39 [NRM]  reward= 220.0
+  ep  40 [NRM]  reward= 220.0
+  ep  41 [ADV]  reward=  80.0
+  ep  42 [NRM]  reward= 240.0
+  ep  43 [ADV]  reward= 120.0
+  ep  44 [NRM]  reward= 240.0
+  ep  45 [ADV]  reward= 120.0
+  ep  46 [NRM]  reward= 220.0
+  ep  47 [NRM]  reward= 240.0
+  ep  48 [NRM]  reward= 240.0
+  ep  49 [NRM]  reward= 220.0
+  ep  50 [ADV]  reward= 120.0
+  ep  51 [NRM]  reward= 220.0
+  ep  52 [NRM]  reward= 240.0
+  ep  53 [NRM]  reward= 240.0
+  ep  54 [ADV]  reward= 120.0
+  ep  55 [ADV]  reward= 100.0
+  ep  56 [ADV]  reward= 100.0
+  ep  57 [ADV]  reward= 140.0
+  ep  58 [ADV]  reward= 140.0
+  ep  59 [ADV]  reward= 120.0
+  ep  60 [ADV]  reward= 120.0
+  ep  61 [NRM]  reward= 160.0
+  ep  62 [ADV]  reward=  80.0
+  ep  63 [ADV]  reward= 100.0
+  ep  64 [NRM]  reward= 240.0
+  ep  65 [NRM]  reward= 200.0
+  ep  66 [ADV]  reward= 100.0
+  ep  67 [ADV]  reward= 140.0
+  ep  68 [NRM]  reward= 240.0
+  ep  69 [NRM]  reward= 240.0
+  ep  70 [NRM]  reward= 200.0
+  ep  71 [NRM]  reward= 240.0
+  ep  72 [ADV]  reward=  80.0
+  ep  73 [ADV]  reward= 100.0
+  ep  74 [ADV]  reward= 140.0
+  ep  75 [NRM]  reward= 240.0
+  ep  76 [ADV]  reward= 140.0
+  ep  77 [NRM]  reward= 260.0
+  ep  78 [NRM]  reward= 240.0
+  ep  79 [ADV]  reward= 120.0
+  ep  80 [NRM]  reward= 220.0
+  ep  81 [ADV]  reward= 100.0
+  ep  82 [ADV]  reward= 120.0
+  ep  83 [ADV]  reward= 140.0
+  ep  84 [ADV]  reward= 140.0
+  ep  85 [NRM]  reward= 200.0
+  ep  86 [NRM]  reward= 140.0
+  ep  87 [ADV]  reward=  80.0
+  ep  88 [ADV]  reward= 120.0
+  ep  89 [ADV]  reward=  60.0
+  ep  90 [NRM]  reward= 220.0
+  ep  91 [ADV]  reward= 140.0
+  ep  92 [NRM]  reward= 220.0
+  ep  93 [ADV]  reward= 100.0
+  ep  94 [NRM]  reward= 240.0
+  ep  95 [ADV]  reward= 120.0
+  ep  96 [NRM]  reward= 200.0
+  ep  97 [ADV]  reward=  80.0
+  ep  98 [ADV]  reward= 100.0
+  ep  99 [NRM]  reward= 200.0
+  ep 100 [ADV]  reward=  80.0
+  ep 101 [ADV]  reward= 120.0
+  ep 102 [NRM]  reward= 240.0
+  ep 103 [ADV]  reward= 120.0
+  ep 104 [NRM]  reward= 220.0
+  ep 105 [ADV]  reward= 120.0
+  ep 106 [NRM]  reward= 220.0
+  ep 107 [NRM]  reward= 220.0
+  ep 108 [NRM]  reward= 220.0
+  ep 109 [ADV]  reward= 100.0
+  ep 110 [NRM]  reward= 220.0
+  ep 111 [ADV]  reward=  80.0
+  ep 112 [NRM]  reward= 200.0
+  ep 113 [NRM]  reward= 220.0
+  ep 114 [NRM]  reward= 200.0
+  ep 115 [NRM]  reward= 240.0
+  ep 116 [NRM]  reward= 200.0
+  ep 117 [NRM]  reward= 240.0
+  ep 118 [ADV]  reward= 160.0
+  ep 119 [NRM]  reward= 240.0
+  ep 120 [ADV]  reward= 120.0
+  ep 121 [ADV]  reward= 100.0
+  ep 122 [ADV]  reward= 140.0
+  ep 123 [ADV]  reward= 120.0
+  ep 124 [NRM]  reward= 240.0
+  ep 125 [NRM]  reward= 220.0
+  ep 126 [NRM]  reward= 240.0
+  ep 127 [NRM]  reward= 240.0
+  ep 128 [NRM]  reward= 220.0
+  ep 129 [NRM]  reward= 260.0
+  ep 130 [ADV]  reward= 100.0
+  ep 131 [NRM]  reward= 240.0
+  ep 132 [NRM]  reward= 220.0
+  ep 133 [NRM]  reward= 140.0
+  ep 134 [NRM]  reward= 220.0
+  ep 135 [NRM]  reward= 240.0
+  ep 136 [ADV]  reward=  80.0
+  ep 137 [NRM]  reward= 240.0
+  ep 138 [NRM]  reward= 200.0
+  ep 139 [NRM]  reward= 240.0
+  ep 140 [NRM]  reward= 200.0
+  ep 141 [NRM]  reward= 220.0
+  ep 142 [ADV]  reward= 120.0
+  ep 143 [NRM]  reward= 240.0
+  ep 144 [NRM]  reward= 220.0
+  ep 145 [NRM]  reward= 200.0
+  ep 146 [NRM]  reward= 240.0
+  ep 147 [ADV]  reward= 140.0
+  ep 148 [ADV]  reward= 100.0
+  ep 149 [NRM]  reward= 240.0
+  ep 150 [ADV]  reward= 100.0
+  ep 151 [NRM]  reward= 240.0
+  ep 152 [ADV]  reward=  60.0
+  ep 153 [NRM]  reward= 220.0
+  ep 154 [NRM]  reward= 200.0
+  ep 155 [NRM]  reward= 200.0
+  ep 156 [ADV]  reward= 120.0
+  ep 157 [NRM]  reward= 260.0
+  ep 158 [ADV]  reward= 120.0
+  ep 159 [NRM]  reward= 240.0
+  ep 160 [NRM]  reward= 220.0
+  ep 161 [ADV]  reward= 120.0
+  ep 162 [ADV]  reward= 120.0
+  ep 163 [ADV]  reward= 140.0
+  ep 164 [ADV]  reward= 120.0
+  ep 165 [NRM]  reward= 220.0
+  ep 166 [ADV]  reward= 100.0
+  ep 167 [ADV]  reward= 100.0
+  ep 168 [NRM]  reward= 200.0
+  ep 169 [NRM]  reward= 220.0
+  ep 170 [NRM]  reward= 240.0
+  ep 171 [NRM]  reward= 260.0
+  ep 172 [NRM]  reward= 220.0
+  ep 173 [ADV]  reward= 140.0
+  ep 174 [ADV]  reward= 120.0
+  ep 175 [NRM]  reward= 240.0
+  ep 176 [NRM]  reward= 240.0
+  ep 177 [ADV]  reward= 100.0
+  ep 178 [ADV]  reward= 120.0
+  ep 179 [NRM]  reward= 220.0
+  ep 180 [NRM]  reward= 240.0
+  ep 181 [ADV]  reward= 100.0
+  ep 182 [ADV]  reward=  60.0
+  ep 183 [NRM]  reward= 240.0
+  ep 184 [NRM]  reward= 220.0
+  ep 185 [NRM]  reward= 200.0
+  ep 186 [ADV]  reward= 120.0
+  ep 187 [ADV]  reward= 140.0
+  ep 188 [ADV]  reward= 120.0
+  ep 189 [ADV]  reward= 100.0
+  ep 190 [NRM]  reward= 220.0
+  ep 191 [ADV]  reward= 100.0
+  ep 192 [ADV]  reward= 120.0
+  ep 193 [NRM]  reward= 220.0
+  ep 194 [ADV]  reward= 120.0
+  ep 195 [ADV]  reward= 100.0
+  ep 196 [NRM]  reward= 240.0
+  ep 197 [ADV]  reward= 140.0
+  ep 198 [NRM]  reward= 240.0
+  ep 199 [NRM]  reward= 240.0
+  ep 200 [NRM]  reward= 240.0
+
+  -- PWADV_advonly --
+  Overall        : 174.50 +- 59.12  (n=200)
+  Normal team    : 223.78  (n=111)
+  Adversary team : 113.03  (n=89)
+  Robustness     : 50.5%  |  zero-reward: 0 / 89
+  GIFs saved     : 10  ->  /workspace/eval_results/gifs_3way_v2_switch50/PWADV_advonly/
+
+============================================================
+  PWADV_advonly (n=200)
+============================================================
+  Overall              : 174.50
+  Normal teammate      : 223.78
+  Adversarial teammate : 113.03
+  Robustness (ADV/NRM) : 50.5%
+  Zero-reward under ADV: 0/89
+
+Saved to /workspace/eval_results/advonly_standalone.json

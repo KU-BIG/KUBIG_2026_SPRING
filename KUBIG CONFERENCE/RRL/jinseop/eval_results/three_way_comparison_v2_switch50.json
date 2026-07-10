@@ -1,0 +1,23 @@
+{
+  "SP": {
+    "overall_mean": 148.3,
+    "nrm_mean": 235.4954954954955,
+    "adv_mean": 39.550561797752806,
+    "robustness_pct": 16.79461499445509,
+    "zero_adv": "2/89"
+  },
+  "SPN_1ADV": {
+    "overall_mean": 178.9,
+    "nrm_mean": 236.57657657657657,
+    "adv_mean": 106.96629213483146,
+    "robustness_pct": 45.21423620322275,
+    "zero_adv": "0/89"
+  },
+  "Adaptive": {
+    "overall_mean": 162.0,
+    "nrm_mean": 235.4954954954955,
+    "adv_mean": 70.33707865168539,
+    "robustness_pct": 29.86769598445707,
+    "zero_adv": "1/89"
+  }
+}

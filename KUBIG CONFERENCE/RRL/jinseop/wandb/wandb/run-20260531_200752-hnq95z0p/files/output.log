@@ -1,0 +1,88 @@
+Training agent: SP_hd256_seed1010, for experiment: Classic/3/SP_hd256_seed1010
+-------------------
+Train TC
+	SP:
+	SP_hd256_seed1010, score for layout 3_chefs_counter_circuit is: -1, start_pos: None, len: 1
+-------------------
+-------------------
+Eval TC
+	SP:
+	SP_hd256_seed1010, score for layout 3_chefs_counter_circuit is: -1, start_pos: None, len: 1
+-------------------
+Curriculum:
+Random curriculum:  ['SP']
+How Long:  20
+Epoch timesteps: 50000
+Total training timesteps: 30000000
+Number of environments: 384
+Hidden dimension: 256
+Seed: 1010
+args.num_of_ckpoints: 40
+args.checkpoint_rate: 750000
+Learner type: originaler
+layout_names ['3_chefs_counter_circuit']
+horizon 400
+num_stack 3
+encoding_fn OAI_egocentric
+lr 0.001
+batch_size 128
+SP_seed 1010
+FCP_seed 1010
+N_X_SP_seed 1010
+N_X_FCP_seed 1010
+SP_h_dim 256
+FCP_h_dim 256
+N_X_SP_h_dim 256
+N_X_FCP_h_dim 256
+ADV_seed 68
+ADV_h_dim 512
+algo_name SPN_1ADV
+num_players 3
+n_x_sp_total_training_timesteps 15000000
+adversary_total_training_timesteps 15000000
+n_x_fcp_total_training_timesteps None
+pop_force_training False
+primary_force_training False
+adversary_force_training False
+how_long 20
+exp_name last
+base_dir /workspace/multiHRI
+data_path data
+dataset 2019_hh_trials_all.pickle
+wandb_mode online
+wandb_ent None
+sb_verbose 1
+c
+args
+epoch_timesteps 50000
+n_envs 384
+teammates_len 1
+overcooked_verbose False
+pop_total_training_timesteps 30000000
+fcp_total_training_timesteps None
+fcp_w_sp_total_training_timesteps None
+eval_steps_interval 20
+reward_magnifier 3.0
+parallel True
+dynamic_reward True
+final_sparse_r_ratio 0.5
+prioritized_sampling False
+exp_dir Classic/3
+primary_learner_type originaler
+adversary_learner_type selfisher
+pop_learner_type originaler
+max_concurrent_jobs 3
+exp_name_prefix
+num_of_ckpoints 40
+resume False
+use_val_func_for_heatmap_gen False
+num_eval_for_heatmap_gen 2
+num_static_advs_per_heatmap 1
+num_dynamic_advs_per_heatmap 1
+num_steps_in_traj_for_dyn_adv 2
+custom_agent_ck_rate_generation 4
+gen_pop_for_eval False
+total_ego_agents 2
+ck_list_offset 0
+device cuda
+Saved on timestep_count: 0 and step_count:0 for tag: ck_0

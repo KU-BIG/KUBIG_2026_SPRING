@@ -1,0 +1,68 @@
+{
+  "os": "Linux-6.8.0-40-generic-x86_64-with-glibc2.35",
+  "python": "CPython 3.11.10",
+  "startedAt": "2026-07-03T15:04:18.450962Z",
+  "args": [
+    "--layout-names",
+    "3_chefs_counter_circuit",
+    "--algo-name",
+    "SPN_1ADV_PWADV_FINAL_ADVONLY",
+    "--num-players",
+    "3",
+    "--teammates-len",
+    "2",
+    "--n-x-sp-total-training-timesteps",
+    "15000000",
+    "--epoch-timesteps",
+    "50000",
+    "--eval-steps-interval",
+    "20",
+    "--n-envs",
+    "384",
+    "--batch-size",
+    "128",
+    "--num-of-ckpoints",
+    "40",
+    "--primary-force-training",
+    "false",
+    "--exp-dir",
+    "Classic/3",
+    "--wandb-mode",
+    "online"
+  ],
+  "program": "/workspace/scripts/train_agents.py",
+  "codePath": "scripts/train_agents.py",
+  "codePathLocal": "scripts/train_agents.py",
+  "git": {
+    "remote": "https://github.com/jin-seop-shin/multiHRI.git",
+    "commit": "5de431b64a30459a57233351d6dffab3c1f8b317"
+  },
+  "email": "sjs020523@gmail.com",
+  "root": "/workspace/wandb",
+  "host": "958f784be206",
+  "executable": "/workspace/venv/bin/python",
+  "cpu_count": 24,
+  "cpu_count_logical": 48,
+  "gpu": "NVIDIA RTX 4000 Ada Generation",
+  "gpu_count": 1,
+  "disk": {
+    "/": {
+      "total": "21474836480",
+      "used": "2529861632"
+    }
+  },
+  "memory": {
+    "total": "270100148224"
+  },
+  "gpu_nvidia": [
+    {
+      "name": "NVIDIA RTX 4000 Ada Generation",
+      "memoryTotal": "21469593600",
+      "cudaCores": 6144,
+      "architecture": "Ada",
+      "uuid": "GPU-a818378c-0c1d-a266-eae6-9882b94dfade"
+    }
+  ],
+  "cudaVersion": "12.4",
+  "writerId": "49xu4bau94je5k7tt3sdbpeswdmjrpgp"
+}

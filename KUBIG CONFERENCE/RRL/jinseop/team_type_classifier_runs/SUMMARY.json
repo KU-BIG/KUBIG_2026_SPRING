@@ -1,0 +1,11 @@
+{
+  "attempts": [
+    {
+      "attempt": 1,
+      "val_acc": 0.9926650524139404,
+      "train_acc": 1.0
+    }
+  ],
+  "success": true,
+  "final_attempt": 1
+}

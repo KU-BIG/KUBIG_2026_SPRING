@@ -1,0 +1,79 @@
+_wandb:
+    value:
+        cli_version: 0.28.0
+        e:
+            49xu4bau94je5k7tt3sdbpeswdmjrpgp:
+                args:
+                    - --layout-names
+                    - 3_chefs_counter_circuit
+                    - --algo-name
+                    - SPN_1ADV_PWADV_FINAL_ADVONLY
+                    - --num-players
+                    - "3"
+                    - --teammates-len
+                    - "2"
+                    - --n-x-sp-total-training-timesteps
+                    - "15000000"
+                    - --epoch-timesteps
+                    - "50000"
+                    - --eval-steps-interval
+                    - "20"
+                    - --n-envs
+                    - "384"
+                    - --batch-size
+                    - "128"
+                    - --num-of-ckpoints
+                    - "40"
+                    - --primary-force-training
+                    - "false"
+                    - --exp-dir
+                    - Classic/3
+                    - --wandb-mode
+                    - online
+                codePath: scripts/train_agents.py
+                codePathLocal: scripts/train_agents.py
+                cpu_count: 24
+                cpu_count_logical: 48
+                cudaVersion: "12.4"
+                disk:
+                    /:
+                        total: "21474836480"
+                        used: "2529861632"
+                email: sjs020523@gmail.com
+                executable: /workspace/venv/bin/python
+                git:
+                    commit: 5de431b64a30459a57233351d6dffab3c1f8b317
+                    remote: https://github.com/jin-seop-shin/multiHRI.git
+                gpu: NVIDIA RTX 4000 Ada Generation
+                gpu_count: 1
+                gpu_nvidia:
+                    - architecture: Ada
+                      cudaCores: 6144
+                      memoryTotal: "21469593600"
+                      name: NVIDIA RTX 4000 Ada Generation
+                      uuid: GPU-a818378c-0c1d-a266-eae6-9882b94dfade
+                host: 958f784be206
+                memory:
+                    total: "270100148224"
+                os: Linux-6.8.0-40-generic-x86_64-with-glibc2.35
+                program: /workspace/scripts/train_agents.py
+                python: CPython 3.11.10
+                root: /workspace/wandb
+                startedAt: "2026-07-03T15:04:18.450962Z"
+                writerId: 49xu4bau94je5k7tt3sdbpeswdmjrpgp
+        m: []
+        python_version: 3.11.10
+        t:
+            "1":
+                - 1
+            "2":
+                - 1
+            "3":
+                - 2
+                - 13
+            "4": 3.11.10
+            "5": 0.28.0
+            "10":
+                - 20
+            "12": 0.28.0
+            "13": linux-x86_64

@@ -1,0 +1,17 @@
+[06:43:08] Using device: cuda
+[06:43:08] EPISODE_LEN=50, TARGET_VAL_ACC=0.99
+[06:43:08] === Attempt 1/5 | dataset_n=2000 | config={'batch_size': 64, 'embed_dim': 256, 'hidden_dim': 256, 'num_layers': 1, 'dropout': 0.1, 'bidirectional': False, 'lr': 0.001, 'weight_decay': 1e-05, 'epochs': 30, 'early_stop_patience': 6} ===
+[06:43:08] Reusing existing dataset with 2048 episodes (>= target 2000).
+[06:43:17]   [attempt 1] epoch 1/30 train_loss=0.1867 train_acc=0.9469 val_acc=0.9976
+[06:43:19]   [attempt 1] epoch 2/30 train_loss=0.0079 train_acc=0.9994 val_acc=0.9976
+[06:43:20]   [attempt 1] epoch 3/30 train_loss=0.0070 train_acc=0.9994 val_acc=1.0000
+[06:43:22]   [attempt 1] epoch 4/30 train_loss=0.0125 train_acc=0.9975 val_acc=1.0000
+[06:43:23]   [attempt 1] epoch 5/30 train_loss=0.0059 train_acc=0.9988 val_acc=0.9976
+[06:43:25]   [attempt 1] epoch 6/30 train_loss=0.0091 train_acc=0.9981 val_acc=1.0000
+[06:43:27]   [attempt 1] epoch 7/30 train_loss=0.0017 train_acc=0.9994 val_acc=0.9976
+[06:43:28]   [attempt 1] epoch 8/30 train_loss=0.0093 train_acc=0.9975 val_acc=1.0000
+[06:43:30]   [attempt 1] epoch 9/30 train_loss=0.0004 train_acc=1.0000 val_acc=1.0000
+[06:43:30]   [attempt 1] early stopping at epoch 9 (best val_acc=1.0000)
+[06:43:32] Saved attempt 1 artifacts to /workspace/team_type_classifier_runs_ep50/attempt_1
+[06:43:32] TARGET REACHED at attempt 1: val_acc=1.0000 >= 0.99
+[06:43:32] Done. Summary: {'attempts': [{'attempt': 1, 'val_acc': 1.0, 'train_acc': 0.9993898868560791}], 'success': True, 'final_attempt': 1}
